@@ -1,0 +1,26 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 84275 2010-06-28 08:28:59Z pierre $
+# Contributor: Judd <jvinet@zeroflux.org>
+
+pkgname=libevent
+pkgver=1.4.14b
+pkgrel=1
+pkgdesc="An event notification library"
+license=('GPL2')
+arch=('i686')
+url="http://www.monkey.org/~provos/libevent/"
+depends=('glibc')
+source=("http://www.monkey.org/~provos/libevent-$pkgver-stable.tar.gz")
+options=('!libtool')
+md5sums=('a00e037e4d3f9e4fe9893e8a2d27918c')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver-stable
+  ./configure --prefix= --sysconfdir=/etc
+  make 
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver-stable
+  make DESTDIR=$pkgdir install 
+}
