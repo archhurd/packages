@@ -1,0 +1,1 @@
+export HG=/bin/hg
