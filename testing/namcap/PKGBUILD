@@ -1,0 +1,46 @@
+# Maintainer: Matt Windsor <mattwindsor@btinternet.com>
+# Contributor: Hugo Doria <hugo@archlinux.org>
+
+pkgname=namcap
+pkgver=2.6
+pkgrel=1
+pkgdesc="A Pacman package analyzer"
+arch=('any')
+url="http://projects.archlinux.org/namcap.git/"
+license=('GPL')
+depends=('python>=2.6' 'licenses')
+source=(ftp://ftp.archlinux.org/other/$pkgname/${pkgname}-${pkgver}.tar.gz
+        namcap-archhurd-nousr.patch namcap-archhurd-noldconfig.patch)
+md5sums=('4ea759bf0793ceb8342953f7520dc643'
+         '032fb83669f6d0473910f25d9033b731'
+         'a7847f9552ca7c8fad1fce48d1c58fe7')
+sha256sums=('4d69ad723e7d0e9054c0031fec7f1586ccaf42f08bbb96308a93baae10d8e19d'
+            'b062345923f82afa7c338ced0e123a24bea692af73db482daced846ed83050e5'
+            'cc11a0b275378f3a71d06c1605c8496f2c5d1f5288155f32f2eed503ebcc2c40')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  # nousr patch used to remove traces of /usr from all areas of namcap.
+  patch -p1 < ../namcap-archhurd-nousr.patch
+
+  # noldconfig used to replace use of ldconfig -p in dependency checker
+  # NOTE: this is done in an i686-specific way (will need changing later)
+  patch -p1 < ../namcap-archhurd-noldconfig.patch
+
+  # The following doesn't seem to work well on Arch Hurd:
+  #./setup.py install --root=${pkgdir} || return 1
+  # So instead we do the following:
+  
+  # Edit the setup script and namcap.py so as not to use /usr/, and get 
+  # setup.py to put the manpages and resources in the package.
+  sed -i s_/usr/share/_${pkgdir}/share/_ setup.py
+  sed -i s_/usr/_/_ setup.py
+  sed -i s_/usr/_/_ namcap.py
+
+  # Use the modified setup.py but change the prefix to the package directory.
+  # (This argument don't seem to work on the /share/ data pointed to by
+  # setup.py, hence the special case sed replacement above to get it to
+  # install into the package.)
+  ./setup.py install --prefix=${pkgdir}
+}

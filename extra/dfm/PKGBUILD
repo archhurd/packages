@@ -1,0 +1,26 @@
+# Maintainer: Matt Windsor <hayashi@archhurd.org>
+# Contributor: Sergej Pupykin <pupykin.s+arch@gmail.com>
+# Contributor: eric <eric@archlinux.org>
+# Contributor: Tom Newsom <Jeepster@gmx.co.uk>
+
+pkgname=dfm
+pkgver=0.99.9
+pkgrel=1
+pkgdesc="A graphical file manager including desktop icons"
+arch=('i686')
+depends=('gtk' 'imlib' 'libxpm')
+license=('GPL')
+source=(http://www.kaisersite.de/dfm/$pkgname-$pkgver.tar.gz)
+url="http://www.kaisersite.de/dfm/"
+md5sums=('c6347874028a2dd2c8ec3dec33968fea')
+
+build() {
+  cd ${srcdir}/${pkgname}
+  ./configure --prefix= --mandir=/share
+  make
+}
+
+package() {
+  cd ${srcdir}/${pkgname}
+  make DESTDIR=${pkgdir} install
+}

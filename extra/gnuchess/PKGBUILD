@@ -1,0 +1,32 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=gnuchess
+pkgver=5.07
+pkgrel=1
+pkgdesc="Lets most modern computers play a full game of chess"
+url="http://www.gnu.org/software/chess/chess.html"
+arch=('i686')
+license=('GPL')
+depends=('glibc' 'ncurses' 'readline')
+source=(ftp://ftp.gnu.org/pub/gnu/chess/$pkgname-$pkgver.tar.gz
+        gnuchess-gcc4.patch
+        gnuchess-glibc210.patch)
+md5sums=('259da00aa559e5624c65279484fccaf7'
+         'a99f426060828d5de76f4fffe941fe7b'
+         'e7fc4876dcd7d6d4e1ff019f39408086')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver
+
+  patch -Np1 -i $srcdir/gnuchess-gcc4.patch
+  patch -Np0 -i $srcdir/gnuchess-glibc210.patch
+
+  ./configure --prefix=
+  make
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
+
+  make prefix=$pkgdir install
+}

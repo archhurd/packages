@@ -1,0 +1,76 @@
+# Maintainer: Matt Windsor <mattwindsor@btinternet.com>
+# Contributor: Jaroslav Lichtblau <dragonlord@aur.archlinux.org>
+# Contributor: Chris Brannon <cmbrannon@cox.net>
+
+# TTY patch contributed by diegonc.
+
+pkgname=emacs-nox
+pkgver=23.2
+pkgrel=2
+pkgdesc="The Emacs Editor, without X11 support."
+arch=('i686')
+url="http://www.gnu.org/software/emacs/emacs.html"
+license=('GPL')
+depends=('dbus-core' 'ncurses' 'perl')
+provides=('emacs')
+conflicts=('emacs' 'emacs-cvs')
+options=('docs')
+install=$pkgname.install
+source=(ftp://ftp.gnu.org/gnu/emacs/emacs-${pkgver}.tar.gz
+        emacs-nox-archhurd-tty-fix.patch)
+md5sums=('b6691852dae0bc142b3c12749f6b7ade'
+         '4cbbf504628ab93fc24cf67213e71a26')
+
+build() {
+  cd ${srcdir}/emacs-${pkgver}
+
+  # Patch!
+
+  patch -Np1 <../emacs-nox-archhurd-tty-fix.patch
+
+  # GCC 4.5 workaround: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43904
+
+  CFLAGS="${CFLAGS} -D_GNU_SOURCE -fno-optimize-sibling-calls"\
+  ./configure --prefix= --without-x --without-sound --without-gconf
+
+  # We don't want to use /libexec.
+  sed -i "s|\"libexec/emacs.*$|\"lib/emacs/$pkgver\"|g" src/epaths.h
+
+  make libexecdir=/lib archlibdir=/lib/emacs/${pkgver}
+}
+
+package() {
+  cd ${srcdir}/emacs-${pkgver}
+
+  make prefix=${pkgdir}/ libexecdir=${pkgdir}/lib \
+    archlibdir=${pkgdir}/lib/emacs/${pkgver} install
+
+  # Remove conflict with ctags package.
+
+  mv ${pkgdir}/bin/{ctags,ctags.emacs}
+  mv ${pkgdir}/bin/{etags,etags.emacs}
+  mv ${pkgdir}/share/man/man1/{etags.1,etags.emacs.1}
+  mv ${pkgdir}/share/man/man1/{ctags.1,ctags.emacs.1}
+
+  # Fix all the 777 permissionss on directories.
+
+  find ${pkgdir}/share/emacs/$pkgver -type d -exec chmod 755 {} \;
+
+  # Fix user/root permissions on /share files.
+
+  find ${pkgdir}/share/emacs/$pkgver -exec chown root.root {} \;
+
+  # Remove empty files.
+
+  rm -rf ${pkgdir}/var
+
+  # Remove .desktop file and icons.
+
+  rm -rf ${pkgdir}/share/{applications,icons}
+
+  # Get rid of the package's info directory. 
+  # install-info adds entries for us at install-time.
+
+  rm ${pkgdir}/share/info/dir
+  gzip -9nf ${pkgdir}/share/info/*
+}

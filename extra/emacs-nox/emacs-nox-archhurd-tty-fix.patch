@@ -1,0 +1,15 @@
+--- a/src/term.c	2010-08-20 22:44:38 +0000
++++ b/src/term.c	2010-09-02 05:30:14 +0000
+@@ -3428,12 +3428,10 @@
+     FILE *file;
+ 
+ #ifdef O_IGNORE_CTTY
+-    if (!ctty)
+       /* Open the terminal device.  Don't recognize it as our
+          controlling terminal, and don't make it the controlling tty
+          if we don't have one at the moment.  */
+       fd = emacs_open (name, O_RDWR | O_IGNORE_CTTY | O_NOCTTY, 0);
+-    else
+ #else
+       /* Alas, O_IGNORE_CTTY is a GNU extension that seems to be only
+          defined on Hurd.  On other systems, we need to explicitly
