@@ -1,4 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 56536 2009-10-22 16:45:57Z jgc $
+# Contributor: Jan de Groot <jgc@archlinux.org>
+# Contributor: Alexander Baldeck <alexander@archlinux.org>
 
 pkgname=xf86dgaproto
 pkgver=2.1
@@ -12,14 +15,14 @@ md5sums=('a036dc2fcbf052ec10621fd48b68dbb1')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix= 
+  make 
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}" 
 }
