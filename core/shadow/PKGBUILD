@@ -28,7 +28,7 @@ build() {
   sed -i "s/noinst_LTLIBRARIES/lib_LTLIBRARIES/g" lib/Makefile.am
   libtoolize
   autoreconf
-  export LDFLAGS="$LDFLAGS -lcrypt"
+  export LIBS="-lcrypt"
 
   patch -Np1 -i $srcdir/xstrdup.patch || return 1
 
@@ -40,7 +40,7 @@ build() {
     --mandir=/share/man --sysconfdir=/etc \
     --enable-shared --disable-static \
     --with-libpam --without-selinux
-  make || return 1
+  make
 }
 
 package() {
@@ -80,7 +80,7 @@ package() {
   find $pkgdir/share/man -name 'su.1' -exec rm -v {} \;
 
   # Remove login and group - using login and group from hurd
-  mv $pkgdir/bin/login $pkgdir/bin/alogin
+  mv $pkgdir/bin/login $pkgdir/bin/login.shadow
   rm -v $pkgdir/bin/groups
   rm -v $pkgdir/share/man/man1/groups.1
 }

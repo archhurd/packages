@@ -1,0 +1,43 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 21908 2010-07-18 20:11:48Z spupykin $
+# Contributor: Sergej Pupykin <pupykin.s+arch@gmail.com>
+# Contributor:  TDY <tdy@gmx.com>
+# Contributor: Grigorios Bouzakis <grbzks[at]gmail[dot]com>
+
+pkgname=tmux
+pkgver=1.3
+pkgrel=1
+pkgdesc="A terminal multiplexer"
+url="http://tmux.sourceforge.net/"
+arch=('i686')
+license=('BSD')
+depends=('ncurses' 'libevent')
+source=(http://downloads.sourceforge.net/tmux/tmux-$pkgver.tar.gz
+  	05_build_kfreebsd_hurd.diff
+	hurd_MAXHOSTNAMELEN.diff
+	LICENSE)
+
+build() {
+  cd "$srcdir/tmux-$pkgver"
+
+  patch -p1 -i ${srcdir}/05_build_kfreebsd_hurd.diff
+  patch -p1 -i ${srcdir}/hurd_MAXHOSTNAMELEN.diff
+  
+  ./configure
+  make
+}
+
+package() {
+  cd "$srcdir/tmux-$pkgver"
+
+  install -Dm755 tmux "$pkgdir/bin/tmux" && \
+  install -Dm644 tmux.1 "$pkgdir/share/man/man1/tmux.1" && \
+  install -Dm644 examples/tmux.vim "$pkgdir/share/vim/vimfiles/syntax/tmux.vim" && \
+  install -Dm644 ../LICENSE "$pkgdir/share/licenses/tmux/LICENSE" && \
+  install -dm755 "$pkgdir/share/tmux/" && \
+  install -m644 examples/* "$pkgdir/share/tmux/"
+}
+md5sums=('96e60cb206de2db0610b9fb6a64c2251'
+         'b4a0bce6097759412ff156dfeadeb7e2'
+         '21b6610a10ac9665ad8d0140d6debefe'
+         '71601bc37fa44e4395580b321963018e')
