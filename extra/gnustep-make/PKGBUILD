@@ -1,0 +1,30 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=gnustep-make
+pkgver=2.4.0
+pkgrel=1
+pkgdesc="The GNUstep make package"
+arch=(i686)
+url="http://www.gnustep.org/"
+license=('GPL')
+depends=('glibc')
+groups=('gnustep-core')
+source=(ftp://ftp.gnustep.org/pub/gnustep/core/$pkgname-$pkgver.tar.gz)
+md5sums=('bc2138e6256665e55b00fb0ffac766f1')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver
+
+  ./configure --prefix=/opt/GNUstep
+  make
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
+
+  make DESTDIR=$pkgdir install
+
+  install -D -m755 \
+    $pkgdir/opt/GNUstep/System/Library/Makefiles/GNUstep.sh \
+    $pkgdir/etc/profile.d/GNUstep.sh
+}

@@ -1,0 +1,44 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=windowmaker
+pkgver=0.92.0
+pkgrel=2
+pkgdesc="An X11 window manager with a NEXTSTEP look and feel"
+arch=(i686)
+url="http://www.windowmaker.info/"
+license=('GPL' 'custom')
+depends=('libxinerama' 'libpng' 'libxpm' 'libxft' 'libtiff' 'giflib')
+options=('!libtool')
+source=(http://windowmaker.info/pub/source/release/WindowMaker-$pkgver.tar.bz2 windowmaker-gcc4.patch.tar.bz2 libpng-1.4.patch)
+md5sums=('aaac5421b686ed2d3e6ab65229c98097' 'd9fb6a9c255f5c03d0e0c83dc3cd2320'\
+         '409173062955f4a527d88cd7a007efa7')
+sha1sums=('4f7fea6f40b9ba9f870d2e2f0ce46274750edb2c' '764aa4883b289994177fd3735541d050fda5bcdb'\
+         '027e1d06360fa38fe95afab6e73b7e9f144da687')
+
+build() {
+  cd $srcdir/WindowMaker-$pkgver
+
+  patch -p1 < ../libpng-1.4.patch
+  patch -Np1 -i ../windowmaker-gcc4.patch
+
+  libtoolize --force --copy
+  aclocal
+  autoconf
+  automake
+
+  [ -z "$LINGUAS" ] && export LINGUAS="`ls po/*.po | sed 's:po/\(.*\)\.po$:\1:'`"
+
+  ./configure --prefix= --sysconfdir=/etc \
+    --with-gnustepdir=/opt/GNUstep --with-nlsdir=/share/locale \
+    --enable-xinerama
+
+  make
+}
+
+package() {
+  cd $srcdir/WindowMaker-$pkgver
+
+  make DESTDIR=$pkgdir install
+  install -D -m644 COPYING.WTFPL $pkgdir/share/licenses/$pkgname/COPYING.WTFPL
+}
+

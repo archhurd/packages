@@ -1,4 +1,4 @@
-# Maintainer: Matt Windsor <mattwindsor@btinternet.com>
+# Maintainer: Matt Windsor <hayashi@archhurd.org>
 # Contributor: Jaroslav Lichtblau <dragonlord@aur.archlinux.org>
 # Contributor: Chris Brannon <cmbrannon@cox.net>
 
@@ -6,7 +6,7 @@
 
 pkgname=emacs-nox
 pkgver=23.2
-pkgrel=2
+pkgrel=3
 pkgdesc="The Emacs Editor, without X11 support."
 arch=('i686')
 url="http://www.gnu.org/software/emacs/emacs.html"
@@ -31,10 +31,13 @@ build() {
   # GCC 4.5 workaround: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43904
 
   CFLAGS="${CFLAGS} -D_GNU_SOURCE -fno-optimize-sibling-calls"\
-  ./configure --prefix= --without-x --without-sound --without-gconf
+  ./configure --prefix= --without-x --without-sound --without-gconf --build=i686-pc-gnu
 
   # We don't want to use /libexec.
-  sed -i "s|\"libexec/emacs.*$|\"lib/emacs/$pkgver\"|g" src/epaths.h
+  sed -i "s|\"/libexec/emacs.*$|\"/lib/emacs/$pkgver\"|g" src/epaths.h
+
+  # Unsure if this is correct
+  sed -i "s|#define PATH_DUMPLOADSEARCH.*$|#define PATH_DUMPLOADSEARCH \"/share/emacs/23.2/lisp\"|g" src/epaths.h
 
   make libexecdir=/lib archlibdir=/lib/emacs/${pkgver}
 }

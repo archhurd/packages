@@ -1,0 +1,34 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=dnsutils
+# Use a period and not a hyphen before the patch level for proper versioning.
+pkgver=9.7.1.P2
+_pkgver=9.7.1-P2
+pkgrel=1
+pkgdesc="Various DNS utilities - dig host nslookup nsupdate"
+arch=(i686)
+url="https://www.isc.org/software/bind"
+license=('custom:ISC')
+depends=('openssl')
+options=('makeflags')
+source=(http://ftp.isc.org/isc/bind9/${_pkgver}/bind-${_pkgver}.tar.gz
+	bind.so_bsdcompat.diff tools-only.patch)
+md5sums=('bd6be63cc910d04da39103d441871596'
+         '447d58721cfee0e1e377b46f7d50b327'
+         'be0558f70ed81d90e68e6b6003ba12ed')
+
+build() {
+  cd "${srcdir}/bind-${_pkgver}"
+  patch -Np0 -i "${srcdir}/bind.so_bsdcompat.diff"
+  patch -Np1 -i "${srcdir}/tools-only.patch"
+  ./configure --prefix= --sysconfdir=/etc --localstatedir=/var \
+		--with-openssl=yes --disable-linux-caps --without-libxml2
+  make
+}
+
+package() {
+  cd "${srcdir}/bind-${_pkgver}/bin"
+  make DESTDIR="${pkgdir}" install
+  install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 ../COPYRIGHT "${pkgdir}/share/licenses/${pkgname}/LICENSE"
+}
