@@ -1,0 +1,14 @@
+--- src-original/scummvm-1.1.1/backends/midi/timidity.cpp	2010-08-31 10:09:45.000000000 +0000
++++ src/scummvm-1.1.1/backends/midi/timidity.cpp	2010-08-31 10:16:01.000000000 +0000
+@@ -55,6 +55,11 @@
+ #include <stdlib.h>
+ #include <errno.h>
+ 
++// Hurd workaround
++#ifndef MAXHOSTNAMELEN
++#define MAXHOSTNAMELEN 1024
++#endif
++
+ // WORKAROUND bug #1870304: Solaris does not provide INADDR_NONE.
+ #ifndef INADDR_NONE
+ #define INADDR_NONE 0xffffffff
