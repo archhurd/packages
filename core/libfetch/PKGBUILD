@@ -2,17 +2,17 @@
 #Thanks to Aaron Griffin, this is mostly his ArchLinux PKGBUILD
 
 pkgname=libfetch
-pkgver=2.32
+pkgver=2.33
 pkgrel=1
 pkgdesc="URL based download library"
 arch=(i686)
 license=('BSD')
-depends=('openssl>=1.0.0')
+depends=('openssl>=1.0')
 url="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/libfetch/"
 source=($pkgname-$pkgver.tar.gz
         Makefile
         libfetch_hurd.patch)
-md5sums=('f7918e221f8e19494e3285999a827ee1'
+md5sums=('425c9202cee5ff68b6d356de7e41352a'
          '298c43d709fd93457d85a1cf7428195a'
          '99cff9c19a6bb4e63610970f5dcdc9a6')
 
