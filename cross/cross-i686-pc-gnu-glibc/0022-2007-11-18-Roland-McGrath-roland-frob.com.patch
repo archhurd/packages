@@ -1,0 +1,33 @@
+Needed for glibc-2_7-branch.
+
+
+2007-11-18  Roland McGrath  <roland@frob.com>
+
+	* sysdeps/mach/hurd/bits/fcntl.h (O_CLOEXEC): Fix value.
+
+---
+ sysdeps/mach/hurd/bits/fcntl.h |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/sysdeps/mach/hurd/bits/fcntl.h b/sysdeps/mach/hurd/bits/fcntl.h
+index 8ed786d..2f890c1 100644
+--- a/sysdeps/mach/hurd/bits/fcntl.h
++++ b/sysdeps/mach/hurd/bits/fcntl.h
+@@ -71,7 +71,6 @@
+ #define O_SYNC		O_FSYNC
+ #ifdef __USE_GNU
+ # define O_NOATIME	0x0800	/* Don't set access time on read (owner).  */
+-# define O_CLOEXEC	0x00010000 /* Set FD_CLOEXEC.  */
+ #endif
+ #ifdef	__USE_MISC
+ # define O_SHLOCK	0x00020000 /* Open with shared file lock.  */
+@@ -118,6 +117,9 @@
+    once the file has been opened.  */
+ 
+ #define	O_TRUNC		0x00010000 /* Truncate file to zero length.  */
++#ifdef __USE_GNU
++# define O_CLOEXEC	0x00400000 /* Set FD_CLOEXEC.  */
++#endif
+ 
+ 
+ /* Controlling terminal flags.  These are understood only by `open',

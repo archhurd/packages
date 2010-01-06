@@ -1,0 +1,79 @@
+# Maintainer: Allan McRae <allan@archlinux.org>
+
+# cross toolchain build order: binutils, gcc (pass 1), gnumach-headers, mig, hurd-headers,
+#                              glibc (pass 1), libpthread, gcc (pass 2), glibc (pass 2)
+
+_target=i686-pc-gnu
+_sysroot=/usr/lib/cross-${_target}
+_pass=1   # 1 or 2
+
+pkgname=cross-${_target}-gcc
+pkgver=4.4.2
+pkgrel=1
+pkgdesc="Hurd cross-toolchain compiler (GCC)"
+arch=('i686' 'x86_64')
+license=('GPL' 'LGPL' 'custom')
+url="http://gcc.gnu.org"
+depends=("cross-${_target}-binutils" 'mpfr' 'cloog-ppl')
+#[ ${_pass} -eq 2 ] && depends=(${depends[@]} "cross-${_target}-libpthread")
+options=('!libtool' '!makeflags' '!strip')
+source=(ftp://gcc.gnu.org/pub/gcc/releases/gcc-${pkgver}/gcc-{core,g++}-${pkgver}.tar.bz2)
+md5sums=('d50ec5af20508974411d0c83c5f4e396'
+         '43b1e4879eb282dc4b05e4c016d356d7')
+
+build() {
+  cd ${srcdir}/gcc-${pkgver}
+  # Don't install libiberty
+  sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
+
+  echo ${pkgver} > gcc/BASE-VER
+
+  if [ ${_pass} -eq 1 ]; then
+    _shared="--disable-shared"
+    _threads="--disable-threads"
+    _headers="--without-headers"
+    _newlib="--with-newlib"
+    _lang="c"
+  else
+    _shared="--enable-shared"
+    _threads="--enable-threads=posix"
+    _headers=""
+    _newlib=""
+    _lang="c,c++"
+  fi
+
+  mkdir build
+  cd build
+  ../configure --prefix=${_sysroot} --bindir=/usr/bin \
+    --with-sysroot=${_sysroot} \
+    --build=$CHOST --host=$CHOST --target=${_target} \
+    --with-gnu-as --with-gnu-ld \
+    --disable-nls \
+    ${_threads} ${_shared} ${_headers} ${_newlib} \
+    --enable-languages=${_lang}
+
+  if [ ${_pass} -eq 1 ]; then
+    make all-gcc all-target-libgcc
+    make -j1 DESTDIR=$pkgdir/ install-gcc install-target-libgcc
+  else
+    make || return 1
+    make -j1 DESTDIR=$pkgdir/ install || return 1
+  fi
+
+  # CHECK IF THIS STILL HOLDS!
+  # glibc wants to link to this but we can not build it in pass 1...
+  [ ${_pass} -eq 1 ] && echo '/* Empty.  */' > ${pkgdir}/${_sysroot}/lib/libgcc_eh.a
+
+  # Install Runtime Library Exception
+  install -Dm644 ../COPYING.RUNTIME ${pkgdir}/usr/share/licenses/${pkgname}/RUNTIME.LIBRARY.EXCEPTION
+  
+  # clean-up cross compiler root
+  rm -rf ${pkgdir}/${_sysroot}/{info,man,share}
+  
+  # manually strip files
+  strip $pkgdir/usr/bin/${_target}-{cpp,gcc,gcov}
+  [ ${_pass} -eq 2 ] && strip $pkgdir/usr/bin/${_target}-c++
+  strip -S $pkgdir/${_sysroot}/libexec/gcc/${_target}/$pkgver/{cc1,collect2}
+  [ ${_pass} -eq 2 ] && strip $pkgdir/${_sysroot}/libexec/gcc/${_target}/$pkgver/cc1plus
+  ${_target}-strip -S ${pkgdir}/${_sysroot}/lib/gcc/${_target}/$pkgver/*.{o,a}
+}

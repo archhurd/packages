@@ -1,0 +1,60 @@
+# Maintainer: Allan McRae <allan@archlinux.org>
+
+# cross toolchain build order: binutils, gcc (pass 1), gnumach-headers, mig, hurd-headers,
+#                              glibc (pass 1), libpthread, gcc (pass 2), glibc (pass 2)
+
+_target=i686-pc-gnu
+_sysroot=/usr/lib/cross-${_target}
+
+pkgname=cross-${_target}-libpthread
+pkgver=20100105
+pkgrel=1
+pkgdesc="Hurd cross-toolchain GNU Hurd pthreads library"
+arch=('i686' 'x86_64')
+url="http://www.gnu.org/software/hurd/index.html"
+license=('GPL')
+depends=("cross-${_target}-glibc")
+makedepends=('git')
+
+_hurd_gitroot="git://git.sv.gnu.org/hurd/hurd.git"
+_libpthread_gitroot="git://git.sv.gnu.org/hurd/libpthread.git"
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [ -d $srcdir/hurd ] ; then
+    cd $srcdir/hurd && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $_hurd_gitroot
+  fi
+
+  if [ -d $srcdir/libpthread ] ; then
+    cd $srcdir/libpthread && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $_libpthread_gitroot
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting make..."
+
+  rm -rf "$srcdir/build"
+  git clone "$srcdir/hurd" "$srcdir/build"
+  git clone "$srcdir/libpthread" "$srcdir/build/libpthread"
+  cd "$srcdir/build"
+
+  # hurd does not include ${prefix}/include by default
+  # should possibly try getting this fixed upstream?
+  export CPPFLAGS="$CPPFLAGS -I ${_sysroot}/include"
+
+  ./configure --prefix=${_sysroot} \
+    --build=$CHOST --host=${_target} --target=${_target} \
+    --disable-profile
+  make libpthread
+  make prefix=${pkgdir}/${_sysroot} libihash-install libpthread-install
+  
+  # conflict with hurd-headers
+  rm -rf ${pkgdir}/${_sysroot}/include/hurd
+} 

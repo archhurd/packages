@@ -1,0 +1,30 @@
+Needed for HEAD and glibc-2_7-branch.
+
+Reported on <http://sourceware.org/bugzilla/show_bug.cgi?id=5246#c6>.
+
+
+2007-11-12  Aurelien Jarno  <aurelien@aurel32.net>
+	    Thomas Schwinge  <tschwinge@gnu.org>
+
+	* sysdeps/mach/i386/sysdep.h (PTR_MANGLE, PTR_DEMANGLE): Define.
+
+
+diff -u b/sysdeps/mach/i386/sysdep.h b/sysdeps/mach/i386/sysdep.h
+--- a/sysdeps/mach/i386/sysdep.h
++++ b/sysdeps/mach/i386/sysdep.h
+@@ -58,6 +58,15 @@
+ 
+ #define STACK_GROWTH_DOWN
+ 
++/* Pointer mangling is not yet supported.  */
++#ifdef __ASSEMBLER__
++#define PTR_MANGLE(var)
++#define PTR_DEMANGLE(var)
++#else
++#define PTR_MANGLE(var) (void) (var)
++#define PTR_DEMANGLE(var) (void) (var)
++#endif
++
+ /* Get the machine-independent Mach definitions.  */
+ #include <sysdeps/mach/sysdep.h>
+ 

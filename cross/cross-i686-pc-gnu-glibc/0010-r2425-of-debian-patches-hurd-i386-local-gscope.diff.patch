@@ -1,0 +1,91 @@
+Needed for HEAD and glibc-2_7-branch.
+
+From Debian glibc repository.  Patch by Samuel Thibault.
+
+
+r2425 (probably wrong?) of debian/patches/hurd-i386/local-gscope.diff.
+
+Date: 2007-07-21 00:27:17 +0000 (Sat, 21 Jul 2007)
+New Revision: 2425
+
+  * hurd-i386/local-gscope.diff: new patch, backport of the CVS global scope.
+
+mrlocks have gone from CVS head, so implementing them would be a loss of time,
+when backporting the GSCOPE_SET/RESET/WAIT can be actually done easily.
+
+Date: 2007-08-02 12:30:10 +0000 (Thu, 02 Aug 2007)
+New Revision: 2496
+
+  * hurd-i386/local-gscope.diff: resync, mostly merged upstream.
+
+
+---
+ elf/dl-support.c                  |    1 +
+ sysdeps/generic/ldsodefs.h        |    1 +
+ sysdeps/mach/hurd/sysdep-cancel.h |    9 +++++++++
+ sysdeps/mach/hurd/tls.h           |   13 +++++++++++++
+ 4 files changed, 24 insertions(+), 0 deletions(-)
+ create mode 100644 sysdeps/mach/hurd/sysdep-cancel.h
+
+diff --git a/elf/dl-support.c b/elf/dl-support.c
+index 2c11ac6..420cc87 100644
+--- a/elf/dl-support.c
++++ b/elf/dl-support.c
+@@ -135,6 +135,7 @@ int (*_dl_make_stack_executable_hook) (void **) internal_function
+ /* Function in libpthread to wait for termination of lookups.  */
+ void (*_dl_wait_lookup_done) (void);
+ 
++int volatile _dl_thread_gscope_count;
+ struct dl_scope_free_list *_dl_scope_free_list;
+ 
+ #ifdef NEED_DL_SYSINFO
+diff --git a/sysdeps/generic/ldsodefs.h b/sysdeps/generic/ldsodefs.h
+index 958a099..041de37 100644
+--- a/sysdeps/generic/ldsodefs.h
++++ b/sysdeps/generic/ldsodefs.h
+@@ -493,6 +493,7 @@ struct rtld_global
+     size_t count;
+     void *list[50];
+   } *_dl_scope_free_list;
++  EXTERN volatile int _dl_thread_gscope_count;
+ #ifdef SHARED
+ };
+ # define __rtld_global_attribute__
+diff --git a/sysdeps/mach/hurd/sysdep-cancel.h b/sysdeps/mach/hurd/sysdep-cancel.h
+new file mode 100644
+index 0000000..ec55c73
+--- /dev/null
++++ b/sysdeps/mach/hurd/sysdep-cancel.h
+@@ -0,0 +1,9 @@
++#include <sysdep.h>
++
++/* Always multi-thread (since there's at least the sig handler), but no
++   handling enabled.  */
++#define SINGLE_THREAD_P (0)
++#define RTLD_SINGLE_THREAD_P (0)
++#define LIBC_CANCEL_ASYNC()	0 /* Just a dummy value.  */
++#define LIBC_CANCEL_RESET(val)	((void)(val)) /* Nothing, but evaluate it.  */
++#define LIBC_CANCEL_HANDLED()	/* Nothing.  */
+diff --git a/sysdeps/mach/hurd/tls.h b/sysdeps/mach/hurd/tls.h
+index 8ad3f1a..1b08ac7 100644
+--- a/sysdeps/mach/hurd/tls.h
++++ b/sysdeps/mach/hurd/tls.h
+@@ -73,5 +73,18 @@ typedef struct
+ 
+ #endif /* HAVE_TLS_SUPPORT */
+ 
++#ifndef __ASSEMBLER__
++#include <mach/mach_traps.h>
++#include <atomic.h>
++/* Temporary poor-man's global scope switch support: just busy-waits */
++#define THREAD_GSCOPE_SET_FLAG() \
++	asm volatile ("lock incl %0":"=m"(GL(dl_thread_gscope_count)))
++#define THREAD_GSCOPE_RESET_FLAG() \
++	asm volatile ("lock decl %0":"=m"(GL(dl_thread_gscope_count)))
++#define THREAD_GSCOPE_WAIT() \
++  while (GL(dl_thread_gscope_count)) { \
++    __swtch_pri (0); \
++  }
++#endif
+ 
+ #endif /* tls.h */

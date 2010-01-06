@@ -1,0 +1,26 @@
+Needed for HEAD and glibc-2_7-branch.
+
+Rejected by Ulrich Drepper in, e.g.,
+<http://sourceware.org/bugzilla/show_bug.cgi?id=3992>.
+
+
+2007-02-07  Thomas Schwinge  <tschwinge@gnu.org>
+
+	* stdlib/fmtmsg.c: Include <stdint.h>.
+
+---
+ stdlib/fmtmsg.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/stdlib/fmtmsg.c b/stdlib/fmtmsg.c
+index 2a4d16a..8a0544e 100644
+--- a/stdlib/fmtmsg.c
++++ b/stdlib/fmtmsg.c
+@@ -19,6 +19,7 @@
+ 
+ #include <fmtmsg.h>
+ #include <bits/libc-lock.h>
++#include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>

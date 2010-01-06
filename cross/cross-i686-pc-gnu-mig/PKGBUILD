@@ -1,0 +1,46 @@
+# Maintainer: Allan McRae <allan@archlinux.org>
+
+# cross toolchain build order: binutils, gcc (pass 1), gnumach-headers, mig, hurd-headers,
+#                              glibc (pass 1), libpthread, gcc (pass 2), glibc (pass 2)
+
+_target=i686-pc-gnu
+_sysroot=/usr/lib/cross-${_target}
+
+pkgname=cross-${_target}-mig
+pkgver=20100106
+pkgrel=1
+pkgdesc="Hurd cross-toolchain GNU Mach Interface Generator"
+arch=('i686' 'x86_64')
+url="http://www.gnu.org/software/hurd/index.html"
+license=('GPL')
+makedepends=('git' "cross-${_target}-gnumach-headers")
+
+_gitroot="git://git.sv.gnu.org/hurd/mig.git"
+_gitname="mig"
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [ -d $_gitname ] ; then
+    cd $_gitname && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $_gitroot
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting make..."
+
+  rm -rf "$srcdir/$_gitname-build"
+  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build"
+  cd "$srcdir/$_gitname-build"
+
+  autoreconf -vif
+
+  ./configure --prefix=${_sysroot} \
+    --build=$CHOST --host=$CHOST --target=${_target} \
+    --bindir=/usr/bin
+  make 
+  make DESTDIR=${pkgdir} install
+} 

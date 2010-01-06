@@ -1,0 +1,36 @@
+Needed for HEAD and glibc-2_7-branch.
+
+From Debian glibc repository.  Patch by Aurelien Jarno.
+
+Reported on <http://sourceware.org/bugzilla/show_bug.cgi?id=5246#c3>.
+
+
+r2656 of debian/patches/any/submitted-sched_h.diff.
+
+r2656 | aurel32 | 2007-11-02 11:38:55 +0100 (Fr, 02 Nov 2007) | 3 lines
+
+  * Add any/submitted-sched_h.diff: new patch to define `__CPU_ALLOC_SIZE.
+
+2007-11-02  Aurelien Jarno  <aurelien@aurel32.net>
+
+	* bits/sched.h (__CPU_ALLOC_SIZE): Define.
+
+
+---
+ bits/sched.h |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/bits/sched.h b/bits/sched.h
+index af92dbc..ac68f27 100644
+--- a/bits/sched.h
++++ b/bits/sched.h
+@@ -69,6 +69,9 @@ typedef struct
+ # define __CPU_ISSET(cpu, cpusetp) \
+   (((cpusetp)->__bits[__CPUELT (cpu)] & __CPUMASK (cpu)) != 0)
+ 
++# define __CPU_ALLOC_SIZE(count) \
++  ((((count) + __NCPUBITS - 1) / __NCPUBITS) * 8)
++
+ __BEGIN_DECLS
+ 
+ extern int __sched_cpucount (size_t __setsize, const cpu_set_t *__setp)
