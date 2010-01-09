@@ -63,12 +63,13 @@ get_source()
   patch_glibc
   
   # git sources
-  GIT_ROOT=git://git.sv.gnu.org/hurd/
+  GIT_ROOT=git://git.sv.gnu.org/hurd
   
   for pkg in gnumach mig hurd; do
     if [ -d $SOURCE_DIR/$pkg ] ; then
       cd $SOURCE_DIR/$pkg && git pull origin
     else
+      cd $SOURCE_DIR
       git clone $GIT_ROOT/$pkg.git
     fi
   done
@@ -77,7 +78,7 @@ get_source()
   if [ -d libpthread ] ; then
     cd libpthread && git pull origin
   else
-    git clone $GIT_ROOT/$libpthread.git
+    git clone $GIT_ROOT/libpthread.git
   fi 
   
   for pkg in gnumach mig hurd; do
@@ -111,6 +112,7 @@ patch_glibc()
 
   PATCH_SOURCE=http://www.schwinge.homeip.net/~thomas/tmp/glibc-patches/
 
+  mkdir -p $SOURCE_DIR/patches
   cd $SOURCE_DIR/patches
 
   for p in ${PATCH1[@]} ${PATCH0[@]}; do
