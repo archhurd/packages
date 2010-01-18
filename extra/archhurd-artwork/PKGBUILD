@@ -1,0 +1,28 @@
+# $Id: PKGBUILD 53943 2009-10-04 05:51:06Z thayer $
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=archhurd-artwork
+pkgver=1
+pkgrel=1
+pkgdesc="Arch Hurd logos from the logo competition."
+arch=(any)
+url="http://www.archhurd.org/"
+license=('CCPL:cc-by-nc-sa' 'custom:TRADEMARKS')
+install=
+source=(http://sources.archhurd.org/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('8ae4cbdd225e4448857b22391b62c906')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver
+  mkdir -p $pkgdir/usr/share/archhurd/{docs,logos}
+
+  install -m644 AUTHORS $pkgdir/usr/share/archhurd/docs/
+  install -m644 FONTS $pkgdir/usr/share/archurd/docs/
+  install -m644 TRADEMARKS $pkgdir/usr/share/archhurd/docs/
+  install -m644 logos/* $pkgdir/usr/share/archhurd/logos/
+
+  # add the custom license
+  mkdir -p $pkgdir/usr/share/licenses/$pkgname/
+  install -m644 TRADEMARKS $pkgdir/usr/share/licenses/$pkgname/
+}
+
