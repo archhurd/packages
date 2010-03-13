@@ -1,0 +1,29 @@
+# Maintainer Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=bash
+pkgver=4.1
+pkgrel=1
+pkgdesc="The GNU Bourne Again shell"
+arch=('i586-hurd')
+url="http://www.gnu.org/software/bash/bash.html"
+license=('GPL')
+groups=('base')
+depends=('glibc')
+makedepends=()
+install=bash.install
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.gz)
+md5sums=('9800d8724815fd84994d9be65ab5e7b8')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --host=i586-pc-gnu --prefix=
+  make || return 1
+  make DESTDIR="$pkgdir/" install
+  
+  cd $pkgdir/bin
+  ln -s bash sh
+}
+
+# vim:set ts=2 sw=2 et:

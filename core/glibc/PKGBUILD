@@ -1,0 +1,97 @@
+# Maintainer Matthias Lanzinger <mlaenz@gmail.com>
+# Note: All the debian patches are only temporary, get as many of them out as 
+#       possible
+
+pkgname=glibc
+pkgver=2.10.1
+pkgrel=1
+pkgdesc="GNU C Library"
+arch=('i586-hurd')
+url="http://www.gnu.org/software/libc"
+license=('GPL','LGPL')
+groups=('base')
+depends=('hurd')
+makedepends=('hurd' 'gcc>=4.3')
+install=glibc.install
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.bz2
+       submitted-stat.diff
+       local-gcc-4.1-init-first.diff
+       local-tls-support.diff
+       local-tls.diff
+       submitted-libc_once.diff
+       local-stdio-lock.diff
+       submitted-strtoul.diff
+       submitted-ptr-mangle.diff
+       submitted-sched_h.diff
+       local-atomic-no-multiple_threads.diff
+       local-check_native.diff
+       local-_dl_random.diff
+       local-gscope.diff
+       submitted-popen.diff
+       local-no-SOCK_NONBLOCK.diff
+       submitted-dl-sysdep.diff
+       local-unwind-resume.diff
+       i686-cpuclock_which.patch)
+noextract=()
+md5sums=('ee71dedf724dc775e4efec9b823ed3be'
+         '8d0a6017bf347e1bdcd7e4f3eaf86a4f'
+         'be6eb77fc81ed3116392b0c194bdf0fe'
+         '966d39c313304b88d579f10a6e306a1e'
+         'f1d45b49fd3a2c6f5be2ac7b78e30d15'
+         '8c0eda0e556f8302b13f97ba560e9931'
+         'bb35ad9b947eea31d31b3b2636b3ad0d'
+         '4c1f7825eb78a25e913e8612c311f3f4'
+         '02f40f285529fb105922a88a73551b6d'
+         'f48252958d8be8ef00c279ec8eaee0fa'
+         'a1639985d2e1284d03e5e3f1a82a1f3f'
+         'ca87f96754d5231fa960b04439ea9d64'
+         '121f7f64f6547fc44aa5694e64abbcba'
+         '2701e4ea8f89ab2877628daba335318e'
+         '642aed10f42dc86fe30dcf19f56087d5'
+         'cc14fe13fc4ca278c07b17a6be8b48f9'
+         'e3ae72d58fd3ec6447fe5f48c84829f7'
+         '03eecaa535040abd9d38a125893c80cf'
+         '1a6638ab233513400c520e9230612ece')
+
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+  
+  msg "Patching..."
+  patch -Np1 -i $srcdir/submitted-stat.diff
+  patch -Np1 -i $srcdir/local-gcc-4.1-init-first.diff
+  patch -Np1 -i $srcdir/local-tls-support.diff
+  patch -Np1 -i $srcdir/local-tls.diff
+  patch -Np1 -i $srcdir/submitted-libc_once.diff
+  patch -Np1 -i $srcdir/local-stdio-lock.diff
+  patch -Np1 -i $srcdir/submitted-strtoul.diff
+  patch -Np1 -i $srcdir/submitted-ptr-mangle.diff
+  patch -Np1 -i $srcdir/submitted-sched_h.diff
+  patch -Np1 -i $srcdir/local-atomic-no-multiple_threads.diff
+  patch -Np1 -i $srcdir/local-check_native.diff
+  patch -Np1 -i $srcdir/local-_dl_random.diff
+  patch -Np1 -i $srcdir/local-gscope.diff
+  patch -Np1 -i $srcdir/submitted-popen.diff
+  patch -Np1 -i $srcdir/local-no-SOCK_NONBLOCK.diff
+  patch -Np1 -i $srcdir/submitted-dl-sysdep.diff
+  patch -Np1 -i $srcdir/local-unwind-resume.diff
+  patch -Np1 -i $srcdir/i686-cpuclock_which.patch  
+  msg "Done Patching."
+
+  mkdir "$srcdir/$pkgname-build"
+  cd "$srcdir/$pkgname-build"
+
+  ../$pkgname-$pkgver/configure --host=i586-pc-gnu --prefix= \
+              --without-gd --without-cvs \
+              --disable-profile \
+  
+  
+  make || return 1
+  make install_root="$pkgdir/" install || return 1
+  
+  cd $pkgdir/lib
+  ln -s ld.so.1 ld.so
+}
+
+# vim:set ts=2 sw=2 et:

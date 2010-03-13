@@ -1,0 +1,34 @@
+# Maintainer Matthias Lanzinger <mlaenz@gmail.com>
+# NOTE: In a not so distant future this should be made to install on MBR
+# for now it will only screw up my qemu images :(
+
+pkgname=grub
+pkgver=0.97
+pkgrel=1
+pkgdesc="A GNU multiboot boot loader"
+arch=('i586-hurd')
+url="http://www.gnu.org/software/grub"
+license=('GPL')
+groups=('base')
+depends=()
+backup=('/boot/grub/menu.lst')
+install=grub.install
+source=(ftp://alpha.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.gz
+        menu.lst)
+md5sums=('cd3f3eb54446be6003156158d51f4884'
+         '6090eed30b66cbf993c1eb8a0afb618c')
+
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --host=i586-pc-gnu --prefix= \
+              --mandir=/share/man --infodir=/share/info
+  make || return 1
+  make DESTDIR="$pkgdir/" install || return 1
+  
+  install -D -m644 $srcdir/menu.lst $pkgdir/boot/grub/menu.lst
+}
+
+# vim:set ts=2 sw=2 et:

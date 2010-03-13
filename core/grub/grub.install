@@ -1,0 +1,26 @@
+infodir=/share/info
+filelist=(grub.info multiboot.info)
+
+post_install() {
+  [ -x bin/install-info ] || return 0
+  for file in ${filelist[@]}; do
+    install-info $infodir/$file.gz $infodir/dir 2> /dev/null
+  done
+  echo "************************************************************"
+  echo "** Note that this package will, for now, not install grub **
+  echo "** to your MBR. You can of course do so manually          **"
+  echo "************************************************************"
+}
+
+
+post_upgrade() {
+  post_install $1
+}
+
+pre_remove() {
+  [ -x bin/install-info ] || return 0
+  for file in ${filelist[@]}; do
+    install-info --delete $infodir/$file.gz $infodir/dir 2> /dev/null
+  done
+}
+

@@ -1,0 +1,45 @@
+# Maintainer Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=gnumach
+pkgver=20100313
+pkgrel=1
+pkgdesc="GNU Mach"
+arch=('i586-hurd')
+url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
+license=('GPL')
+groups=('base')
+makedepends=('git' 'mig' 'glibc')
+install=gnumach.install
+source=()
+md5sums=()
+
+_gitroot="git://git.sv.gnu.org/hurd/gnumach.git"
+_gitname="gnumach"
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [ -d $_gitname ] ; then
+    cd $_gitname && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $_gitroot $_gitname
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting make..."
+
+  rm -rf "$srcdir/$_gitname-build"
+  mkdir "$srcdir/$_gitname-build"
+  cd "$srcdir/$_gitname-build"
+
+  #
+  # BUILD HERE
+  #
+  autoreconf -vif ../$_gitname
+  ../$_gitname/configure --host=i586-pc-gnu --prefix=
+  make || return 1
+  make DESTDIR="$pkgdir/" install || return 1
+} 
+

@@ -1,0 +1,11 @@
+timeout   5
+default   0
+color light-blue/black light-cyan/blue
+
+# (0) Arch Hurd
+title Arch Hurd
+root (hd0,0)
+kernel /boot/gnumach root=device:hd0s1 -s
+module /hurd/ext2fs.static --multiboot-command-line=${kernel-command-line} --host-priv-port=${host-port} --device-master-port=${device-port} --exec-server-task=${exec-task} -T typed ${root} $(task-create) $(task-resume)
+module /lib/ld.so.1 /hurd/exec $(exec-task=task-create)
+boot

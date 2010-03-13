@@ -1,0 +1,61 @@
+# Maintainer Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=hurd
+pkgver=20100313
+pkgrel=1
+pkgdesc="The GNU Hurd"
+arch=('i586-hurd')
+url="http://www.gnu.org/software/hurd/hurd.html"
+license=('GPL')
+groups=('base')
+depends=('gnumach' 'glibc')
+makedepends=('git' 'glibc')
+install=hurd.install
+source=(tls_support.patch
+        pflocal.patch)
+md5sums=('af87e4b04d89392a2b6e7751361f2460'
+         '44291124d0b08ed4a735c42f06ceec28')     
+
+_gitroot="git://git.sv.gnu.org/hurd/hurd.git"
+_gitname="hurd"
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [ -d $_gitname ] ; then
+    cd $_gitname && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $_gitroot $_gitname
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Patching..."
+  cd $srcdir/$_gitname
+  patch -Np1 < $srcdir/tls_support.patch
+  patch -Np0 < $srcdir/pflocal.patch
+  
+  msg "Starting make..."
+
+  rm -rf "$srcdir/$_gitname-build"
+  mkdir "$srcdir/$_gitname-build"
+  cd "$srcdir/$_gitname-build"
+
+  #
+  # BUILD HERE
+  #
+
+  unset MAKEFLAGS #hurd does not build correctly with -j :(
+  autoreconf -vif ../$_gitname
+  ../$_gitname/configure --host=i586-pc-gnu --prefix= --disable-profile
+  make || return 1
+  make prefix="$pkgdir/" install || return 1
+  
+  #add stuff needed to boot
+  mkdir -p $pkgdir/servers/socket $pkgdir/tmp
+  touch $pkgdir/servers/exec
+  chmod 1777 $pkgdir/tmp
+  
+} 
+

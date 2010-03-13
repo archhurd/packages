@@ -1,0 +1,29 @@
+# Maintainer Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=coreutils
+pkgver=8.4
+pkgrel=1
+pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
+arch=('i586-hurd')
+url="http://www.gnu.org/software/coreutils"
+license=('GPL3')
+groups=('base')
+depends=('glibc')
+options=('!emptydirs')
+install=coreutils.install
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.xz)
+md5sums=('1fde97f144b4699b18f36c2ec18b1f18')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --host=i586-pc-gnu --prefix=
+  make || return 1
+  make DESTDIR="$pkgdir/" install
+  
+  #uptime is already provided by hurd
+  rm -f $pkgdir/bin/uptime
+}
+
+# vim:set ts=2 sw=2 et:
