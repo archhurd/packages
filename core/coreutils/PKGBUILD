@@ -20,10 +20,13 @@ build() {
 
   ./configure --host=i586-pc-gnu --prefix=
   make || return 1
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
   make DESTDIR="$pkgdir/" install
   
   #uptime is already provided by hurd
   rm -f $pkgdir/bin/uptime
 }
 
-# vim:set ts=2 sw=2 et:

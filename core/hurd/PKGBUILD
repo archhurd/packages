@@ -1,7 +1,7 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=hurd
-pkgver=20100313
+pkgver=20100314
 pkgrel=1
 pkgdesc="The GNU Hurd"
 arch=('i586-hurd')
@@ -29,33 +29,33 @@ build() {
   else
     git clone $_gitroot $_gitname
   fi
-
   msg "GIT checkout done or server timeout"
+  
+  rm -rf "$srcdir/$_gitname-build"
+  cp -r "$srcdir/$_gitname" "$srcdir/$_gitname-build"
+  cd "$srcdir/$_gitname-build"
+
   msg "Patching..."
-  cd $srcdir/$_gitname
   patch -Np1 < $srcdir/tls_support.patch
   patch -Np0 < $srcdir/pflocal.patch
-  
-  msg "Starting make..."
-
-  rm -rf "$srcdir/$_gitname-build"
-  mkdir "$srcdir/$_gitname-build"
-  cd "$srcdir/$_gitname-build"
 
   #
   # BUILD HERE
   #
-
+  msg "Building..."
   unset MAKEFLAGS #hurd does not build correctly with -j :(
   autoreconf -vif ../$_gitname
-  ../$_gitname/configure --host=i586-pc-gnu --prefix= --disable-profile
+  ./configure --host=i586-pc-gnu --prefix= --disable-profile
   make || return 1
+}
+
+package() {
+  cd "$srcdir/$_gitname-build"
   make prefix="$pkgdir/" install || return 1
   
   #add stuff needed to boot
   mkdir -p $pkgdir/servers/socket $pkgdir/tmp
   touch $pkgdir/servers/exec
-  chmod 1777 $pkgdir/tmp
-  
+  chmod 1777 $pkgdir/tmp  
 } 
 

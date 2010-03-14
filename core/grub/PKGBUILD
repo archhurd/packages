@@ -1,6 +1,5 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
-# NOTE: In a not so distant future this should be made to install on MBR
-# for now it will only screw up my qemu images :(
+# NOTE: One day this should be made to install on MBR on install :)
 
 pkgname=grub
 pkgver=0.97
@@ -26,8 +25,12 @@ build() {
   ./configure --host=i586-pc-gnu --prefix= \
               --mandir=/share/man --infodir=/share/info
   make || return 1
-  make DESTDIR="$pkgdir/" install || return 1
+}
+
+package() { 
+  cd "$srcdir/$pkgname-$pkgver"
   
+  make DESTDIR="$pkgdir/" install || return 1
   install -D -m644 $srcdir/menu.lst $pkgdir/boot/grub/menu.lst
 }
 

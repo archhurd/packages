@@ -1,7 +1,7 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=gnumach
-pkgver=20100313
+pkgver=20100314
 pkgrel=1
 pkgdesc="GNU Mach"
 arch=('i586-hurd')
@@ -40,6 +40,10 @@ build() {
   autoreconf -vif ../$_gitname
   ../$_gitname/configure --host=i586-pc-gnu --prefix=
   make || return 1
+}
+
+package() {
+  cd "$srcdir/$_gitname-build"
   make DESTDIR="$pkgdir/" install || return 1
 } 
 

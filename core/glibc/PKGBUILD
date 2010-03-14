@@ -13,7 +13,7 @@ groups=('base')
 depends=('hurd')
 makedepends=('hurd' 'gcc>=4.3')
 install=glibc.install
-source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.bz2
+source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2
        submitted-stat.diff
        local-gcc-4.1-init-first.diff
        local-tls-support.diff
@@ -53,8 +53,6 @@ md5sums=('ee71dedf724dc775e4efec9b823ed3be'
          '03eecaa535040abd9d38a125893c80cf'
          '1a6638ab233513400c520e9230612ece')
 
-
-
 build() {
   cd "$srcdir/$pkgname-$pkgver"
   
@@ -79,6 +77,7 @@ build() {
   patch -Np1 -i $srcdir/i686-cpuclock_which.patch  
   msg "Done Patching."
 
+  rm -rf "$srcdir/$pkgname-build" 
   mkdir "$srcdir/$pkgname-build"
   cd "$srcdir/$pkgname-build"
 
@@ -88,6 +87,10 @@ build() {
   
   
   make || return 1
+}
+
+package() {
+  cd "$srcdir/$pkgname-build"
   make install_root="$pkgdir/" install || return 1
   
   cd $pkgdir/lib

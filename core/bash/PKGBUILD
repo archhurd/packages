@@ -20,8 +20,11 @@ build() {
 
   ./configure --host=i586-pc-gnu --prefix=
   make || return 1
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
   make DESTDIR="$pkgdir/" install
-  
   cd $pkgdir/bin
   ln -s bash sh
 }
