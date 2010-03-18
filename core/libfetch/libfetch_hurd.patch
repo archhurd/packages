@@ -1,0 +1,138 @@
+diff -u source/libfetch-2.30/common.c build/libfetch-2.30/common.c
+--- source/libfetch-2.30/common.c	2010-02-27 02:13:45.000000000 +0100
++++ build/libfetch-2.30/common.c	2010-03-06 22:24:09.740305036 +0100
+@@ -876,17 +876,21 @@
+ int
+ fetch_netrc_auth(struct url *url)
+ {
++#ifndef __GNU__
+ 	char fn[PATH_MAX];
++#endif
+ 	const char *word;
+ 	char *p;
+ 	FILE *f;
+ 
+ 	if ((p = getenv("NETRC")) != NULL) {
++#ifndef __GNU__
+ 		if (snprintf(fn, sizeof(fn), "%s", p) >= (int)sizeof(fn)) {
+ 			fetch_info("$NETRC specifies a file name "
+ 			    "longer than PATH_MAX");
+ 			return (-1);
+ 		}
++#endif
+ 	} else {
+ 		if ((p = getenv("HOME")) != NULL) {
+ 			struct passwd *pwd;
+@@ -895,11 +899,19 @@
+ 			    (p = pwd->pw_dir) == NULL)
+ 				return (-1);
+ 		}
++		
++#ifndef __GNU__
+ 		if (snprintf(fn, sizeof(fn), "%s/.netrc", p) >= (int)sizeof(fn))
+ 			return (-1);
++#endif
++
+ 	}
+ 
++#ifdef __GNU__
++	if ((f = fopen(p, "r")) == NULL)
++#else
+ 	if ((f = fopen(fn, "r")) == NULL)
++#endif
+ 		return (-1);
+ 	while ((word = fetch_read_word(f)) != NULL) {
+ 		if (strcmp(word, "default") == 0)
+diff -u source/libfetch-2.30/ftp.c build/libfetch-2.30/ftp.c
+--- source/libfetch-2.30/ftp.c	2010-02-27 02:13:45.000000000 +0100
++++ build/libfetch-2.30/ftp.c	2010-03-06 22:45:16.499002199 +0100
+@@ -98,6 +98,10 @@
+ #include "common.h"
+ #include "ftperr.h"
+ 
++#ifndef PATH_MAX
++#define PATH_MAX 4096
++#endif
++
+ #define FTP_ANONYMOUS_USER	"anonymous"
+ 
+ #define FTP_CONNECTION_ALREADY_OPEN	125
+@@ -252,7 +256,7 @@
+  * command.
+  */
+ static int
+-ftp_pwd(conn_t *conn, char *pwd, size_t pwdlen)
++ftp_pwd(conn_t *conn, char **pwd, int *pwdlen)
+ {
+ 	char *src, *dst, *end;
+ 	int q;
+@@ -264,7 +268,11 @@
+ 	src = conn->buf + 4;
+ 	if (src >= end || *src++ != '"')
+ 		return (FTP_PROTOCOL_ERROR);
+-	for (q = 0, dst = pwd; src < end && pwdlen--; ++src) {
++	
++	*pwdlen = end-src+1;
++	*pwd = malloc(*pwdlen);
++
++	for (q = 0, dst = *pwd; src < end && pwdlen--; ++src) {
+ 		if (!q && *src == '"')
+ 			q = 1;
+ 		else if (q && *src != '"')
+@@ -288,8 +296,8 @@
+ ftp_cwd(conn_t *conn, const char *file, int subdir)
+ {
+ 	const char *beg, *end;
+-	char pwd[PATH_MAX];
+-	int e, i, len;
++	char *pwd = NULL;
++	int e, i, len, pwdlen;
+ 
+ 	/* If no slashes in name, no need to change dirs. */
+ 	if (subdir)
+@@ -297,7 +305,11 @@
+ 	else if ((end = strrchr(file, '/')) == NULL)
+ 		return (0);
+ 	if ((e = ftp_cmd(conn, "PWD\r\n")) != FTP_WORKING_DIRECTORY ||
+-	    (e = ftp_pwd(conn, pwd, sizeof(pwd))) != FTP_OK) {
++	    (e = ftp_pwd(conn, &pwd, &pwdlen)) != FTP_OK) {
++	    if (pwd != NULL) {
++	        free(pwd);
++	        pwd = NULL;
++	    }
+ 		ftp_seterr(e);
+ 		return (-1);
+ 	}
+@@ -315,11 +327,17 @@
+ 			break;
+ 		if ((e = ftp_cmd(conn, "CDUP\r\n")) != FTP_FILE_ACTION_OK ||
+ 		    (e = ftp_cmd(conn, "PWD\r\n")) != FTP_WORKING_DIRECTORY ||
+-		    (e = ftp_pwd(conn, pwd, sizeof(pwd))) != FTP_OK) {
++		    (e = ftp_pwd(conn, &pwd, &pwdlen)) != FTP_OK) {
++		    if (pwd != NULL) {
++		        free(pwd);
++		        pwd = NULL;
++		    }
+ 			ftp_seterr(e);
+ 			return (-1);
+ 		}
+ 	}
++	if (pwd != NULL) 
++	    free(pwd);
+ 
+ #ifdef FTP_COMBINE_CWDS
+ 	/* Skip leading slashes, even "////". */
+diff -u source/libfetch-2.30/http.c build/libfetch-2.30/http.c
+--- source/libfetch-2.30/http.c	2010-02-27 02:13:45.000000000 +0100
++++ build/libfetch-2.30/http.c	2010-03-06 22:48:57.659396385 +0100
+@@ -110,6 +110,10 @@
+ #include "common.h"
+ #include "httperr.h"
+ 
++#ifndef PATH_MAX
++#define PATH_MAX 4096
++#endif
++
+ /* Maximum number of redirects to follow */
+ #define MAX_REDIRECT 5
+ 

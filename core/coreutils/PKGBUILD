@@ -4,7 +4,7 @@ pkgname=coreutils
 pkgver=8.4
 pkgrel=1
 pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
-arch=('i586-hurd')
+arch=(i686)
 url="http://www.gnu.org/software/coreutils"
 license=('GPL3')
 groups=('base')
@@ -18,7 +18,7 @@ md5sums=('1fde97f144b4699b18f36c2ec18b1f18')
 build() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  ./configure --host=i586-pc-gnu --prefix=
+  ./configure --host=i686-pc-gnu --prefix=
   make || return 1
 }
 

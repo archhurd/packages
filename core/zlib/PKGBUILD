@@ -1,34 +1,28 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
-pkgname=binutils
-pkgver=2.19.1
+pkgname=zlib
+pkgver=1.2.3
 pkgrel=1
-pkgdesc="A set of programs to assemble and manipulate binary and object files"
-arch=('i586-hurd')
-url="http://www.gnu.org/software/binutils/"
-license=('GPL3')
+pkgdesc="Compression library implementing the deflate compression method found in gzip and PKZIP"
+arch=(i686)
+url="http://zlib.net"
+license=('custom')
 groups=('base')
-depends=('glibc' 'zlib')
-install=binutils.install
-source=(ftp://ftp.gnu.org/pub/gnu/binutils/$pkgname-$pkgver.tar.bz2)
-md5sums=('09a8c5821a2dfdbb20665bc0bd680791')
+depends=('glibc')
+source=(http://www.zlib.net/$pkgname-$pkgver.tar.gz)
+md5sums=('debc62758716a169df9f62e6ab2bc634')
+
 
 build() {
-  cd $srcdir
-  rm -rf build
-  mkdir build
-  cd build
+        cd $srcdir/zlib-$pkgver
+        ./configure --prefix= --shared
+        make || return 1
 
-  ../$pkgname-$pkgver/configure --host=i586-pc-gnu --prefix= \
-              --disable-multilib --mandir=/share/man --infodir=/share/info 
-  make || return 1
+        grep -A 24 '^  Copyright' zlib.h > LICENSE
 }
 
 package() {
-  cd $srcdir/build
-  
-  make DESTDIR="$pkgdir/" install
-  rm -rf $pkgdir/i586-pc-gnu #only when cross-compiling?
+        cd $srcdir/zlib-$pkgver
+        make install prefix=$pkgdir || return 1
+        install -D -m644 LICENSE $pkgdir/share/licenses/zlib/LICENSE
 }
-
-# vim:set ts=2 sw=2 et:

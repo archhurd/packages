@@ -1,0 +1,36 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=libarchive
+pkgver=2.8.3
+pkgrel=1
+pkgdesc="library that can create and read several streaming archive formats"
+arch=(i686)
+url="http://libarchive.googlecode.com/"
+license=('BSD')
+depends=('zlib' 'bzip2' 'xz-utils' 'openssl')
+install=
+source=(http://libarchive.googlecode.com/files/$pkgname-$pkgver.tar.gz
+        libarchive_hurd.patch)
+noextract=()
+md5sums=('fe8d917e101d4b37580124030842a1d0'
+         'a5737c2d8c12a2404e68997eeef5744f')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  patch -Np2 < $srcdir/libarchive_hurd.patch
+
+  ./configure --host=i686-pc-gnu --prefix= --without-xml2
+  make || return 1
+} 
+
+package() { 
+  cd $srcdir/$pkgname-$pkgver
+  make DESTDIR="$pkgdir/" install || return 1
+  
+  mkdir -p $pkgdir/share/licenses/libarchive
+  install -m644 COPYING $pkgdir/share/licenses/libarchive
+}
+
+

@@ -6,7 +6,7 @@ pkgname=glibc
 pkgver=2.10.1
 pkgrel=1
 pkgdesc="GNU C Library"
-arch=('i586-hurd')
+arch=(i686)
 url="http://www.gnu.org/software/libc"
 license=('GPL','LGPL')
 groups=('base')
@@ -81,7 +81,7 @@ build() {
   mkdir "$srcdir/$pkgname-build"
   cd "$srcdir/$pkgname-build"
 
-  ../$pkgname-$pkgver/configure --host=i586-pc-gnu --prefix= \
+  ../$pkgname-$pkgver/configure --host=i686-pc-gnu --prefix= \
               --without-gd --without-cvs \
               --disable-profile \
   

@@ -4,7 +4,7 @@ pkgname=binutils
 pkgver=2.19.1
 pkgrel=1
 pkgdesc="A set of programs to assemble and manipulate binary and object files"
-arch=('i586-hurd')
+arch=(i686)
 url="http://www.gnu.org/software/binutils/"
 license=('GPL3')
 groups=('base')
@@ -19,7 +19,7 @@ build() {
   mkdir build
   cd build
 
-  ../$pkgname-$pkgver/configure --host=i586-pc-gnu --prefix= \
+  ../$pkgname-$pkgver/configure --host=i686-pc-gnu --prefix= \
               --disable-multilib --mandir=/share/man --infodir=/share/info 
   make || return 1
 }
@@ -28,7 +28,6 @@ package() {
   cd $srcdir/build
   
   make DESTDIR="$pkgdir/" install
-  rm -rf $pkgdir/i586-pc-gnu #only when cross-compiling?
+  rm -rf $pkgdir/i686-pc-gnu #only when cross-compiling?
 }
 
-# vim:set ts=2 sw=2 et:

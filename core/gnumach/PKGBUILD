@@ -1,10 +1,10 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=gnumach
-pkgver=20100314
+pkgver=20100317
 pkgrel=1
 pkgdesc="GNU Mach"
-arch=('i586-hurd')
+arch=(i686)
 url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
 license=('GPL')
 groups=('base')
@@ -37,8 +37,11 @@ build() {
   #
   # BUILD HERE
   #
+  
+  # Dont think about it, only O1 works for i686
+  export CFLAGS="-march=i686 -O1 -pipe -mtune=generic"
   autoreconf -vif ../$_gitname
-  ../$_gitname/configure --host=i586-pc-gnu --prefix=
+  ../$_gitname/configure --host=i686-pc-gnu --prefix=
   make || return 1
 }
 

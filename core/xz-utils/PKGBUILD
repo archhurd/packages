@@ -1,0 +1,32 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=xz-utils
+pkgver=4.999.9beta
+pkgrel=1
+pkgdesc="A free general-purpose data compression software with high compression ratio"
+arch=(i686)
+url="http://tukaani.org/xz/"
+license=('GPL', 'LGPL')
+groups=('base')
+depends=('glibc')
+source=("http://tukaani.org/xz/xz-$pkgver.tar.gz")
+md5sums=('f2073579b6da2fe35d453adee1aaf1b2')
+
+
+build() {
+  cd "$srcdir/xz-$pkgver"
+
+  sed -i "s#__MACH__#__OSX__#" src/liblzma/check/crc{32,64}_x86.S
+  
+  ./configure --host=i686-pc-gnu --prefix= \
+              --enable-dynamic --disable-rpath
+              
+  make || return 1
+}
+
+package() {
+  cd $srcdir/xz-$pkgver
+  make DESTDIR="$pkgdir/" install
+}
+
+

@@ -5,7 +5,7 @@ pkgname=grub
 pkgver=0.97
 pkgrel=1
 pkgdesc="A GNU multiboot boot loader"
-arch=('i586-hurd')
+arch=(i686)
 url="http://www.gnu.org/software/grub"
 license=('GPL')
 groups=('base')
@@ -22,7 +22,7 @@ md5sums=('cd3f3eb54446be6003156158d51f4884'
 build() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  ./configure --host=i586-pc-gnu --prefix= \
+  ./configure --host=i686-pc-gnu --prefix= \
               --mandir=/share/man --infodir=/share/info
   make || return 1
 }

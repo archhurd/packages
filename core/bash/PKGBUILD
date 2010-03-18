@@ -4,7 +4,7 @@ pkgname=bash
 pkgver=4.1
 pkgrel=1
 pkgdesc="The GNU Bourne Again shell"
-arch=('i586-hurd')
+arch=(i686)
 url="http://www.gnu.org/software/bash/bash.html"
 license=('GPL')
 groups=('base')
@@ -18,7 +18,7 @@ md5sums=('9800d8724815fd84994d9be65ab5e7b8')
 build() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  ./configure --host=i586-pc-gnu --prefix=
+  ./configure --host=i686-pc-gnu --prefix=
   make || return 1
 }
 
