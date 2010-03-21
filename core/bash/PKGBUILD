@@ -2,14 +2,14 @@
 
 pkgname=bash
 pkgver=4.1
-pkgrel=1
+pkgrel=2
 pkgdesc="The GNU Bourne Again shell"
 arch=(i686)
 url="http://www.gnu.org/software/bash/bash.html"
 license=('GPL')
 groups=('base')
 depends=('glibc')
-makedepends=()
+provides=('sh')
 install=bash.install
 source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.gz)
 md5sums=('9800d8724815fd84994d9be65ab5e7b8')

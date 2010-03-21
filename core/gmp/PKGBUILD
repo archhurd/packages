@@ -1,0 +1,30 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=gmp
+pkgver=5.0.1
+pkgrel=1
+pkgdesc="A free library for arbitrary precision arithmetic"
+arch=(i686)
+url="http://gmplib.org/"
+license=('LGPL3')
+depends=('gcc-libs' 'sh')
+install=gmp.install
+source=(ftp://ftp.gmplib.org/pub/gmp-$pkgver/$pkgname-$pkgver.tar.bz2)
+md5sums=('6bac6df75c192a13419dfd71d19240a7')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  HOST_CC=gcc \
+  ./configure --host=i686-pc-gnu --prefix= --infodir=/share/info \
+              --enable-cxx
+  make || return 1
+} 
+
+package() { 
+  cd "$srcdir/$pkgname-$pkgver"
+  make DESTDIR="$pkgdir/" install
+}
+
+
