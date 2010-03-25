@@ -1,0 +1,31 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=sed
+pkgver=4.2.1
+pkgrel=1
+pkgdesc="GNU stream editor"
+arch=(i686)
+url="http://www.gnu.org/software/sed"
+license=('GPL3')
+groups=('base')
+depends=('glibc')
+makedepends=('gettext')
+install=sed.install
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.bz2)
+md5sums=('7d310fbd76e01a01115075c1fd3f455a')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --host=i686-pc-gnu --prefix= \
+              --without-included-regex
+  make || return 1
+} 
+
+package() { 
+  cd "$srcdir/$pkgname-$pkgver"
+  make DESTDIR="$pkgdir/" install
+}
+
+

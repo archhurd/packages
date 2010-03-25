@@ -1,0 +1,33 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=gawk
+pkgver=3.1.7
+pkgrel=1
+pkgdesc="GNU awk"
+arch=(i686)
+url="http://www.gnu.org/software/gawk/"
+license=('GPL')
+groups=('base')
+depends=('sh' 'glibc')
+provides=('awk')
+install=gawk.install
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.xz)
+md5sums=('7f16a68357c10c385ac76066b264f39d')
+
+
+build() {
+  cd ${srcdir}/$pkgname-$pkgver
+
+  ./configure --host=i686-pc-gnu --prefix= 
+  make || return 1
+} 
+
+package() { 
+  cd ${srcdir}/$pkgname-$pkgver
+  make DESTDIR="$pkgdir/" install
+  
+  cd ${pkgdir}
+  mv libexec lib
+}
+
+

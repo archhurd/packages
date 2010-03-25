@@ -1,0 +1,21 @@
+--- a/src/gcc/config.gcc	2009-04-26 21:36:36.000000000 +0200
++++ b/src/gcc/config.gcc	2009-04-26 21:36:53.000000000 +0200
+@@ -3057,7 +3057,7 @@
+ 	i[34567]86-*-darwin* | x86_64-*-darwin*)
+ 		tmake_file="${tmake_file} i386/t-fprules-softfp soft-fp/t-softfp"
+ 		;;
+-	i[34567]86-*-linux* | x86_64-*-linux* | i[34567]86-*-kfreebsd*-gnu | x86_64-*-kfreebsd*-gnu)
++	i[34567]86-*-linux* | x86_64-*-linux* | i[34567]86-*-kfreebsd*-gnu | x86_64-*-kfreebsd*-gnu | i[34567]86-*-gnu*)
+ 		tmake_file="${tmake_file} i386/t-fprules-softfp soft-fp/t-softfp i386/t-linux"
+ 		;;
+ 	ia64*-*-linux*)
+--- a/src/libgcc/config.host	2009-04-27 02:04:10.000000000 +0200
++++ b/src/libgcc/config.host	2009-04-27 02:04:23.000000000 +0200
+@@ -591,6 +591,7 @@
+ case ${host} in
+ i[34567]86-*-darwin* | x86_64-*-darwin* | \
+   i[34567]86-*-kfreebsd*-gnu | x86_64-*-kfreebsd*-gnu | \
++  i[34567]86-*-gnu* | \
+   i[34567]86-*-linux* | x86_64-*-linux*)
+ 	if test "${host_address}" = 32; then
+ 		tmake_file="${tmake_file} t-softfp i386/${host_address}/t-fprules-softfp"

@@ -1,0 +1,31 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=grep
+pkgver=2.5.4
+pkgrel=1
+pkgdesc="A string search utility"
+arch=(i686)
+url="http://www.gnu.org/software/grep/"
+license=('GPL3')
+groups=('base')
+depends=('glibc' 'sh')
+install=grep.install
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.bz2)
+md5sums=('5650ee2ae6ea4b39e9459d7d0585b315')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --host=i686-pc-gnu --prefix= \
+              --disable-perl-regexp \
+              --without-included-regex
+  make || return 1
+} 
+
+package() { 
+  cd "$srcdir/$pkgname-$pkgver"
+  make DESTDIR="$pkgdir/" install
+}
+
+

@@ -1,0 +1,84 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=('gcc' 'gcc-libs')
+pkgver=4.4.3
+pkgrel=1
+pkgdesc="The GNU Compiler Collection"
+arch=(i686)
+url="http://gcc.gnu.org"
+license=('GPL' 'LGPL')
+makedepends=('binutils' 'mpfr' 'cloog-ppl')
+source=(ftp://ftp.gnu.org/pub/gnu/gcc/gcc-${pkgver}/gcc-{core,g++}-${pkgver}.tar.bz2
+        gcc-4.4.3_hurd.diff)
+md5sums=('054b66f315b3d04ad06544ce26e72365'
+         'cd179ec4f05ee17ce76464da25a2674c'
+         'b46b41127011fcd13a0df3f70df41565')
+
+
+#for cross-compiling :(
+_libdir=/lib
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  # Do not install libiberty
+  sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
+  # Do not run fixincludes
+  sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
+  
+  #patch for succesfull compile on hurd
+  patch -Np2 < ${srcdir}/gcc-4.4.3_hurd.diff
+  
+  cd libdecnumber && ln -sf dpd no
+
+  cd ../..
+  mkdir build && cd build
+  ../${pkgname}-${pkgver}/configure --host=i686-pc-gnu --prefix= \
+    --with-cloog=$_libdir --with-ppl=$_libdir --with-gmp=$_libdir \
+    --with-mpfr=$_libdir --enable-long-long --enable-c99 \
+    --enable-shared --enable-threads=posix --enable-__cxa_atexit \
+    --enable-languages=c,c++ --disable-libstdcxx-pch --enable-clocale=gnu\
+    --disable-multilib --mandir=/share/man --infodir=/share/info \
+    --libexecdir=/lib
+
+  make || return 1
+} 
+
+package_gcc() { 
+  groups=('base-devel')
+  depends=('binutils' 'mpfr' 'cloog-ppl')
+  install=gcc.install
+  
+  cd ${srcdir}/build
+  make DESTDIR=${pkgdir} install-gcc
+}
+
+
+package_gcc-libs() {
+  pkgdesc="Runtime libraries shipped by GCC for C and C++ languages"
+  groups=('base')
+  depends=('glibc')
+  install=gcc-libs.install
+
+  
+  cd ${srcdir}/build  
+  make -j1 -C i686-pc-gnu/libgcc DESTDIR=${pkgdir} install-shared
+  for lib in libmudflap libgomp libssp libstdc++-v3/src; do
+    make -j1 -C i686-pc-gnu/$lib DESTDIR=${pkgdir} install-toolexeclibLTLIBRARIES
+  done  
+  
+  make -j1 -C i686-pc-gnu/libstdc++-v3/po DESTDIR=${pkgdir} install
+  make -j1 -C i686-pc-gnu/libgomp DESTDIR=${pkgdir} install-info
+
+  make DESTDIR=${pkgdir} install-target-libobjc
+  
+  #cleaning up the mess...
+  rm -rf ${pkgdir}/lib/gcc
+  find ${pkgdir} -name *.a -delete
+  
+  
+  install -Dm644 ${srcdir}/${pkgname}-${pkgver}/COPYING.RUNTIME \
+    ${pkgdir}/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION
+}
+
+
