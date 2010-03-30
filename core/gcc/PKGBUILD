@@ -2,7 +2,7 @@
 
 pkgname=('gcc' 'gcc-libs')
 pkgver=4.4.3
-pkgrel=1
+pkgrel=2
 pkgdesc="The GNU Compiler Collection"
 arch=(i686)
 url="http://gcc.gnu.org"
@@ -16,7 +16,7 @@ md5sums=('054b66f315b3d04ad06544ce26e72365'
 
 
 #for cross-compiling :(
-_libdir=/lib
+_libdir=/home/lnz/abs-hurd/cross/hurd/lib
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -33,15 +33,15 @@ build() {
 
   cd ../..
   mkdir build && cd build
-  ../${pkgname}-${pkgver}/configure --host=i686-pc-gnu --prefix= \
+  ../${pkgname}-${pkgver}/configure --target=i686-pc-gnu --host=i686-pc-gnu --prefix= \
     --with-cloog=$_libdir --with-ppl=$_libdir --with-gmp=$_libdir \
     --with-mpfr=$_libdir --enable-long-long --enable-c99 \
     --enable-shared --enable-threads=posix --enable-__cxa_atexit \
-    --enable-languages=c,c++ --disable-libstdcxx-pch --enable-clocale=gnu\
+    --enable-languages=c,c++ --disable-libstdcxx-pch --enable-clocale=gnu \
     --disable-multilib --mandir=/share/man --infodir=/share/info \
     --libexecdir=/lib
 
-  make || return 1
+  make RPATH_ENVVAR="/usr/lib/" || return 1
 } 
 
 package_gcc() { 
@@ -69,11 +69,10 @@ package_gcc-libs() {
   
   make -j1 -C i686-pc-gnu/libstdc++-v3/po DESTDIR=${pkgdir} install
   make -j1 -C i686-pc-gnu/libgomp DESTDIR=${pkgdir} install-info
-
-  make DESTDIR=${pkgdir} install-target-libobjc
+ 
   
   #cleaning up the mess...
-  rm -rf ${pkgdir}/lib/gcc
+ # rm -rf ${pkgdir}/lib/gcc
   find ${pkgdir} -name *.a -delete
   
   

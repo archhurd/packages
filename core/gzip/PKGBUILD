@@ -1,0 +1,30 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=findutils
+pkgver=4.5.5
+pkgrel=1
+pkgdesc="GNU utilities to locate files"
+arch=(i686)
+url="http://www.gnu.org/software/findutils/"
+license=('GPL3')
+groups=('base')
+depends=('glibc')
+install=findutils.install
+source=(ftp://alpha.gnu.org/gnu/findutils/$pkgname-$pkgver.tar.gz)
+md5sums=('39f9dbee5db8e26f8fe01884cb99397b')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --host=i686-pc-gnu --prefix=
+  make || return 1
+} 
+
+package() { 
+  cd "$srcdir/$pkgname-$pkgver"
+  make DESTDIR="$pkgdir/" install
+  rm -rf ${pkgdir}/libexec  
+}
+
+

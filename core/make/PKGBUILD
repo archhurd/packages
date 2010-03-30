@@ -1,0 +1,30 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=make
+pkgver=3.81
+pkgrel=1
+pkgdesc="GNU make utility to maintain groups of programs"
+arch=(i686)
+url="http://www.gnu.org/software/make/"
+license=('GPL')
+groups=('base-devel')
+depends=('glibc' 'bash')
+install=make.install
+source=(ftp://ftp.gnu.org/pub/gnu/make/$pkgname-$pkgver.tar.bz2)
+md5sums=('354853e0b2da90c527e35aabb8d6f1e6')
+
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --host=i686-pc-gnu --prefix= \
+              --mandir=/share/man --infodir=/share/info
+  make || return 1
+} 
+
+package() { 
+  cd "$srcdir/$pkgname-$pkgver"
+  make DESTDIR="$pkgdir/" install
+}
+
+
