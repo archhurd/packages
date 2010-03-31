@@ -16,7 +16,7 @@ md5sums=('054b66f315b3d04ad06544ce26e72365'
 
 
 #for cross-compiling :(
-_libdir=/home/lnz/abs-hurd/cross/hurd/lib
+_libdir=/lib
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -41,7 +41,7 @@ build() {
     --disable-multilib --mandir=/share/man --infodir=/share/info \
     --libexecdir=/lib
 
-  make RPATH_ENVVAR="/usr/lib/" || return 1
+  make || return 1
 } 
 
 package_gcc() { 
