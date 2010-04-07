@@ -1,7 +1,7 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=binutils
-pkgver=2.19.1
+pkgver=2.20.1
 pkgrel=1
 pkgdesc="A set of programs to assemble and manipulate binary and object files"
 arch=(i686)
@@ -11,7 +11,7 @@ groups=('base')
 depends=('glibc' 'zlib')
 install=binutils.install
 source=(ftp://ftp.gnu.org/pub/gnu/binutils/$pkgname-$pkgver.tar.bz2)
-md5sums=('09a8c5821a2dfdbb20665bc0bd680791')
+md5sums=('9cdfb9d6ec0578c166d3beae5e15c4e5')
 
 build() {
   cd $srcdir
@@ -20,7 +20,10 @@ build() {
   cd build
 
   ../$pkgname-$pkgver/configure --host=i686-pc-gnu --prefix= \
-              --disable-multilib --mandir=/share/man --infodir=/share/info 
+              --disable-multilib --enable-shared \
+              --mandir=/share/man --infodir=/share/info 
+
+  make configure-host || return 1
   make || return 1
 }
 

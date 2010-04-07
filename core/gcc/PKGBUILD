@@ -2,7 +2,7 @@
 
 pkgname=('gcc' 'gcc-libs')
 pkgver=4.4.3
-pkgrel=2
+pkgrel=3
 pkgdesc="The GNU Compiler Collection"
 arch=(i686)
 url="http://gcc.gnu.org"
@@ -41,7 +41,7 @@ build() {
     --disable-multilib --mandir=/share/man --infodir=/share/info \
     --libexecdir=/lib
 
-  make || return 1
+  make RPATH_ENVVAR="/usr/lib/" || return 1
 } 
 
 package_gcc() { 
@@ -69,10 +69,11 @@ package_gcc-libs() {
   
   make -j1 -C i686-pc-gnu/libstdc++-v3/po DESTDIR=${pkgdir} install
   make -j1 -C i686-pc-gnu/libgomp DESTDIR=${pkgdir} install-info
- 
+
+  cd ${pkgdir}
+  ln -s libgcc_s.so lib/libgcc.so
   
   #cleaning up the mess...
- # rm -rf ${pkgdir}/lib/gcc
   find ${pkgdir} -name *.a -delete
   
   

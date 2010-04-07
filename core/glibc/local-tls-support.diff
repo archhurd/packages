@@ -1,3 +1,5 @@
+TLS support
+
 ---
  csu/libc-start.c                        |    2 +
  hurd/hurdfault.c                        |    2 +
@@ -9,16 +11,14 @@
  sysdeps/mach/hurd/bits/libc-tsd.h       |   35 ------------------
  sysdeps/mach/hurd/fork.c                |    7 +++
  sysdeps/mach/hurd/i386/init-first.c     |   60 +++++++++++++++++++-------------
- sysdeps/mach/hurd/i386/tls.h            |   53 ++++++++++++++++++++++------
  sysdeps/mach/hurd/i386/tlsdesc.sym      |   17 +++++++++
+ sysdeps/mach/hurd/i386/tls.h            |   53 ++++++++++++++++++++++------
  sysdeps/mach/hurd/i386/trampoline.c     |    2 -
  sysdeps/mach/hurd/profil.c              |    2 +
  sysdeps/mach/hurd/setitimer.c           |    3 +
  sysdeps/mach/hurd/tls.h                 |    2 +
  sysdeps/mach/i386/thread_state.h        |   11 +++++
- sysdeps/mach/powerpc/thread_state.h     |    1 
  sysdeps/mach/thread_state.h             |    3 +
- 20 files changed, 167 insertions(+), 75 deletions(-)
 
 --- a/csu/libc-start.c
 +++ b/csu/libc-start.c
@@ -296,6 +296,15 @@
       properly before before cthreads initialization, so cthreads can know
 --- a/sysdeps/mach/hurd/i386/tls.h
 +++ b/sysdeps/mach/hurd/i386/tls.h
+@@ -31,6 +31,8 @@
+ 
+ # ifndef __ASSEMBLER__
+ 
++#include <pthread/pthread.h>
++
+ /* Use i386-specific RPCs to arrange that %gs segment register prefix
+    addresses the TCB in each thread.  */
+ # include <mach/i386/mach_i386.h>
 @@ -72,7 +72,7 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
  
        /* Get the first available selector.  */
@@ -450,17 +459,7 @@
 +
  struct machine_thread_all_state
    {
-     int set;			/* Mask of bits (1 << FLAVOR).  */
---- a/sysdeps/mach/powerpc/thread_state.h
-+++ b/sysdeps/mach/powerpc/thread_state.h
-@@ -19,6 +19,7 @@
- 
- #include <mach/machine/thread_status.h>
- 
-+#define MACHINE_NEW_THREAD_STATE_FLAVOR	PPC_THREAD_STATE
- #define MACHINE_THREAD_STATE_FLAVOR	PPC_THREAD_STATE
- #define MACHINE_THREAD_STATE_COUNT	PPC_THREAD_STATE_COUNT
- 
+     int set;			/* Mask of bits (1 << FLAVOR).  */ 
 --- a/sysdeps/mach/thread_state.h
 +++ b/sysdeps/mach/thread_state.h
 @@ -38,6 +38,9 @@

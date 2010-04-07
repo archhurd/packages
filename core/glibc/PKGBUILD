@@ -1,9 +1,8 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
-# Note: All the debian patches are only temporary, get as many of them out as 
-#       possible
+# Note: For now there is no way around the ridiculous amount of patching :(
 
 pkgname=glibc
-pkgver=2.10.1
+pkgver=2.11.1
 pkgrel=1
 pkgdesc="GNU C Library"
 arch=(i686)
@@ -13,69 +12,156 @@ groups=('base')
 depends=('hurd')
 makedepends=('hurd' 'gcc>=4.3')
 install=glibc.install
+
 source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2
-       submitted-stat.diff
-       local-gcc-4.1-init-first.diff
-       local-tls-support.diff
-       local-tls.diff
-       submitted-libc_once.diff
-       local-stdio-lock.diff
-       submitted-strtoul.diff
-       submitted-ptr-mangle.diff
-       submitted-sched_h.diff
-       local-atomic-no-multiple_threads.diff
-       local-check_native.diff
-       local-_dl_random.diff
-       local-gscope.diff
-       submitted-popen.diff
-       local-no-SOCK_NONBLOCK.diff
-       submitted-dl-sysdep.diff
-       local-unwind-resume.diff
-       i686-cpuclock_which.patch)
-noextract=()
-md5sums=('ee71dedf724dc775e4efec9b823ed3be'
-         '8d0a6017bf347e1bdcd7e4f3eaf86a4f'
+        local-gcc-4.1-init-first.diff
+        local-tls-support.diff
+        libc-lock.diff
+        local-atomic-no-multiple_threads.diff
+        local-stdio-lock.diff
+        submitted-stat.diff
+        submitted-libc_once.diff
+        local-longjmp_chk.diff
+        submitted-ptr-mangle.diff
+        local-check_native.diff
+        local-_dl_random.diff
+        local-gscope.diff
+        submitted-strtoul.diff
+        local-tls.diff
+        local-unwind-resume.diff
+        submitted-net.diff
+        submitted-popen.diff
+        submitted-sched_h.diff
+        local-no-SOCK_NONBLOCK.diff
+        i686-cpuclock_which.patch
+        submitted-dl-sysdep.diff
+        cvs-getcwd.diff
+        cvs-setsid.diff
+        local-mlock.diff
+        submitted-dup2-fix.diff
+        submitted-sbrk.diff
+        submitted-critical-sections.diff
+        submitted-posix_opt.h.diff
+        submitted-ioctl-decode-argument.diff
+        submitted-ioctl-unsigned-size_t.diff
+        submitted-ECANCELED.diff
+        submitted-IPV6_PKTINFO.diff
+        submitted-extern_inline.diff
+        submitted-itimer-lock.diff
+        submitted-null-pathname.diff
+        submitted-SOL_IP.patch
+        local-bigmem.diff
+        local-disable-ioctls.diff
+        local-pthread_posix-option.diff
+        submitted-getnprocs.diff
+        local-pthread.diff 
+        local-dl-dynamic-weak.diff
+        local-thread-cancel.diff
+        local-pthread_types.diff
+        local-unlockpt-chroot.diff) 
+
+md5sums=('6856d5d8b1239556687f0d1217f3f266'
          'be6eb77fc81ed3116392b0c194bdf0fe'
-         '966d39c313304b88d579f10a6e306a1e'
-         'f1d45b49fd3a2c6f5be2ac7b78e30d15'
-         '8c0eda0e556f8302b13f97ba560e9931'
-         'bb35ad9b947eea31d31b3b2636b3ad0d'
-         '4c1f7825eb78a25e913e8612c311f3f4'
-         '02f40f285529fb105922a88a73551b6d'
-         'f48252958d8be8ef00c279ec8eaee0fa'
+         'd86420fee1baa42810893152ccd63e25'
+         'efd419e392d7de011f38e70e90dff760'
          'a1639985d2e1284d03e5e3f1a82a1f3f'
+         'bb35ad9b947eea31d31b3b2636b3ad0d'
+         '8d0a6017bf347e1bdcd7e4f3eaf86a4f'
+         '8c0eda0e556f8302b13f97ba560e9931'
+         '9a269163236af278fa499aeb452fafe6'
+         '02f40f285529fb105922a88a73551b6d'
          'ca87f96754d5231fa960b04439ea9d64'
          '121f7f64f6547fc44aa5694e64abbcba'
          '2701e4ea8f89ab2877628daba335318e'
-         '642aed10f42dc86fe30dcf19f56087d5'
-         'cc14fe13fc4ca278c07b17a6be8b48f9'
-         'e3ae72d58fd3ec6447fe5f48c84829f7'
+         '4c1f7825eb78a25e913e8612c311f3f4'
+         'f1d45b49fd3a2c6f5be2ac7b78e30d15'
          '03eecaa535040abd9d38a125893c80cf'
-         '1a6638ab233513400c520e9230612ece')
+         '78fae3441021ea011c9a867d5372d242'
+         '642aed10f42dc86fe30dcf19f56087d5'
+         'f48252958d8be8ef00c279ec8eaee0fa'
+         'cc14fe13fc4ca278c07b17a6be8b48f9'
+         '1a6638ab233513400c520e9230612ece'
+         'e3ae72d58fd3ec6447fe5f48c84829f7'
+         'd4276a95e6a9f30e9b3e6d0166af21ac'
+         'c4d72dcb4df11499dc19f5fed460c839'
+         '139d74c68e9b8c31f263ac7b442b63ec'
+         '32ed697517c85e217bb9bf6654c1c2c6'
+         '87cc8871fe2183baebae95ff5cd69b3f'
+         '4b9dc0f1f8a97c9cd48948b03f59cdd1'
+         '27c3aaaa846ede48938ff3d191cb6384'
+         'a9405f6901922f08d717d78efaeee6ec'
+         '6b868ad42836c45f39161e3d8a5d1ad4'
+         'c395cd788e5fe600c06188ad395a9825'
+         'da0c98a4bb54cfd75027f3f5c933fa68'
+         'dbc6832fff14ec2213058dd5e25311b9'
+         'd1c93cfbe7ad6a1a63e09bab3cdccdc7'
+         '069946fd414c60e0ae08f16efe4b1f59'
+         'f8dbbaf7f2d7da91d8c17820e0056c2e'
+         '0c1e22753988cc9779f9d861e4dc25c1'
+         '147f7ff378c7818f41c1c965a49217e5'
+         'a0070eaa18ad119c742e1da576109add'
+         '8d4f2ce29907990d6fb7893ac0abc508'
+         '5325c498384ca533c3d20f6fd1047cca'
+         '120995353c98d85f62f0c29e3edba797'
+         'ffd0e44875970ae2b17824c551a982bd'
+         '293e19249d7b20a2d2f221fd93b7d231'
+         '0de47307f7d8dfccab740048875f435f')
+
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
   
   msg "Patching..."
-  patch -Np1 -i $srcdir/submitted-stat.diff
-  patch -Np1 -i $srcdir/local-gcc-4.1-init-first.diff
-  patch -Np1 -i $srcdir/local-tls-support.diff
-  patch -Np1 -i $srcdir/local-tls.diff
-  patch -Np1 -i $srcdir/submitted-libc_once.diff
-  patch -Np1 -i $srcdir/local-stdio-lock.diff
-  patch -Np1 -i $srcdir/submitted-strtoul.diff
-  patch -Np1 -i $srcdir/submitted-ptr-mangle.diff
-  patch -Np1 -i $srcdir/submitted-sched_h.diff
-  patch -Np1 -i $srcdir/local-atomic-no-multiple_threads.diff
-  patch -Np1 -i $srcdir/local-check_native.diff
-  patch -Np1 -i $srcdir/local-_dl_random.diff
-  patch -Np1 -i $srcdir/local-gscope.diff
-  patch -Np1 -i $srcdir/submitted-popen.diff
-  patch -Np1 -i $srcdir/local-no-SOCK_NONBLOCK.diff
-  patch -Np1 -i $srcdir/submitted-dl-sysdep.diff
-  patch -Np1 -i $srcdir/local-unwind-resume.diff
-  patch -Np1 -i $srcdir/i686-cpuclock_which.patch  
+  # tlsdesc.sym from packages doesn't work, use the one from local-tls-support patch
+  rm -f sysdeps/mach/hurd/i386/tlsdesc.sym
+  
+  patch -Np1 < ${srcdir}/local-gcc-4.1-init-first.diff
+  patch -Np1 < ${srcdir}/local-tls-support.diff
+  patch -Np1 < ${srcdir}/libc-lock.diff
+  patch -Np1 < ${srcdir}/local-atomic-no-multiple_threads.diff
+  patch -Np1 < ${srcdir}/local-stdio-lock.diff
+  patch -Np1 < ${srcdir}/submitted-stat.diff
+  patch -Np1 < ${srcdir}/submitted-libc_once.diff
+  patch -Np1 < ${srcdir}/local-longjmp_chk.diff
+  patch -Np1 < ${srcdir}/submitted-ptr-mangle.diff
+  patch -Np1 < ${srcdir}/local-check_native.diff
+  patch -Np1 < ${srcdir}/local-_dl_random.diff
+  patch -Np1 < ${srcdir}/local-gscope.diff
+  patch -Np1 < ${srcdir}/submitted-strtoul.diff
+  patch -Np1 < ${srcdir}/local-tls.diff
+  patch -Np1 < ${srcdir}/local-unwind-resume.diff
+  patch -Np1 < ${srcdir}/submitted-net.diff
+  patch -Np1 < ${srcdir}/submitted-popen.diff
+  patch -Np1 < ${srcdir}/submitted-sched_h.diff
+  patch -Np1 < ${srcdir}/local-no-SOCK_NONBLOCK.diff
+  patch -Np1 < ${srcdir}/i686-cpuclock_which.patch
+  patch -Np1 < ${srcdir}/submitted-dl-sysdep.diff
+  patch -Np1 < ${srcdir}/cvs-getcwd.diff
+  patch -Np1 < ${srcdir}/cvs-setsid.diff
+  patch -Np1 < ${srcdir}/local-mlock.diff
+  patch -Np1 < ${srcdir}/submitted-dup2-fix.diff
+  patch -Np1 < ${srcdir}/submitted-sbrk.diff
+  patch -Np1 < ${srcdir}/submitted-critical-sections.diff
+  patch -Np1 < ${srcdir}/submitted-posix_opt.h.diff
+  patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff
+  patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff
+  patch -Np1 < ${srcdir}/submitted-ECANCELED.diff
+  patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff
+  patch -Np1 < ${srcdir}/submitted-extern_inline.diff
+  patch -Np1 < ${srcdir}/submitted-itimer-lock.diff
+  patch -Np1 < ${srcdir}/submitted-null-pathname.diff
+  patch -Np1 < ${srcdir}/submitted-SOL_IP.patch
+  patch -Np1 < ${srcdir}/local-bigmem.diff
+  patch -Np1 < ${srcdir}/local-disable-ioctls.diff
+  patch -Np1 < ${srcdir}/local-pthread_posix-option.diff
+  patch -Np1 < ${srcdir}/submitted-getnprocs.diff
+  patch -Np1 < ${srcdir}/local-pthread.diff
+  patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff
+  patch -Np1 < ${srcdir}/local-thread-cancel.diff
+  patch -Np1 < ${srcdir}/local-pthread_types.diff
+  patch -Np1 < ${srcdir}/local-unlockpt-chroot.diff
   msg "Done Patching."
+
 
   rm -rf "$srcdir/$pkgname-build" 
   mkdir "$srcdir/$pkgname-build"
@@ -85,7 +171,7 @@ build() {
               --without-gd --without-cvs \
               --disable-profile \
   
-  
+
   make || return 1
 }
 
@@ -94,7 +180,8 @@ package() {
   make install_root="$pkgdir/" install || return 1
   
   cd $pkgdir/lib
+  cp -r ../libexec/* .
+  rm -rf ../libexec
   ln -s ld.so.1 ld.so
 }
 
-# vim:set ts=2 sw=2 et:
