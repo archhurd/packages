@@ -1,0 +1,11 @@
+--- source/wget-1.12/src/wget.h	2009-09-22 05:07:58.000000000 +0200
++++ build/wget-1.12/src/wget.h	2010-03-07 21:02:10.845000462 +0100
+@@ -41,6 +41,8 @@
+ /* Include these, so random files need not include them.  */
+ #include "sysdep.h"
+ 
++#define PATH_MAX 4096
++
+ /* Disable assertions when debug support is not compiled in. */
+ #ifndef ENABLE_DEBUG
+ # define NDEBUG

@@ -2,7 +2,7 @@
 
 pkgname=('gcc' 'gcc-libs')
 pkgver=4.4.3
-pkgrel=3
+pkgrel=4
 pkgdesc="The GNU Compiler Collection"
 arch=(i686)
 url="http://gcc.gnu.org"
@@ -41,23 +41,37 @@ build() {
     --disable-multilib --mandir=/share/man --infodir=/share/info \
     --libexecdir=/lib
 
-  make RPATH_ENVVAR="/usr/lib/" || return 1
+  make || return 1
 } 
 
 package_gcc() { 
   groups=('base-devel')
-  depends=('binutils' 'mpfr' 'cloog-ppl')
+  depends=('binutils' 'mpfr' 'cloog-ppl' 'sh')
   install=gcc.install
   
   cd ${srcdir}/build
-  make DESTDIR=${pkgdir} install-gcc
+
+  #install and clean up
+  make DESTDIR=${pkgdir} install
+  rm $pkgdir/lib/*.so*
+  rm $pkgdir/share/info/libgomp.info
+  rm $pkgdir/share/locale/{de,fr}/LC_MESSAGES/libstdc++.mo
+
+  #sometimes required
+  install -dm755 ${pkgdir}/lib
+  ln -sf /bin/cpp ${pkgdir}/lib/cpp
+  ln -sf gcc ${pkgdir}/bin/cc
+  ln -sf g++ ${pkgdir}/bin/c++
+
+  install -Dm644 ${srcdir}/${pkgname}-${pkgver}/COPYING.RUNTIME \
+    ${pkgdir}/share/licenses/gcc/RUNTIME.LIBRARY.EXCEPTION
 }
 
 
 package_gcc-libs() {
   pkgdesc="Runtime libraries shipped by GCC for C and C++ languages"
   groups=('base')
-  depends=('glibc')
+  depends=('glibc' 'sh')
   install=gcc-libs.install
 
   

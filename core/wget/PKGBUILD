@@ -1,0 +1,31 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=wget
+pkgver=1.12
+pkgrel=2
+pkgdesc="A network utility to retrieve files from the Web"
+arch=('i686')
+url="http://www.gnu.org/software/wget/wget.html"
+license=('GPL3')
+groups=('base')
+depends=('openssl' 'sh')
+backup=('etc/wgetrc')
+install=wget.install
+source=(ftp://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.gz
+        wget_hurd.patch)
+md5sums=('141461b9c04e454dc8933c9d1f2abf83'
+         '609c1aafd66d918f6bb3ca8b73973c1f')
+
+build() {
+  cd ${srcdir}/$pkgname-$pkgver
+
+  patch -Np2 < ${srcdir}/wget_hurd.patch
+  
+  ./configure --host=i686-pc-gnu --prefix= --sysconfdir=/etc
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/$pkgname-$pkgver
+  make DESTDIR=${pkgdir} install
+}

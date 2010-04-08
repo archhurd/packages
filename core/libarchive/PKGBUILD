@@ -2,12 +2,12 @@
 
 pkgname=libarchive
 pkgver=2.8.3
-pkgrel=1
+pkgrel=2
 pkgdesc="library that can create and read several streaming archive formats"
 arch=(i686)
 url="http://libarchive.googlecode.com/"
 license=('BSD')
-depends=('zlib' 'bzip2' 'xz-utils' 'openssl')
+depends=('zlib' 'bzip2' 'xz-utils' 'openssl>=1.0.0')
 install=
 source=(http://libarchive.googlecode.com/files/$pkgname-$pkgver.tar.gz
         libarchive_hurd.patch)
