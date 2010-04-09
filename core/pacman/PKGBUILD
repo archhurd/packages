@@ -2,13 +2,14 @@
 
 pkgname=pacman
 pkgver=3.3.3
-pkgrel=2
+pkgrel=3
 pkgdesc="A library-based package manager with dependency support"
 arch=(i686)
 url="http://www.archlinux.org/pacman/"
 license=('GPL')
 groups=('base')
 depends=('bash' 'libarchive' 'libfetch')
+optdepends=('fakeroot: for makepkg usage as normal user')
 backup=(etc/pacman.conf etc/makepkg.conf)
 source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
         pacman.conf
@@ -18,7 +19,7 @@ source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
 md5sums=('a8cef73d68e2a4c3a46fb46c33210719'
          '7e6f21f9990f986edfcb9e573ff4f9f2'
          '860171534a40d600b8ed038191a21ddc'
-         'ea4e5c8e957d7b7635d291d5aa255527'
+         'a3566f9fc156d88123d4cd113e18d47c'
          '90f2e8a6f40279d1dd47c3e05d3908cf')
 
 
