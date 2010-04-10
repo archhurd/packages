@@ -1,0 +1,30 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=gdbm
+pkgver=1.8.3
+pkgrel=1
+pkgdesc="GNU database library"
+url="http://www.gnu.org/software/gdbm/gdbm.html"
+license=('GPL')
+arch=('i686')
+groups=('base')
+depends=('glibc' 'sh')
+source=(ftp://ftp.gnu.org/gnu/gdbm/$pkgname-$pkgver.tar.gz)
+install=gdbm.install
+options=(!libtool)
+md5sums=('1d1b1d5c0245b1c00aff92da751e9aa1')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver
+  ./configure --prefix=/ --mandir=/share/man --infodir=/share/info
+  make prefix=/ || return 1
+} 
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
+  make prefix=$pkgdir/ manprefix=$pkgdir/share/man man3dir=$pkgdir/share/man/man3 infodir=$pkgdir/share/info install
+  make prefix=$pkgdir/ manprefix=$pkgdir/share/man man3dir=$pkgdir/share/man/man3 infodir=$pkgdir/share/info install-compat
+  chown root.root $pkgdir/include/{dbm.h,gdbm.h,ndbm.h}
+  chown root.root $pkgdir/share/man/man3/gdbm.3
+  chown root.root $pkgdir/share/info/gdbm.info
+}

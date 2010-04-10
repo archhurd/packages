@@ -1,0 +1,39 @@
+pkgname=perl
+pkgver=5.10.1
+pkgrel=1
+pkgdesc="Practical Extraction and Report Language"
+arch=('i686')
+depends=('coreutils' 'sh' 'glibc' 'db' 'gdbm')
+license=('GPL' 'PerlArtistic')
+url="http://www.perl.org"
+source=(http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2)
+options=('!makeflags' '!purge')
+install=('perl.install')
+md5sums=('82400c6d34f7b7b43d0196c76cd2bbb1')
+
+
+build() {
+  cd ${srcdir}/perl-${pkgver}
+ 
+  ./Configure -des -Dusethreads -Duseshrplib -Doptimize="${CFLAGS}" \
+        -Dprefix=/ -Dinstallprefix=${pkgdir}/ -Dvendorprefix=/ \
+        -Dprivlib=/share/perl5/core_perl \
+        -Darchlib=/lib/perl5/core_perl \
+        -Dsitelib=/share/perl5/site_perl/${pkgver} \
+        -Dsitearch=/lib/perl5/site_perl/${pkgver} \
+        -Dvendorlib=/share/perl5/vendor_perl \
+        -Dvendorarch=/lib/perl5/vendor_perl \
+        -Dotherlibdirs=/lib/perl5/current:/lib/perl5/site_perl/current \
+        -Dscriptdir='/bin/perlbin/core' \
+        -Dsitescript='/bin/perlbin/site' \
+        -Dvendorscript='/bin/perlbin/vendor' \
+        -Dman1ext=1perl -Dman3ext=3perl 
+
+  make || return 1
+}
+
+package(){
+  cd ${srcdir}/perl-${pkgver}
+ 
+  make install
+}
