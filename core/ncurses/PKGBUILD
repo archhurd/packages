@@ -1,0 +1,27 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=ncurses
+pkgver=5.7
+pkgrel=2.1
+pkgdesc="System V Release 4.0 curses emulation library"
+arch=('i686')
+url="http://www.gnu.org/software/ncurses/"
+license=('MIT')
+depends=('glibc')
+source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
+md5sums=('cce05daf61a64501ef6cd8da1f727ec6')
+options=('!zipman')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+
+  ./configure --prefix= --mandir=/share/man \
+     --with-shared --with-normal --without-debug --without-ada \
+     --with-install-prefix=${pkgdir} --enable-widec 
+  make || return 1
+} 
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make install
+}
