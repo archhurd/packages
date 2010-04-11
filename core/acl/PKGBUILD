@@ -13,11 +13,14 @@ replaces=('xfsacl')
 provides=('xfsacl')
 conflicts=('xfsacl')
 options=('!libtool')
-source=(ftp://ftp.archlinux.org/other/acl/acl-${pkgver}.src.tar.gz)
-sha256sums=('b45e21549c9752ad9b99862cce79d7ec5ef4b32c3e95a39f79f0a8442b86476e')
+source=(http://download.savannah.gnu.org/releases-noredirect/$pkgname/$pkgname-$pkgver.src.tar.gz acl-hurd-MAX_PATH.patch)
+
+md5sums=('181445894cca986da9ae0099d5ce2d08'
+         '296cfd1deaa9d5072e7c03651f5f686f')
 
 build() {
   cd $srcdir/acl-$pkgver
+  patch -p1 < $srcdir/acl-hurd-MAX_PATH.patch
 
   ./configure --prefix= --libexecdir=/lib
   make || return 1 
