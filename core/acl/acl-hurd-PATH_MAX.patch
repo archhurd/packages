@@ -1,0 +1,12 @@
+diff -upr acl-2.2.49/setfacl/parse.c acl-2.2.49-patch/setfacl/parse.c
+--- acl-2.2.49/setfacl/parse.c	2009-06-29 21:17:07.000000000 +0200
++++ acl-2.2.49-patch/setfacl/parse.c	2010-04-11 15:42:06.036499550 +0200
+@@ -36,6 +36,8 @@
+ #include "parse.h"
+ #include "misc.h"
+ 
++#define PATH_MAX 4096
++
+ #define SKIP_WS(x) ({ \
+ 	while (*(x)==' ' || *(x)=='\t' || *(x)=='\n' || *(x)=='\r') \
+ 		(x)++; \

@@ -2,7 +2,7 @@
 
 pkgname=acl
 pkgver=2.2.49
-pkgrel=1
+pkgrel=2
 pkgdesc="Library for filesystem ACL support"
 arch=('i686')
 url="http://savannah.nongnu.org/projects/acl"
@@ -13,14 +13,11 @@ replaces=('xfsacl')
 provides=('xfsacl')
 conflicts=('xfsacl')
 options=('!libtool')
-source=(http://download.savannah.gnu.org/releases-noredirect/$pkgname/$pkgname-$pkgver.src.tar.gz acl-hurd-MAX_PATH.patch)
-
-md5sums=('181445894cca986da9ae0099d5ce2d08'
-         '296cfd1deaa9d5072e7c03651f5f686f')
+source=(http://download.savannah.gnu.org/releases-noredirect/$pkgname/$pkgname-$pkgver.src.tar.gz acl-hurd-PATH_MAX.patch)
 
 build() {
   cd $srcdir/acl-$pkgver
-  patch -p1 < $srcdir/acl-hurd-MAX_PATH.patch
+  patch -p1 < $srcdir/acl-hurd-PATH_MAX.patch
 
   ./configure --prefix=$pkgdir --libexecdir=$pkgdir/lib  
   make || return 1 
@@ -30,3 +27,5 @@ package() {
   cd $srcdir/acl-$pkgver
   make install install-dev install-lib
 }
+md5sums=('181445894cca986da9ae0099d5ce2d08'
+         '10e571a4c8a9d0e0a8e4e01c77733da7')
