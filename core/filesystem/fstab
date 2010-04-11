@@ -1,0 +1,5 @@
+# 
+# /etc/fstab: static file system information
+#
+# <file system>        <dir>         <type>    <options>          <dump> <pass>
+/dev/hd0s1              /             ext2     defaults             1      1

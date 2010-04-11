@@ -1,0 +1,28 @@
+--- a/libexec/rc	2010-04-11 10:42:02.563939295 +0200
++++ b/libexec/rc	2010-04-11 11:24:04.463620879 +0200
+@@ -89,9 +89,6 @@
+ fi
+ echo done
+ 
+-# This file must exist for e2fsck to work. XXX
+-touch /var/run/mtab
+-
+ #echo -n restoring pty permissions...
+ #chmod 666 /dev/tty[pqrs]*
+ #echo done
+@@ -104,15 +101,6 @@
+ 
+ chmod 664 /etc/motd
+ 
+-echo -n starting daemons:
+-
+-/sbin/syslogd	&& echo -n ' syslogd'
+-/sbin/inetd	&& echo -n ' inetd'
+-
+-if test -x /sbin/sendmail -a -r /etc/sendmail.cf; then
+-  /sbin/sendmail -bd -q30m	&& echo -n ' sendmail'
+-fi
+-
+ echo .
+ 
+ date

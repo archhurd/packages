@@ -1,0 +1,11 @@
+post_install() {
+  echo "******************************************"
+  echo "* please run /sbin/setup_translators     *"
+  echo "* manually after installing this package *"
+  echo "******************************************"
+}
+
+post_upgrade() {
+  post_install $1
+}
+
