@@ -20,13 +20,13 @@ sha256sums=('e01fa00686072a02dddf994e6217be950f51c1dc0852ad2e210c48b6e8de793a')
 build() {
   cd $srcdir/$pkgname-$pkgver  
   autoconf
-  ./configure --prefix= --libexecdir=/lib
+  ./configure --prefix=$pkgdir --libexecdir=$pkgdir/lib
   sed -i -e 's/man2//g' man/Makefile
   make || return 1 
 }
 
 package() {
   cd $srcdir/$pkgname-$pkgver 
-  make prefix=$pkgdir libexedir=$pkgdir/lib install install-lib install-dev
+  make install install-lib install-dev
 }
 
