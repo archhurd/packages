@@ -1,0 +1,29 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=acl
+pkgver=2.2.48
+pkgrel=1
+pkgdesc="Library for filesystem ACL support"
+arch=('i686')
+url="http://oss.sgi.com/projects/xfs/"
+license=('LGPL')
+groups=('base')
+depends=('attr')
+replaces=('xfsacl')
+provides=('xfsacl')
+conflicts=('xfsacl')
+options=('!libtool')
+source=(ftp://ftp.archlinux.org/other/acl/acl-${pkgver}.src.tar.gz)
+sha256sums=('b45e21549c9752ad9b99862cce79d7ec5ef4b32c3e95a39f79f0a8442b86476e')
+
+build() {
+  cd $srcdir/acl-$pkgver
+
+  ./configure --prefix= --libexecdir=/lib
+  make || return 1 
+}
+
+package() {
+  cd $srcdir/acl-$pkgver
+  make prefix=$pkgdir/ libexecdir=$pkgdir/lib install install-lib install-dev
+}
