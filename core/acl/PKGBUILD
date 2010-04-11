@@ -22,11 +22,11 @@ build() {
   cd $srcdir/acl-$pkgver
   patch -p1 < $srcdir/acl-hurd-MAX_PATH.patch
 
-  ./configure --prefix= --libexecdir=/lib
+  ./configure --prefix=$pkgdir --libexecdir=$pkgdir/lib  
   make || return 1 
 }
 
 package() {
   cd $srcdir/acl-$pkgver
-  make prefix=$pkgdir/ libexecdir=$pkgdir/lib install install-lib install-dev
+  make install install-dev install-lib
 }
