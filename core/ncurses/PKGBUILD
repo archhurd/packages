@@ -21,7 +21,10 @@ build() {
      --with-shared --with-normal --without-debug --without-ada \
      --with-install-prefix=${pkgdir} --enable-widec 
   make || return 1
-  make install
+}
+ 
+package() {
+ make install
 
   # move libraries needed for boot to /lib (we call tput in initscripts)
   ln -sf ../../lib/libncursesw.so.5 ${pkgdir}/lib/libncursesw.so
@@ -42,16 +45,16 @@ build() {
   ln -sf libncurses.a ${pkgdir}/lib/libcurses.a
 
   # Install libncurses.so.5 for external binary support 
-  ./configure --prefix= \
-    --with-shared --with-normal --without-debug --without-ada \
-    --with-install-prefix=${pkgdir}
-  make || return 1
-  
-  install -Dm755 lib/libncurses.so.${pkgver} ${pkgdir}/lib/libncurses.so.${pkgver}
-  ln -sf libncurses.so.${pkgver} ${pkgdir}/lib/libncurses.so.5
-
-  # install license, rip it from the readme
-  cd ${srcdir}/${pkgname}-${pkgver}
-  install -dm755 ${pkgdir}/share/licenses/$pkgname
-  grep -B 100 '$Id' README > ${pkgdir}/share/licenses/${pkgname}/license.txt
+#  ./configure --prefix= \
+#    --with-shared --with-normal --without-debug --without-ada \
+#    --with-install-prefix=${pkgdir}
+#  make || return 1
+#  
+#  install -Dm755 lib/libncurses.so.${pkgver} ${pkgdir}/lib/libncurses.so.${pkgver}
+#  ln -sf libncurses.so.${pkgver} ${pkgdir}/lib/libncurses.so.5
+#
+#  # install license, rip it from the readme
+#  cd ${srcdir}/${pkgname}-${pkgver}
+#  install -dm755 ${pkgdir}/share/licenses/$pkgname
+#  grep -B 100 '$Id' README > ${pkgdir}/share/licenses/${pkgname}/license.txt
 }
