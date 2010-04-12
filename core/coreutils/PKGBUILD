@@ -2,13 +2,13 @@
 
 pkgname=coreutils
 pkgver=8.4
-pkgrel=1
+pkgrel=2
 pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
 arch=(i686)
 url="http://www.gnu.org/software/coreutils"
 license=('GPL3')
 groups=('base')
-depends=('glibc')
+depends=('glibc' 'acl' 'gmp' 'sh')
 options=('!emptydirs')
 install=coreutils.install
 source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.xz)
