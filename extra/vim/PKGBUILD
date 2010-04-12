@@ -31,16 +31,16 @@ build()
   get_patches 
 
   cd ${srcdir}/${_versiondir}
-#  sed -i 's|^.*\(#define SYS_.*VIMRC_FILE.*"\) .*$|\1|' src/feature.h
-#  sed -i 's|^.*\(#define VIMRC_FILE.*"\) .*$|\1|' src/feature.h
+  sed -i 's|^.*\(#define SYS_.*VIMRC_FILE.*"\) .*$|\1|' src/feature.h
+  sed -i 's|^.*\(#define VIMRC_FILE.*"\) .*$|\1|' src/feature.h
   # build party
-#  ./configure --prefix= --localstatedir=/var/lib/vim --mandir=/share/man \
-#    --with-compiledby=ArchHurd --with-features=big \
-#    --with-x=no --with-tlib=ncursesw --disable-gui \
-#    --enable-multibyte --enable-cscope \
-#    --enable-perlinterp 
+  ./configure --prefix= --localstatedir=/var/lib/vim --mandir=/share/man \
+    --with-compiledby=ArchHurd --with-features=big \
+    --with-x=no --with-tlib=ncursesw --disable-gui \
+    --enable-multibyte --enable-cscope \
+    --enable-perlinterp 
     #--with-global-runtime=/share/vim --with-vim-name=vim \
-#  make  LDFLAGS="${LDFLAGS} -lncursesw" || return 1
+  make || return 1
 }
 
 package()
