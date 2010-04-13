@@ -20,10 +20,10 @@ md5sums=('10714e50cea54dc7a227e3eddcd44d57'
 
 build() {
   cd $srcdir/$pkgname-$pkgver 
-#  patch -Np1 -i $srcdir/flex-2.5.35-gcc44.patch || return 1
+  patch -Np1 -i $srcdir/flex-2.5.35-gcc44.patch || return 1
   
-#  ./configure --prefix= \
-#    --mandir=/share/man --infodir=/share/info || return 1
+  ./configure --prefix= \
+    --mandir=/share/man --infodir=/share/info || return 1
   make || return 1
 }
 
