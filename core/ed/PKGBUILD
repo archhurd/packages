@@ -1,0 +1,31 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=ed
+pkgver=1.4
+pkgrel=1
+pkgdesc="A POSIX-compliant line editor"
+arch=('i686')
+license=('GPL')
+url="http://www.gnu.org/software/ed/ed.html"
+install=ed.install
+groups=('base-devel')
+depends=('glibc')
+options=('!emptydirs')
+source=(ftp://ftp.gnu.org/gnu/ed/${pkgname}-${pkgver}.tar.gz)
+md5sums=('da0ddc0e0b0bec2da4b13b0d0d1bce2b')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  ./configure --prefix=/ --mandir=/share/man --infodir=/share/info
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install || return 1
+
+  cd ${pkgdir}/share/info
+  ln ed.info red.info
+
+  rm ${pkgdir}/share/info/dir
+}
