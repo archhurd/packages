@@ -35,7 +35,7 @@ build()
   sed -i 's|^.*\(#define VIMRC_FILE.*"\) .*$|\1|' src/feature.h
   # build party
   ./configure --prefix= --localstatedir=/var/lib/vim --mandir=/share/man \
-    --with-compiledby=ArchHurd --with-features=big \
+    --enable-acl --with-compiledby=ArchHurd --with-features=big \
     --with-x=no --with-tlib=ncursesw --disable-gui \
     --enable-multibyte --enable-cscope \
     --enable-perlinterp 
