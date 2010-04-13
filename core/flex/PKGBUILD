@@ -1,0 +1,43 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=flex
+pkgver=2.5.35
+pkgrel=1
+pkgdesc="A tool for generating text-scanning programs"
+arch=('i686')
+url="http://flex.sourceforge.net"
+license=('custom')
+groups=('base-devel')
+depends=('glibc' 'm4' 'sh')
+makedepends=('gzip')
+install=flex.install
+source=(http://downloads.sourceforge.net/sourceforge/flex/flex-$pkgver.tar.bz2 
+        flex-2.5.35-gcc44.patch
+	lex.sh)
+md5sums=('10714e50cea54dc7a227e3eddcd44d57'
+         'e4444ef5c07db71a43280be74139bdea'
+         'f725259ec23a9e87ee29e2ef82eda9a5')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver 
+#  patch -Np1 -i $srcdir/flex-2.5.35-gcc44.patch || return 1
+  
+#  ./configure --prefix= \
+#    --mandir=/share/man --infodir=/share/info || return 1
+  make || return 1
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver 
+  make prefix=$pkgdir \
+    mandir=$pkgdir/share/man \
+    infodir=$pkgdir/share/info \
+    install || return 1
+  install -Dm755 $srcdir/lex.sh $pkgdir/bin/lex || return 1
+
+  install -Dm644 COPYING \
+  	$pkgdir/share/licenses/$pkgname/license.txt || return 1
+            
+  rm -f $pkgdir/share/info/dir
+  gzip -9 $pkgdir/share/info/*
+}

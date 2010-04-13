@@ -1,0 +1,48 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=mig
+pkgver=20100104
+pkgrel=1
+pkgdesc="Mach Interface Generator"
+arch=('i686')
+license=('GPL')
+url="http://www.gnu.org/software/hurd/microkernel/mach/mig.html"
+groups=('base-devel')
+depends=("gnumach" "glibc")
+makedepends=("git")
+source=()
+md5sums=()
+
+_gitroot=git://git.sv.gnu.org/hurd/mig.git
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [ -d $pkgname ] ; then
+    cd $pkgname && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $_gitroot $pkgname
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting make..."
+
+  cd $srcdir/$pkgname
+  autoreconf -vif   
+
+  rm -rf "$srcdir/$pkgname-build"
+  mkdir "$srcdir/$pkgname-build"
+  d "$srcdir/$pkgname-build"
+
+  ../$pkgname/configure --prefix= \
+    --libexecdir=/lib || return 1
+
+  make || return 1
+}
+
+package() {
+  cd $srcdir/$pkgname-build
+  make DESTDIR=$pkgdir install || return 1
+}
