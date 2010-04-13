@@ -2,7 +2,7 @@
 
 pkgname=pacman
 pkgver=3.3.3
-pkgrel=3
+pkgrel=4
 pkgdesc="A library-based package manager with dependency support"
 arch=(i686)
 url="http://www.archlinux.org/pacman/"
@@ -18,7 +18,7 @@ source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
         mirrorlist)
 md5sums=('a8cef73d68e2a4c3a46fb46c33210719'
          '7e6f21f9990f986edfcb9e573ff4f9f2'
-         '860171534a40d600b8ed038191a21ddc'
+         '5f30bf6af8a5e60449e170b01337037d'
          'a3566f9fc156d88123d4cd113e18d47c'
          '90f2e8a6f40279d1dd47c3e05d3908cf')
 
