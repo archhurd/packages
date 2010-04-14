@@ -2,7 +2,7 @@
 
 pkgname=ed
 pkgver=1.4
-pkgrel=1
+pkgrel=3
 pkgdesc="A POSIX-compliant line editor"
 arch=('i686')
 license=('GPL')
@@ -23,9 +23,6 @@ build() {
 package() {
   cd ${srcdir}/${pkgname}-${pkgver}
   make DESTDIR=${pkgdir} install || return 1
-
-  cd ${pkgdir}/share/info
-  ln ed.info red.info
 
   rm ${pkgdir}/share/info/dir
 }
