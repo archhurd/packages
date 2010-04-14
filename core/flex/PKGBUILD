@@ -39,5 +39,4 @@ package() {
   	$pkgdir/share/licenses/$pkgname/license.txt || return 1
             
   rm -f $pkgdir/share/info/dir
-  gzip -9 $pkgdir/share/info/*
 }

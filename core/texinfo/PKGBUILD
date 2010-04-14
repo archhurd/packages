@@ -23,5 +23,4 @@ package() {
    cd ${srcdir}/${pkgname}-4.13
    make DESTDIR=${pkgdir} install || return 1
    rm -f ${pkgdir}/share/info/dir
-   gzip ${pkgdir}/share/info/*
 }

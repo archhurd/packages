@@ -1,39 +1,49 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
-pkgname=groff
-pkgver=1.20.1
+pkgname=man-db
+pkgver=2.5.7
 pkgrel=1
-pkgdesc="GNU troff text-formatting system"
-arch=(i686)
-url="http://www.gnu.org/software/groff/groff.html"
-license=('GPL')
-depends=('perl' 'gcc-libs' 'texinfo')
-#makedepends=('netpbm' 'psutils' 'ghostscript')
-#optdepends=('netpbm: for use together with man -H command interaction in browsers'
-#            'psutils: for use together with man -H command interaction in browsers')
-source=(ftp://ftp.gnu.org/gnu/groff/groff-$pkgver.tar.gz
-        site.tmac)
-install=groff.install
-md5sums=('48fa768dd6fdeb7968041dd5ae8e2b02'
-         'a1fedafd7863b37968d32ad9ae1d8c13')
-
+pkgdesc="A utility for reading man pages"
+arch=('i686')
+url="http://www.nongnu.org/man-db/"
+license=('GPL' 'LGPL')
+groups=('base')
+depends=( 'bash' 'gdbm' 'zlib' 'groff')
+optdepends=('less' 'gzip')
+backup=('etc/man_db.conf'
+	'etc/cron.daily/man-db')
+conflicts=('man')
+provides=('man')
+replaces=('man')
+install=${pkgname}.install
+source=(http://savannah.nongnu.org/download/man-db/$pkgname-$pkgver.tar.gz
+	#http://launchpad.net/man-db/main/${pkgver}/+download/${pkgname}-${pkgver}.tar.gz
+        convert-mans man-db.cron.daily)
+                        
 build() {
-  cd $srcdir/$pkgname-$pkgver
-  ./configure --prefix= --without-x
- 
-  make -j1 || return 1
-  make prefix=$pkgdir install
-	cd $pkgdir/bin
-	# needed for xman
-	ln -s eqn geqn
-	ln -s tbl gtbl
-	ln -s soelim zsoelim
-  rm -rf $pkgdir/lib
-
-  # Fix some issues when encoding to utf8 man pages
-  #  The output chars don't match keyboard chars...
-  cat $srcdir/site.tmac >> \
-    $pkgdir/share/groff/site-tmac/man.local
-  cat $srcdir/site.tmac >> \
-    $pkgdir/share/groff/site-tmac/mdoc.local
+  cd ${srcdir}/${pkgname}-${pkgver}
+  
+#  ./configure --prefix= --sysconfdir=/etc --libexecdir=/lib \
+#	--with-db=gdbm --disable-setuid --enable-mandirs=GNU \
+#	--with-sections="1 n l 8 3 0 2 5 4 9 6 7"
+  make || return 1
 }
+
+package() { 
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install || return 1
+
+  # part of groff pkg
+  rm -f ${pkgdir}/bin/zsoelim
+
+  # script from LFS to convert manpages, see
+  # http://www.linuxfromscratch.org/lfs/view/6.4/chapter06/man-db.html
+  install -D -m755 ${srcdir}/convert-mans  ${pkgdir}/bin/convert-mans 
+
+  #install whatis cron script
+  install -D -m744 ${srcdir}/man-db.cron.daily ${pkgdir}/etc/cron.daily/man-db
+}
+
+md5sums=('eef0d8c8e54894e4e050e2176bb1d88d'
+         '2b7662a7d5b33fe91f9f3e034361a2f6'
+         'cdd8098a4827c70f1dedb54a1ecb0d32')
