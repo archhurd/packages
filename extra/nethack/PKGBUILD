@@ -1,0 +1,55 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=nethack
+pkgver=3.4.3
+pkgrel=1
+pkgdesc='A single player dungeon exploration game'
+arch=('i686')
+url="http://www.nethack.org/index.html"
+license=('custom')
+depends=('ncurses' 'gzip')
+source=(http://downloads.sourceforge.net/sourceforge/$pkgname/$pkgname-${pkgver//.}-src.tgz)
+md5sums=('21479c95990eefe7650df582426457f9')
+
+build(){
+  cd $srcdir/$pkgname-$pkgver/
+  sh sys/unix/setup.sh
+
+  sed 's/<curses\.h>/<ncursesw\/curses\.h>/' -i sys/share/unixtty.c
+  sed 's/<curses\.h>/<ncursesw\/curses\.h>/' -i win/tty/termcap.c
+
+  sed -e '/define HACKDIR/ s|/usr/games/lib/nethackdir|/share/nethack/|' \
+      -e '/^#define COMPRESS\s/ s|/usr/bin/compress|/bin/gzip|' \
+      -e '/^#define COMPRESS_EXTENSION/ s|".Z"|".gz"|' \
+      -e 's|^/\* \(#define DLB\) \*/|\1|' -i include/config.h
+
+  sed -e 's|^/\* \(#define LINUX\) \*/|\1|' \
+      -e 's|^/\* \(#define TIMED_DELAY\) \*/|\1|' -i include/unixconf.h
+
+  sed -e 's|^# \(WINTTYLIB = -lncurses\)|\1|' \
+      -e 's|^WINTTYLIB = -ltermlib|#&|' -i src/Makefile
+
+  sed -e '/^GAMEDIR\s*=/ s|/games/.*$|/share/$(GAME)|' \
+      -e '/^GAMEUID\s*=/ s|games|root|' \
+      -e '/^GAMEGRP\s*=/ s|bin|root|' \
+      -e '/^SHELLDIR\s*=/ s|/games|/bin|' -i Makefile
+  sed -e "/^MANDIR\s*=/s|/usr/man/man6|$pkgdir/share/man/man6|" -i doc/Makefile
+
+  make || return 1
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver/
+  install -dm755 $pkgdir/share/{man/man6,doc/nethack}
+  make PREFIX=$pkgdir install manpages
+  sed -e "s|HACKDIR=$pkgdir/usr/|HACKDIR=/|" \
+      -e 's|HACK=$HACKDIR|HACK=/lib/nethack|' \
+      -i $pkgdir/bin/nethack
+
+  install -dm755 $pkgdir/lib/nethack
+  mv $pkgdir/share/nethack/{nethack,recover} $pkgdir/lib/nethack/
+
+  install -Dm644 doc/Guidebook.txt $pkgdir/share/doc/nethack/Guidebook.txt
+      
+  install -Dm644 dat/license $pkgdir/share/licenses/$pkgname/license
+}
