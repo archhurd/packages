@@ -1,0 +1,3 @@
+#!/bin/bash
+/lib/python%%PYBASEVER%%/site-packages/pynche/pynche
+
