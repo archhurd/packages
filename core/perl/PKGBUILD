@@ -1,20 +1,20 @@
 pkgname=perl
 pkgver=5.10.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Practical Extraction and Report Language"
 arch=('i686')
 depends=('coreutils' 'sh' 'glibc' 'db' 'gdbm')
 license=('GPL' 'PerlArtistic')
 url="http://www.perl.org"
-source=(http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2)
+source=(http://www.perl.com/CPAN/src/perl-${pkgver}.tar.bz2
+    perlbin.sh perl-5.10.1-archlinux-inc-order.patch)
 options=('!makeflags' '!purge')
 install=('perl.install')
-md5sums=('82400c6d34f7b7b43d0196c76cd2bbb1')
-
 
 build() {
   cd ${srcdir}/perl-${pkgver}
- 
+  patch -Np0 -i ../perl-5.10.1-archlinux-inc-order.patch || return 1
+
   ./Configure -des -Dusethreads -Duseshrplib -Doptimize="${CFLAGS}" \
         -Dprefix=/ -Dinstallprefix=${pkgdir}/ -Dvendorprefix=/ \
         -Dprivlib=/share/perl5/core_perl \
@@ -35,5 +35,40 @@ build() {
 package(){
   cd ${srcdir}/perl-${pkgver}
  
-  make install
+  make install || return 1
+
+  sed -e '/^man1ext=/ s/1perl/1p/' -e '/^man3ext=/ s/3perl/3pm/' \
+      -i ${pkgdir}/lib/perl5/core_perl/Config_heavy.pl
+
+  ### CPAN Settings ###
+  # Set CPAN default config to use the site directories.
+  sed -e '/(makepl_arg =>/   s/""/"INSTALLDIRS=site"/' \
+      -e '/(mbuildpl_arg =>/ s/""/"installdirs=site"/' \
+      -i ${pkgdir}/share/perl5/core_perl/CPAN/FirstTime.pm
+
+  ### CPANPLUS Settings ###
+  # Set CPANPLUS default config to use the site directories.
+  sed -e "/{'makemakerflags'}/ s/'';/'INSTALLDIRS=site';/" \
+      -e "/{'buildflags'}/     s/'';/'installdirs=site';/" \
+      -i ${pkgdir}/share/perl5/core_perl/CPANPLUS/Config.pm
+
+  # Profile script so set paths to perl scripts.
+  install -D -m755 ${srcdir}/perlbin.sh ${pkgdir}/etc/profile.d/perlbin.sh
+
+  (cd ${pkgdir}/bin; mv perl${pkgver} perl)
+  (cd ${pkgdir}/bin/perlbin/core; \
+      ln -sf c2ph pstruct; ln -sf s2p psed)
+  grep -Rl "${pkgdir}" ${pkgdir} | \
+      xargs sed -i "s^${pkgdir}^^g"
+
+  # Remove all pod files *except* those under /share/perl5/core_perl/pod/
+  # (FS#16488)
+  rm -f $pkgdir/share/perl5/core_perl/*.pod
+  for d in $pkgdir/share/perl5/core_perl/*; do
+    if [ -d $d -a $(basename $d) != "pod" ]; then
+      find $d -name *.pod -delete
+    fi
+  done
+  find $pkgdir/lib -name *.pod -delete
+  find $pkgdir -name .packlist -delete
 }
