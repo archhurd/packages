@@ -1,0 +1,29 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=egd
+pkgver=0.9
+pkgrel=1
+pkgdesc="An Entropy Gathering Daemon"
+arch=('i686')
+license=('GPL')
+depends=('perl' 'perl-digest-sha1')
+mkdepends=('perl' 'perl-digest-sha1')
+url="http://egd.sourceforge.net"
+source=(http://prdownloads.sourceforge.net/${pkgname}/${pkgname}-${pkgver}.tar.gz)
+md5sums=('0d7f762fbf723c78ef72dac9da6f3195')
+
+build()
+{
+  cd ${srcdir}/${pkgname}-${pkgver}
+  perl Makefile.PL
+  make
+}
+
+package()
+{
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install
+
+  # perl-digest-sha1 already has the manfile
+  rm -rf ${pkgdir}/share
+}

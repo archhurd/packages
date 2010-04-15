@@ -2,7 +2,7 @@
 
 pkgname=filesystem
 pkgver=2010.04
-pkgrel=1
+pkgrel=2
 pkgdesc="Base filesystem"
 arch=('any')
 license=('GPL')
@@ -66,6 +66,8 @@ build()
   mkdir ${pkgdir}/var/empty
   touch ${pkgdir}/var/empty/.keep
 
+  # :(
+  ln -s / ${pkgdir}/usr
 
 }
 
