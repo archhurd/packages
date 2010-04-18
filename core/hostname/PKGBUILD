@@ -1,0 +1,49 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=hostname
+_pkgname=net-tools
+pkgver=1.60
+pkgrel=2
+pkgdesc="Configuration tool for changing the hostname"
+arch=('i686')
+license=('GPL')
+url="http://www.tazenda.demon.co.uk/phil/net-tools"
+groups=('base')
+depends=('glibc')
+backup=('etc/conf.d/nisdomainname')
+source=(http://www.tazenda.demon.co.uk/phil/$_pkgname/$_pkgname-$pkgver.tar.bz2
+	gcc340.patch nisdomainname.conf.d)
+options=(!makeflags)
+
+build() {
+  cd $srcdir/$_pkgname-$pkgver
+  patch -Np1 -i ../gcc340.patch || return 1
+  
+  make config.h hostname || return 1
+}
+package() {
+  cd $srcdir/$_pkgname-$pkgver
+
+  install -m 0755 -d $pkgdir/bin
+  install -m 0755 hostname $pkgdir/bin
+  ln -fs hostname $pkgdir/bin/dnsdomainname
+  ln -fs hostname $pkgdir/bin/ypsdomainname
+  ln -fs hostname $pkgdir/bin/nisdomainname
+  ln -fs hostname $pkgdir/bin/domainname
+
+  cd po/
+  make INSTALLNLSDIR=$pkgdir/share/locale install || return 1
+
+  cd ../man/
+  make mandir=$pkgdir/share/man install || return 1
+
+  # Remove other man pages
+  rm -fr $pkgdir/share/man/man{5,8}
+
+  cd ../..
+  install -D -m644 nisdomainname.conf.d \
+    $pkgdir/etc/conf.d/nisdomainname
+}
+md5sums=('888774accab40217dde927e21979c165'
+         'b52d899cba9956bb0055150506f41ac1'
+         'af3eef5d4837939f7858eec692aa4671')

@@ -1,0 +1,54 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=syslog-ng
+pkgver=3.1.0
+pkgrel=1
+pkgdesc="Next-generation syslogd with advanced networking and filtering capabilities"
+arch=('i686')
+license=('GPL2')
+groups=('base')
+url="http://www.balabit.com/network-security/syslog-ng/"
+depends=('glib2' 'eventlog' 'tcp_wrappers' 'openssl')
+optdepends=('logrotate')
+provides=('logger')
+backup=('etc/syslog-ng.conf' 'etc/logrotate.d/syslog-ng')
+source=(http://www.balabit.com/downloads/files/syslog-ng/sources/$pkgver/source/$pkgname\_$pkgver.tar.gz
+        syslog-ng.conf
+        syslog-ng.logrotate
+        syslog-ng.rc)
+install=syslog-ng.install
+
+build() {
+    cd $srcdir/$pkgname-$pkgver
+
+    # NOTE - re-assess this with later releases
+    # FS#15787: syslog-ng does not write to files not owned by root
+    # Upstream: https://bugzilla.balabit.com/show_bug.cgi?id=52
+    # Solution: --disable-linux-caps
+
+    LDFLAGS="$LDFLAGS -Wl,--no-undefined" ./configure \
+                --prefix= \
+                --sysconfdir=/etc \
+                --localstatedir=/var/lib/syslog-ng \
+                --enable-tcp-wrapper \
+                --with-pidfile-dir=/var/run \
+                --disable-spoof-source \
+                --disable-linux-caps
+
+    make || return 1
+}
+
+package() {
+    cd $srcdir/$pkgname-$pkgver
+    make DESTDIR=$pkgdir install || return 1
+    install -dm755 $pkgdir/var/lib/syslog-ng
+    install -Dm644 $srcdir/syslog-ng.conf $pkgdir/etc/syslog-ng.conf
+    install -Dm644 $srcdir/syslog-ng.logrotate $pkgdir/etc/logrotate.d/syslog-ng
+    install -Dm755 $srcdir/syslog-ng.rc $pkgdir/etc/rc.d/syslog-ng
+    # remove libexec
+    rm -rf $pkgdir/libexec
+}
+md5sums=('10f2ad8df738d9551996be4367d1cf4e'
+         'e02be6637d0c3b5484d4597ce049ae39'
+         '735636090be4582885974542d2a75855'
+         'ee7783bf72bbde82456e37117fe7426d')
