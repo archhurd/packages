@@ -1,0 +1,25 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=mpc
+pkgver=0.19
+pkgrel=1
+pkgdesc="Minimalist command line interface to MPD"
+arch=('i686')
+url="http://mpd.wikia.com/wiki/Client:Mpc"
+license=('GPL2')
+depends=('libmpdclient')
+options=('!emptydirs')
+source=(http://downloads.sourceforge.net/musicpd/${pkgname}-$pkgver.tar.bz2)
+md5sums=('9ab2967d9ec719b06a86f3b4121be654')
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  ./configure --prefix= || return 1
+  make || return 1
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  make DESTDIR="$pkgdir" install || return 1
+}
