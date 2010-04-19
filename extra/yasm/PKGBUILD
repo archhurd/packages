@@ -1,0 +1,25 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=yasm
+pkgver=0.8.0
+pkgrel=1
+pkgdesc="A rewrite of NASM to allow for multiple syntax supported (NASM, TASM, GAS, etc.)"
+arch=('i686')
+license=('custom')
+url="http://www.tortall.net/projects/yasm/"
+depends=('glibc')
+source=(http://www.tortall.net/projects/yasm/releases/${pkgname}-${pkgver}.tar.gz)
+options=('!libtool')
+md5sums=('84a72204c9b452a00b39b1b00495163f')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  ./configure --prefix=
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install
+  install -Dm644 COPYING ${pkgdir}/share/licenses/${pkgname}/COPYING
+}

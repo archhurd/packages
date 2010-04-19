@@ -2,27 +2,35 @@
 
 pkgname=hurd
 pkgver=20100321
-pkgrel=2
+pkgrel=3
 pkgdesc="The GNU Hurd"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/hurd.html"
 license=('GPL')
 groups=('base')
-depends=('gnumach' 'glibc' )
+depends=('gnumach' 'glibc' 'initscripts')
 makedepends=('git' 'glibc')
 options=('!makeflags')
+backup=(libexec/rc libexec/runsystem etc/ttys)
 source=(tls_support.hurd.patch
         tls_support.libpthread.patch
         libpthread_fix.patch
         pflocal.patch
-        rc.patch
+        ext2fs_large_stores.patch
+        libpager_update_seqno.patch
+        pfinet_dhcp.patch
+        extern_inline_fix.patch
         ttys)
 md5sums=('af87e4b04d89392a2b6e7751361f2460'
          '15886845ff60d66e767b8eb88c501458'
          'f745ddc28dfe41fa42087fbb7dbd6b65'
          '44291124d0b08ed4a735c42f06ceec28'
-         'f404f1b3fbfb6f57aff4b470c7fadc07'
+         'c39c95a2b36f66cc6b5b2fef4ad150b8'
+         'b6473e67ed1aa9721f47df73e04ca427'
+         '1706c9685c0ab551a4367583c542dfa1'
+         'e0910b3df6fc3a18ec44de4299dcf0d0'
          'f2ae144d872ec41cc4f2e070df71dfb1')
+
 
 
 _hurdgitroot="git://git.sv.gnu.org/hurd/hurd.git"
@@ -50,6 +58,11 @@ build() {
   cd "$srcdir/build"
   patch -Np1 < $srcdir/tls_support.hurd.patch
   patch -Np0 < $srcdir/pflocal.patch
+  patch -Np1 < $srcdir/ext2fs_large_stores.patch
+  patch -Np0 < $srcdir/libpager_update_seqno.patch
+  patch -Np0 < $srcdir/pfinet_dhcp.patch
+  patch -Np1 < $srcdir/extern_inline_fix.patch
+
 
   cp -a ../libpthread .
   cd libpthread
@@ -60,6 +73,7 @@ build() {
   #
   # BUILD HERE
   #
+  export LDFLAGS=`echo $LDFLAGS | sed 's/-Wl,--as-needed//'`
   autoreconf -vif ../hurd
   ./configure --host=i686-pc-gnu --prefix= --disable-profile
   make || return 1
@@ -77,9 +91,12 @@ package() {
 
   install -m 644 $srcdir/ttys $pkgdir/etc/ttys
 
-  # Remove daemon starting from /libexec/rc. 
-  # We want our initscripts to do that.
-  cd $pkgdir
-  patch -Np1 < $srcdir/rc.patch
+  # system startup scripts are in the initscripts package
+  rm $pkgdir/libexec/runsystem $pkgdir/libexec/rc
+
+  # for rc.shutdown
+  mv $pkgdir/sbin/halt $pkgdir/sbin/internal_halt
+  mv $pkgdir/sbin/reboot $pkgdir/sbin/internal_reboot
+
 } 
 
