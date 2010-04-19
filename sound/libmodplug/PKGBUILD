@@ -1,0 +1,28 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=libmodplug
+pkgver=0.8.8
+pkgrel=1
+pkgdesc="A MOD playing library"
+arch=(i686)
+url="http://modplug-xmms.sourceforge.net/"
+license=('custom')
+depends=('gcc-libs')
+options=('!libtool')
+source=(http://downloads.sourceforge.net/sourceforge/modplug-xmms/libmodplug-${pkgver}.tar.gz)
+md5sums=('fa9e5ede2e53d847f288c0315feec275')
+
+build() {
+  cd ${srcdir}/libmodplug-${pkgver}
+
+  ./configure --prefix= || return 1
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/libmodplug-${pkgver}
+
+  make DESTDIR=${pkgdir} install || return 1
+  install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
+}
+

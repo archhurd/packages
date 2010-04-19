@@ -1,0 +1,25 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=libmpcdec
+pkgver=1.2.6
+pkgrel=1
+pkgdesc="Musepack decoding library"
+arch=('i686')
+url="http://musepack.net/"
+license=('custom')
+depends=('glibc')
+options=('!libtool')
+source=(http://files.musepack.net/source/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('7f7a060e83b4278acf4b77d7a7b9d2c0')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  ./configure --prefix= --disable-static
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install || return 1
+  install -Dm644 COPYING ${pkgdir}/share/licenses/${pkgname}/COPYING
+}
