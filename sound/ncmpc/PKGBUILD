@@ -1,0 +1,36 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=ncmpc
+pkgver=0.16.1
+pkgrel=1
+pkgdesc="A ncurses (command line) interface for MPD"
+arch=("i686")
+url="http://mpd.wikia.com/wiki/Client:Ncmpc"
+license=('GPL')
+depends=('ncurses' 'glib2' 'libmpdclient')
+optdepends=('python: to enable lyrics plugin'
+	    'ruby: to enable lyrics plugin')
+source=("http://downloads.sourceforge.net/musicpd/$pkgname-$pkgver.tar.bz2")
+md5sums=('f3e53a379bd0bc82d315aa111bfdd17a')
+
+build() {
+  cd ${srcdir}/$pkgname-$pkgver
+
+  ./configure --prefix= \
+    --sysconfdir=/etc \
+    --enable-lyrics-screen \
+    --with-lyrics-plugin-dir=/share/ncmpc/lyrics
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/$pkgname-$pkgver
+
+  make prefix=${pkgdir} install
+  install -d ${pkgdir}/etc/ncmpc
+  install -m644 doc/{config.sample,keys.sample} \
+    ${pkgdir}/etc/ncmpc || return 1
+  install -d ${pkgdir}/share/ncmpc/lyrics
+  install -m755 lyrics/{10-hd.sh,15-leoslyrics.sh,20-lyricwiki.rb,30-leoslyrics.py} \
+    ${pkgdir}/share/ncmpc/lyrics || return 1
+}
