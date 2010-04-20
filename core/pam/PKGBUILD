@@ -1,0 +1,64 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=pam
+pkgver=1.1.1
+pkgrel=1
+pkgdesc="PAM (Pluggable Authentication Modules) library"
+arch=('i686')
+license=('GPL2')
+url="http://www.kernel.org/pub/linux/libs/pam/"
+groups=('base')
+depends=('glibc' 'db' 'cracklib')
+makedepends=('pam')
+backup=(etc/security/{access.conf,group.conf,limits.conf,namespace.conf,namespace.init,pam_env.conf,time.conf} etc/pam.d/other etc/default/passwd etc/environment)
+source=(\
+ http://www.kernel.org/pub/linux/libs/pam/library/Linux-PAM-$pkgver.tar.bz2 \
+    ftp://ftp.suse.com/pub/people/kukuk/pam/pam_unix2/pam_unix2-2.6.tar.bz2 \
+	pam_xauth-hurd_no_setfsuid.patch other pam_unix-archhurd.sum.patch)
+
+options=('!libtool' '!emptydirs')
+
+build() {
+  cd $srcdir/Linux-PAM-$pkgver
+ 
+  patch ./modules/pam_xauth/pam_xauth.c < \
+	$srcdir/pam_xauth-hurd_no_setfsuid.patch || return 1
+
+  ./configure --prefix= --sysconfdir=/etc DESTDIR=$pkgdir \
+	--libdir=/lib --includedir=/include/security
+
+  make || return 1
+  make INSTALL=/bin/install DESTDIR=$pkgdir install || return 1
+
+  install -D -m644 ../other $pkgdir/etc/pam.d/other
+
+  # build pam_unix2 module
+  # source ftp://ftp.suse.com/pub/people/kukuk/pam/pam_unix2
+  cd $srcdir/pam_unix2-2.6
+  patch -p2 < $srcdir/pam_unix-archhurd.sum.patch || return 1
+  ./configure --prefix=
+  make || return 1 
+  make DESTDIR=$pkgdir install || return 1
+  # add the realtime permissions for audio users
+  sed -i 's|# End of file||' $pkgdir/etc/security/limits.conf
+  cat >>$pkgdir/etc/security/limits.conf <<_EOT
+*               -       rtprio          0
+*               -       nice            0
+@audio          -       rtprio          65
+@audio          -       nice           -10
+@audio          -       memlock         40000
+_EOT
+  # fix some missing symlinks from old pam for compatibility
+  cd $pkgdir/lib/security
+  ln -s pam_unix.so pam_unix_acct.so
+  ln -s pam_unix.so pam_unix_auth.so
+  ln -s pam_unix.so pam_unix_passwd.so
+  ln -s pam_unix.so pam_unix_session.so
+  # set unix_chkpwd uid
+  chmod +s $pkgdir/sbin/unix_chkpwd
+}
+md5sums=('9b3d952b173d5b9836cbc7e8de108bee'
+         'e2788389a6c59224110a45fcff30e02b'
+         'a95043471afabe8a182cac539c7f2aa7'
+         '6e6c8719e5989d976a14610f340bd33a'
+         'a6c61e467da5ceac9425645e87e9ead1')

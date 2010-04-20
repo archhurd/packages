@@ -1,0 +1,112 @@
+--- pam_xauth.c.orig	2010-04-16 16:44:02.000000000 +0000
++++ pam_xauth.c	2010-04-16 18:29:27.000000000 +0000
+@@ -35,7 +35,9 @@
+ 
+ #include "config.h"
+ #include <sys/types.h>
++#ifdef HAVE_SYS_FSUID_H
+ #include <sys/fsuid.h>
++#endif /* HAVE_SYS_FSUID_H */
+ #include <sys/wait.h>
+ #include <errno.h>
+ #include <fnmatch.h>
+@@ -218,6 +220,9 @@ check_acl(pam_handle_t *pamh,
+ 	FILE *fp;
+ 	int i;
+ 	uid_t euid;
++#ifndef HAVE_SYS_FSUID_H
++	uid_t uid;
++#endif
+ 	/* Check this user's <sense> file. */
+ 	pwd = pam_modutil_getpwnam(pamh, this_user);
+ 	if (pwd == NULL) {
+@@ -234,9 +239,35 @@ check_acl(pam_handle_t *pamh,
+ 		return PAM_SESSION_ERR;
+ 	}
+ 	euid = geteuid();
++#ifdef HAVE_SYS_FSUID_H
+ 	setfsuid(pwd->pw_uid);
++#else
++	uid = getuid();
++	if (uid == pwd->pw_uid)
++		setreuid(euid, uid);
++	else {
++		setreuid(0, -1);
++		if (setreuid(-1, uid) == -1) {
++			setreuid(-1, 0);
++			setreuid(0, -1);
++			if (setreuid(-1, pwd->pw_uid))
++				return PAM_CRED_INSUFFICIENT;
++
++		}
++	}
++#endif 
+ 	fp = fopen(path, "r");
++#ifdef HAVE_SYS_FSUID_H
+ 	setfsuid(euid);
++#else
++	if (uid == pwd->pw_uid)
++		setreuid(uid, euid);
++	else {
++		if (setreuid(-1, 0) != -1)
++			setreuid(uid, -1);
++		setreuid(-1, euid);
++	}
++#endif
+ 	if (fp != NULL) {
+ 		char buf[LINE_MAX], *tmp;
+ 		/* Scan the file for a list of specs of users to "trust". */
+@@ -306,6 +337,9 @@ pam_sm_open_session (pam_handle_t *pamh,
+ 	int fd, i, debug = 0;
+ 	int retval = PAM_SUCCESS;
+ 	uid_t systemuser = 499, targetuser = 0, euid;
++#ifdef HAVE_SYS_FSUID_H
++	uid_t uid;
++#endif
+ 
+ 	/* Parse arguments.  We don't understand many, so no sense in breaking
+ 	 * this into a separate function. */
+@@ -554,8 +588,24 @@ pam_sm_open_session (pam_handle_t *pamh,
+ 
+ 		/* Generate a new file to hold the data. */
+ 		euid = geteuid();
++#ifdef HAVE_SYS_FSUID_H
+ 		setfsuid(tpwd->pw_uid);
+-		
++#else
++		uid_t uid;
++		uid = getuid();
++		if (uid == tpwd->pw_uid)
++			setreuid(euid, uid);
++		else {
++			setreuid(0, -1);
++			if (setreuid(-1, uid) == -1) {
++				setreuid(-1, 0);
++				setreuid(0, -1);
++				if (setreuid(-1, tpwd->pw_uid))
++					return PAM_CRED_INSUFFICIENT;
++			}
++		}
++#endif
++
+ #ifdef WITH_SELINUX
+ 		if (is_selinux_enabled() > 0) {
+ 			struct selabel_handle *ctx = selabel_open(SELABEL_CTX_FILE, NULL, 0);
+@@ -584,7 +634,17 @@ pam_sm_open_session (pam_handle_t *pamh,
+ 		save_errno = errno;
+ #endif
+ 
++#ifdef HAVE_SYS_FSUID_H
+ 		setfsuid(euid);
++#else
++		if (uid == tpwd->pw_uid)
++			setreuid(uid, euid);
++		else {
++			if (setreuid(-1, 0) == -1)
++				setreuid(uid, -1);
++			setreuid(-1, euid);
++		}
++#endif
+ 		if (fd == -1) {
+ 			errno = save_errno;
+ 			pam_syslog(pamh, LOG_ERR,

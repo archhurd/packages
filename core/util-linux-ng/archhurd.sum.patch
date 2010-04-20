@@ -1,0 +1,81 @@
+diff -rup old/util-linux-ng-2.17.2/lib/fsprobe.c new/util-linux-ng-2.17.2/lib/fsprobe.c
+--- old/util-linux-ng-2.17.2/lib/fsprobe.c	2010-03-22 09:05:42.000000000 +0100
++++ new/util-linux-ng-2.17.2/lib/fsprobe.c	2010-04-19 08:55:50.241659510 +0200
+@@ -31,8 +31,12 @@ open_device(const char *devname)
+ 		int fd = open(devname, O_RDONLY);
+ 		if (fd >= 0)
+ 			return fd;
++#ifdef ENOMEDIUM
+ 		if (errno != ENOMEDIUM)
+ 			break;
++#else
++        break;
++#endif
+ 		if (retries >= CRDOM_NOMEDIUM_RETRIES)
+ 			break;
+ 		++retries;
+diff -rup old/util-linux-ng-2.17.2/lib/ismounted.c new/util-linux-ng-2.17.2/lib/ismounted.c
+--- old/util-linux-ng-2.17.2/lib/ismounted.c	2010-03-18 23:11:23.000000000 +0100
++++ new/util-linux-ng-2.17.2/lib/ismounted.c	2010-04-19 08:56:23.894964627 +0200
+@@ -20,6 +20,8 @@
+ #include "pathnames.h"
+ #include "ismounted.h"
+ 
++#define PATH_MAX 4096
++
+ #ifdef HAVE_MNTENT_H
+ /*
+  * Helper function which checks a file in /etc/mtab format to see if a
+diff -rup old/util-linux-ng-2.17.2/misc-utils/write.c new/util-linux-ng-2.17.2/misc-utils/write.c
+--- old/util-linux-ng-2.17.2/misc-utils/write.c	2010-02-04 12:53:56.000000000 +0100
++++ new/util-linux-ng-2.17.2/misc-utils/write.c	2010-04-19 10:53:21.386682942 +0200
+@@ -63,6 +63,9 @@
+ #include "pathnames.h"
+ #include "carefulputc.h"
+ #include "nls.h"
++
++#define MAXPATHLEN 1024
++#define MAXHOSTNAMELEN 1024
+  
+ void search_utmp(char *, char *, char *, uid_t);
+ void do_write(char *, char *, uid_t);
+diff -rup old/util-linux-ng-2.17.2/shlibs/blkid/src/topology/evms.c new/util-linux-ng-2.17.2/shlibs/blkid/src/topology/evms.c
+--- old/util-linux-ng-2.17.2/shlibs/blkid/src/topology/evms.c	2010-03-18 23:11:23.000000000 +0100
++++ new/util-linux-ng-2.17.2/shlibs/blkid/src/topology/evms.c	2010-04-19 10:13:28.063589306 +0200
+@@ -50,8 +50,10 @@ static int probe_evms_tp(blkid_probe pr,
+ 
+ 	memset(&evms, 0, sizeof(evms));
+ 
++#ifdef _IOT_evms_strip_info
+ 	if (ioctl(pr->fd, EVMS_GET_STRIPE_INFO, &evms))
+ 		goto nothing;
++#endif
+ 
+ 	blkid_topology_set_minimum_io_size(pr, evms.size << 9);
+ 	blkid_topology_set_optimal_io_size(pr, (evms.size * evms.width) << 9);
+diff -rup old/util-linux-ng-2.17.2/shlibs/blkid/src/topology/md.c new/util-linux-ng-2.17.2/shlibs/blkid/src/topology/md.c
+--- old/util-linux-ng-2.17.2/shlibs/blkid/src/topology/md.c	2010-03-18 23:11:23.000000000 +0100
++++ new/util-linux-ng-2.17.2/shlibs/blkid/src/topology/md.c	2010-04-19 10:08:56.361116910 +0200
+@@ -101,8 +101,10 @@ static int probe_md_tp(blkid_probe pr, c
+ 
+ 	memset(&md, 0, sizeof(md));
+ 
++#ifdef _IOT_md_array_info
+ 	if (ioctl(fd, GET_ARRAY_INFO, &md))
+ 		goto nothing;
++#endif
+ 
+ 	if (fd != pr->fd)
+ 		close(fd);
+diff -rup old/util-linux-ng-2.17.2/sys-utils/rdev.c new/util-linux-ng-2.17.2/sys-utils/rdev.c
+--- old/util-linux-ng-2.17.2/sys-utils/rdev.c	2010-02-04 12:53:59.000000000 +0100
++++ new/util-linux-ng-2.17.2/sys-utils/rdev.c	2010-04-19 10:58:18.374152649 +0200
+@@ -69,6 +69,8 @@ Wed Jun 22 21:12:29 1994: Applied patche
+ 
+ #include "nls.h"
+ 
++#define PATH_MAX 4096
++
+ /* rdev.c  -  query/set root device. */
+ 
+ static void

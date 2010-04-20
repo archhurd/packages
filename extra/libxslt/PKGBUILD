@@ -1,0 +1,24 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=libxslt
+pkgver=1.1.26
+pkgrel=1
+pkgdesc="XML stylesheet transformation library"
+arch=('i686')
+url="http://xmlsoft.org/XSLT/"
+license=('custom')
+depends=('libxml2' 'libgcrypt')
+makedepends=('python')
+options=('!libtool')
+source=(ftp://xmlsoft.org/libxslt/${pkgname}-${pkgver}.tar.gz)
+md5sums=('e61d0364a30146aaa3001296f853b2b9')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix= || return 1
+  make || return 1
+  make DESTDIR="${pkgdir}" install || return 1
+  install -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+}
+

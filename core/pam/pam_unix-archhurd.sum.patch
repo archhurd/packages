@@ -1,0 +1,61 @@
+diff -rup old/pam_unix2-2.6/src/public.h new/pam_unix2-2.6/src/public.h
+--- old/pam_unix2-2.6/src/public.h	2006-11-29 12:11:16.000000000 +0100
++++ new/pam_unix2-2.6/src/public.h	2010-04-16 18:02:14.826836412 +0200
+@@ -91,11 +91,11 @@ extern int get_options (pam_handle_t *pa
+ 
+ /* Restore all attributes */
+ extern int copy_xattr (pam_handle_t *pamh, const char *from, const char *to);
+-
++/**
+ #if !defined (HAVE_PAM_SYSLOG)
+ extern void pam_syslog (pam_handle_t *pamh, int err, const char *format,...);
+ #endif
+-
++**/
+ #ifdef WITH_SELINUX
+ extern int selinux_check_access (const char *__chuser,
+                                  unsigned int __access);
+diff -rup old/pam_unix2-2.6/src/read-files.c new/pam_unix2-2.6/src/read-files.c
+--- old/pam_unix2-2.6/src/read-files.c	2006-01-12 18:16:52.000000000 +0100
++++ new/pam_unix2-2.6/src/read-files.c	2010-04-16 18:02:14.822656597 +0200
+@@ -35,6 +35,8 @@
+ 
+ #include "read-files.h"
+ 
++#include <cthreads.h>
++
+ static enum { none, getent, getby }last_use;
+ 
+ #define ISCOLON(c) ((c) == ':')
+diff -rup old/pam_unix2-2.6/src/support.c new/pam_unix2-2.6/src/support.c
+--- old/pam_unix2-2.6/src/support.c	2006-11-06 13:59:12.000000000 +0100
++++ new/pam_unix2-2.6/src/support.c	2010-04-16 18:02:14.822656597 +0200
+@@ -50,6 +50,8 @@
+ 
+ #include "public.h"
+ 
++#define PATH_MAX 4096
++
+ int
+ c2n (char c)
+ {
+@@ -280,9 +282,9 @@ __call_other_module(pam_handle_t * pamh,
+ 
+   return retval;
+ }
+-
++/**
+ #if !defined(HAVE_PAM_SYSLOG)
+-/* syslogging function for errors and other information */
++ //syslogging function for errors and other information 
+ void
+ pam_syslog (pam_handle_t *pamh __attribute__ ((unused)), int err,
+ 	    const char *format,...)
+@@ -298,6 +300,7 @@ pam_syslog (pam_handle_t *pamh __attribu
+   va_end (args);
+ }
+ #endif
++**/
+ 
+ /* static module data */
+ #ifdef PAM_STATIC
