@@ -1,0 +1,15 @@
+post_install() {
+  update-mime-database share/mime > /dev/null 2>&1
+}
+
+post_upgrade() {
+  post_install
+}
+
+post_remove() {
+  if [ -d share/mime ]; then
+    rm -f share/mime/{globs,globs2,icons,treemagic,generic-icons,types,magic,XMLnamespaces,subclasses,aliases,mime.cache}
+    rm -rf share/mime/{application,audio,image,inode,message,model,multipart,text,video,x-content,x-epoc}
+    rmdir --ignore-fail-on-non-empty share/mime
+  fi
+}
