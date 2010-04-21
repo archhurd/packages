@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=nano
-pkgver=2.2.3
+pkgver=2.2.4
 pkgrel=1
 pkgdesc="Pico editor clone with enhancements"
 arch=('i686')
@@ -12,7 +12,6 @@ depends=('glibc' 'sh' 'ncurses')
 source=(http://www.nano-editor.org/dist/v2.2/nano-${pkgver}.tar.gz)
 backup=(etc/nanorc)
 install=nano.install
-md5sums=('91918a484f54f94fedaebe00dc393a50')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}

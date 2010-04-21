@@ -1,83 +1,154 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
-pkgname=vim
+pkgbase=('vim')
+pkgname=('vim' 'vim-runtime')
 _srcver=7.2
-_patchlevel=385
+_patchlevel=411
 pkgver=${_srcver}.${_patchlevel}
 pkgrel=1
-pkgdesc='Vi Improved, a highly configurable, improved version of the vi text editor'
 arch=('i686')
 license=('custom:vim')
 url="http://www.vim.org"
-depends=('coreutils' 'perl' 'acl')
-makedepends=('wget' 'sed' 'grep' 'gettext' 'curl' 'rsync')
-backup=(etc/vimrc)
-install=${pkgname}.install
-# we need the extra-stuff to get all patches applied smoothly
+makedepends=('coreutils' 'perl' 'python' 'wget' 'sed' 'grep' \
+	     'gettext' 'curl' 'rsync' 'pkgconfig')
 source=(ftp://ftp.vim.org/pub/vim/unix/vim-${_srcver}.tar.bz2 \
         ftp://ftp.vim.org/pub/vim/extra/vim-${_srcver}-extra.tar.gz \
         ftp://ftp.vim.org/pub/vim/extra/vim-${_srcver}-lang.tar.gz \
-        fetch_patches.sh fetch_runtime.sh vimrc archhurd.vim)
-md5sums=('f0901284b338e448bfd79ccca0041254' '35e04482f07c57221c9a751aaa3b8dac' \
-         'd8884786979e0e520c112faf2e176f05' '9c8f6b302fc3f343962686b8cf4a0350' \
-         '45c1c3c6aff7de0d8fc2a9d8cd5cec7d' 'e57777374891063b9ca48a1fe392ac05' \
+        vimrc archhurd.vim )
+
+_versiondir="vim$(echo ${_srcver} | sed "s/\.//")"
+
+##### Build #####
+
+_get_patches() {
+	curl ftp://ftp.vim.org/pub/vim/patches/${_srcver}/MD5SUMS | sed -e '/.gz$/d' > MD5SUMS
+	_currpatch=$(cat MD5SUMS | wc -l)
+
+	rsync -avzcP --exclude '*.gz' "ftp.nluug.nl::Vim/patches/${_srcver}/${_srcver}.*" .
+	md5sum -c MD5SUMS > /dev/null || return 1
+
+	> vim.full.patch.log
+	for _file in $(cat MD5SUMS | awk '{ print $2 }'); do
+		patch -d ${_versiondir} -p0 < ${_file} >> vim.full.patch.log || return 1 
+	done
+
+	if [ ${_patchlevel} -lt ${_currpatch} ]; then
+		echo ''
+		echo -e '\t\tWARNING!'
+		echo 'You are not building the latest available version! A newer patchlevel'
+		echo 'seems to be available. Please edit the PKGBUILD and add the latest'
+		echo "${_currpatch} as pkgrel number!"
+		echo ''
+		sleep 10
+	fi
+	return 0
+}
+
+_get_runtime() {
+	# Get a copy of the runtime from the archive if we don't already have one
+	if [ ! -d runtime ]; then
+		cp -r "${_versiondir}/runtime" . || return 1
+	fi
+
+	# Update our runtime to the newest version
+	# --delete assures we won't overwrite any non-runtime files
+	# with old, cached versions in the next step
+	rsync -avzcP --delete --exclude 'dos' --exclude 'spell' \
+	    'ftp.nluug.nl::Vim/runtime/' "${srcdir}/runtime" || return 1
+
+	# Install our new runtime into the source
+	cp -r runtime "${_versiondir}"
+}
+
+build() {
+	cd ${srcdir}
+
+	# pull in patches from vim.org
+	_get_patches || return 1
+
+	# pull in runtime from vim.org
+	_get_runtime || return 1
+
+	# define the place for the global (g)vimrc file (set to /etc/vimrc)
+	sed -i 's|^.*\(#define SYS_.*VIMRC_FILE.*"\) .*$|\1|' \
+	    "${_versiondir}/src/feature.h" || return 1
+	sed -i 's|^.*\(#define VIMRC_FILE.*"\) .*$|\1|' \
+	    "${_versiondir}/src/feature.h" || return 1
+
+	# build party
+	rm -rf vim-build gvim-build
+	mv ${_versiondir} vim-build
+	cp -r vim-build gvim-build
+
+	cd ${srcdir}/vim-build
+
+	./configure --prefix= --localstatedir=/var/lib/vim \
+	    --mandir=/share/man --with-compiledby=ArchHurd \
+	    --with-features=big --enable-acl --with-x=no \
+	    --disable-gui --enable-multibyte --enable-cscope \
+	    --disable-netbeans --enable-perlinterp --disable-pythoninterp 
+
+	make || return 1
+}
+
+##### Packaging #####
+
+package_vim() {
+	pkgdesc='Vi Improved, a highly configurable, improved version of the vi text editor'
+	depends=("vim-runtime=${pkgver}" 'coreutils' 'perl')
+	conflicts=('gvim')
+
+	cd ${srcdir}/vim-build
+	make -j1 VIMRCLOC=/etc DESTDIR=${pkgdir} install || return 1
+
+	# provided by (n)vi in core
+	rm ${pkgdir}/bin/{ex,view}
+
+	# delete some manpages
+	find ${pkgdir}/share/man -type d -name 'man1' 2>/dev/null | \
+	    while read _mandir; do
+		cd ${_mandir}
+		rm -f ex.1 view.1 # provided by (n)vi
+		rm -f evim.1      # this does not make sense if we have no GUI
+	done
+
+  mv ${pkgdir}/share/vim ${srcdir}/runtime-install
+
+	# license
+	install -dm755 ${pkgdir}/share/licenses/vim
+	ln -s /share/vim/${_versiondir}/doc/uganda.txt \
+	    ${pkgdir}/share/licenses/vim/license.txt
+}
+
+package_vim-runtime() {
+	pkgdesc='Runtime for vim and gvim'
+	backup=(etc/vimrc)
+
+	# Install the runtime split from gvim
+	install -dm755 ${pkgdir}/share
+	mv ${srcdir}/runtime-install ${pkgdir}/share/vim
+
+	# Don't forget logtalk.dict
+	install -Dm644 ${srcdir}/gvim-build/runtime/ftplugin/logtalk.dict \
+	    ${pkgdir}/share/vim/${_versiondir}/ftplugin/logtalk.dict || return 1
+
+	# fix FS#17216
+	sed -i 's|messages,/var|messages,/var/log/messages.log,/var|' \
+	    ${pkgdir}/share/vim/vim72/filetype.vim
+
+	# rc files
+	install -Dm644 ${srcdir}/vimrc ${pkgdir}/etc/vimrc
+	install -Dm644 ${srcdir}/archhurd.vim \
+	    ${pkgdir}/share/vim/vimfiles/archhurd.vim
+
+	# license
+	install -dm755 ${pkgdir}/share/licenses/vim-runtime
+	ln -s /share/vim/${_versiondir}/doc/uganda.txt \
+	    ${pkgdir}/share/licenses/vim-runtime/license.txt
+}
+md5sums=('f0901284b338e448bfd79ccca0041254'
+         '35e04482f07c57221c9a751aaa3b8dac'
+         'd8884786979e0e520c112faf2e176f05'
+         'f49254c3823600bd1f55d5093ffaf6b6'
          '10353a61aadc3f276692d0e17db1478e')
 
-build()
-{
-  _versiondir="vim"$(echo ${_srcver} | sed "s/\.//")
-  # pull in patches from vim.org (or the src cache alternatively)
-  . ${srcdir}/fetch_patches.sh
-  get_patches 
-
-  cd ${srcdir}/${_versiondir}
-  sed -i 's|^.*\(#define SYS_.*VIMRC_FILE.*"\) .*$|\1|' src/feature.h
-  sed -i 's|^.*\(#define VIMRC_FILE.*"\) .*$|\1|' src/feature.h
-  # build party
-  ./configure --prefix= --localstatedir=/var/lib/vim --mandir=/share/man \
-    --enable-acl --with-compiledby=ArchHurd --with-features=big \
-    --with-x=no --with-tlib=ncursesw --disable-gui \
-    --enable-multibyte --enable-cscope \
-    --enable-perlinterp 
-    #--with-global-runtime=/share/vim --with-vim-name=vim \
-  make || return 1
-}
-
-package()
-{
-  . ${srcdir}/fetch_runtime.sh
-  _versiondir="vim"$(echo ${_srcver} | sed "s/\.//")
-  cd ${srcdir}/${_versiondir}
-
-  make  VIMRCLOC=/etc DESTDIR=${pkgdir} install
-  cd ${pkgdir}/bin
-  #rm ex view          # provided by (n)vi in core
-  mv vim vim-normal   # we create a vim-symlink on post_install
-  ln -sf vim-normal vim
-  # ... make g* related symlinks point directly to the actual binary
-  ln -sf vim-normal rview
-  ln -sf vim-normal rvim
-  ln -sf vim-normal vimdiff
-
-  # delete some manpages
-  #find ${pkgdir}/share/man -type d -name 'man1' 2> /dev/null | \
-  # while read mandir; do
-  #  cd ${mandir}
-  #  rm -f ex.1 view.1       # provided by (n)vi
-  # rm -f evim.1            # this does not make sense in the console version
-  #done
-
-  # fix FS#17216
-  sed -i 's|messages,/var|messages,/var/log/messages.log,/var|' \
-    ${pkgdir}/share/vim/vim72/filetype.vim
-
-  _runtimedir="${pkgdir}/share/vim/${_versiondir}/"
-  update_runtime
-  cd ${srcdir}/${_versiondir}
-  install -Dm644 ${srcdir}/vimrc  ${pkgdir}/etc/vimrc
-  install -Dm644 ${srcdir}/archhurd.vim  \
-                 ${pkgdir}/share/vim/vimfiles/archhurd.vim
-  install -dm755 ${pkgdir}/share/licenses/vim
-  cd ${pkgdir}/share/licenses/vim
-  ln -s ../../vim/${_versiondir}/doc/uganda.txt license.txt
-}

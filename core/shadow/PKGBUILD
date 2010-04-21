@@ -2,7 +2,7 @@
 
 pkgname=shadow
 pkgver=4.1.4.2
-pkgrel=1
+pkgrel=2
 pkgdesc="Shadow password file utilities"
 arch=('i686')
 url='http://pkg-shadow.alioth.debian.org/'
@@ -80,7 +80,7 @@ package() {
   find $pkgdir/share/man -name 'su.1' -exec rm -v {} \;
 
   # Remove login and group - using login and group from hurd
-  mv $pkgidr/bin/login $pkgdir/bin/alogin
+  mv $pkgdir/bin/login $pkgdir/bin/alogin
   rm -v $pkgdir/bin/groups
   rm -v $pkgdir/share/man/man1/groups.1
 }

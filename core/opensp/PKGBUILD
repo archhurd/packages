@@ -10,12 +10,11 @@ license=('BSD')
 depends=('gcc-libs')
 makedepends=('xmlto' 'docbook-xsl')
 options=('!libtool')
-source=(http://downloads.sourceforge.net/project/openjade/opensp/1.5.2/OpenSP-1.5.2.tar.gz \
-        opensp-MAXPATHLEN.patch)
+source=(http://sourceforge.net/projects/openjade/files/opensp/1.5.2/OpenSP-1.5.2.tar.gz/download)
+md5sums=('670b223c5d12cee40c9137be86b6c39b')
 
 build() {
   cd $srcdir/OpenSP-$pkgver
-  patch -p1 < ../opensp-MAXPATHLEN.patch
   ./configure --prefix= --mandir=/share/man \
      --disable-nls \
      --enable-http \
@@ -31,5 +30,3 @@ package() {
   install -D -m644 COPYING $pkgdir/share/licenses/$pkgname/COPYING
 }
 
-md5sums=('670b223c5d12cee40c9137be86b6c39b'
-         'f35934d3c5bd4935bdf21edb1e6bf47d')

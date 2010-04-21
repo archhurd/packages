@@ -1,0 +1,12 @@
+diff -upr OpenSP-1.5.2.orig/sx/XmlOutputEventHandler.cxx OpenSP-1.5.2/sx/XmlOutputEventHandler.cxx
+--- OpenSP-1.5.2.orig/sx/XmlOutputEventHandler.cxx	2005-08-26 22:08:19.000000000 +0200
++++ OpenSP-1.5.2/sx/XmlOutputEventHandler.cxx	2010-04-21 21:10:32.091556150 +0200
+@@ -44,6 +44,8 @@ namespace SP_NAMESPACE {
+ #define EXT_ENT_FILE "extEntities.dtf"
+ #define INT_ENT_FILE "intEntities.dtf"
+ 
++#define MAXPATHLEN 1024
++
+ inline
+ void operator+=(StringC &str, const char *s)
+ {
