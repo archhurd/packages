@@ -1,0 +1,23 @@
+#Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=fontcacheproto
+pkgver=0.1.3
+pkgrel=1
+pkgdesc="X11 font cache extension wire protocol"
+arch=('any')
+url="http://xorg.freedesktop.org/"
+license=('BSD')
+source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('a8a50e5e995bfacb0359575faf7f6906')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  ./configure --prefix= || return 1
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install || return 1
+  install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
+}

@@ -1,0 +1,27 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+pkgname=libxau
+pkgver=1.0.5
+pkgrel=1
+pkgdesc="X11 authorisation library"
+arch=('i686')
+url="http://xorg.freedesktop.org/"
+depends=('glibc')
+makedepends=('pkgconfig' 'xproto>=7.0.15')
+license=('custom')
+options=('!libtool')
+source=(${url}/releases/individual/lib/libXau-${pkgver}.tar.bz2)
+sha1sums=('b1c68843edf7e80ce952f7ee0541448f41bac202')
+
+build() {
+  cd "${srcdir}/libXau-${pkgver}"
+  ./configure --prefix= --sysconfdir=/etc || return 1
+  make || return 1
+}
+
+package() {
+  cd "${srcdir}/libXau-${pkgver}"
+  make DESTDIR="${pkgdir}" install || return 1
+
+  install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+}

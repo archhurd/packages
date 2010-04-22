@@ -1,0 +1,28 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=libice
+pkgver=1.0.6
+pkgrel=1
+pkgdesc="X11 Inter-Client Exchange library"
+arch=('i686')
+url="http://xorg.freedesktop.org/"
+depends=('glibc' 'xproto')
+makedepends=('pkgconfig' 'xtrans')
+options=('!libtool')
+source=(${url}/releases/individual/lib/libICE-${pkgver}.tar.bz2)
+license=('custom')
+sha1sums=('ac1f702ea580bd496610266b13434858b62df9e1')
+
+build() {
+  cd "${srcdir}/libICE-${pkgver}"
+  ./configure --prefix= --sysconfdir=/etc || return 1
+  make || return 1
+}
+
+package() {
+  cd "${srcdir}/libICE-${pkgver}"
+  make DESTDIR="${pkgdir}" install || return 1
+
+  install -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+}
