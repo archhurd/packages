@@ -1,7 +1,7 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=zlib
-pkgver=1.2.4
+pkgver=1.2.5
 pkgrel=1
 pkgdesc="Compression library implementing the deflate compression method found in gzip and PKZIP"
 arch=(i686)
@@ -10,7 +10,7 @@ license=('custom')
 groups=('base')
 depends=('glibc')
 source=(http://www.zlib.net/$pkgname-$pkgver.tar.gz)
-md5sums=('47f6ed51b3c83a8534f9228531effa18')
+md5sums=('c735eab2d659a96e5a594c9e8541ad63')
 
 
 build() {

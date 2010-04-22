@@ -1,9 +1,9 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
-# Note: For now there is no way around the ridiculous amount of patching :(
+# Note: For now there is now way around the ridiculous amount of patching :(
 
 pkgname=glibc
 pkgver=2.11.1
-pkgrel=1
+pkgrel=2
 pkgdesc="GNU C Library"
 arch=(i686)
 url="http://www.gnu.org/software/libc"
@@ -11,7 +11,6 @@ license=('GPL','LGPL')
 groups=('base')
 depends=('hurd')
 makedepends=('hurd' 'gcc>=4.3')
-install=glibc.install
 
 source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2
         local-gcc-4.1-init-first.diff
@@ -58,7 +57,10 @@ source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2
         local-dl-dynamic-weak.diff
         local-thread-cancel.diff
         local-pthread_types.diff
-        local-unlockpt-chroot.diff) 
+        local-unlockpt-chroot.diff
+        glibc-__i686.patch
+        locale.gen.txt
+        locale-gen) 
 
 md5sums=('6856d5d8b1239556687f0d1217f3f266'
          'be6eb77fc81ed3116392b0c194bdf0fe'
@@ -105,7 +107,11 @@ md5sums=('6856d5d8b1239556687f0d1217f3f266'
          '120995353c98d85f62f0c29e3edba797'
          'ffd0e44875970ae2b17824c551a982bd'
          '293e19249d7b20a2d2f221fd93b7d231'
-         '0de47307f7d8dfccab740048875f435f')
+         '0de47307f7d8dfccab740048875f435f'
+         '40cd342e21f71f5e49e32622b25acc52'
+         '07ac979b6ab5eeb778d55f041529d623'
+         '476e9113489f93b348b21e144b6a8fcf')
+
 
 
 build() {
@@ -160,6 +166,11 @@ build() {
   patch -Np1 < ${srcdir}/local-thread-cancel.diff
   patch -Np1 < ${srcdir}/local-pthread_types.diff
   patch -Np1 < ${srcdir}/local-unlockpt-chroot.diff
+
+  # http://sources.redhat.com/bugzilla/show_bug.cgi?id=411
+  # http://sourceware.org/ml/libc-alpha/2009-07/msg00072.html
+  patch -Np1 < ${srcdir}/glibc-__i686.patch
+  
   msg "Done Patching."
 
 
@@ -178,7 +189,18 @@ build() {
 package() {
   cd "$srcdir/$pkgname-build"
   make install_root="$pkgdir/" install || return 1
-  
+
+  install -dm755 ${pkgdir}/lib/locale
+  install -m755 ${srcdir}/locale-gen ${pkgdir}/sbin
+
+  # create /etc/locale.gen
+  install -m644 ${srcdir}/locale.gen.txt ${pkgdir}/etc/locale.gen
+  sed -i "s|/| |g" ${srcdir}/$pkgname-$pkgver/localedata/SUPPORTED
+  sed -i 's|\\| |g' ${srcdir}/$pkgname-$pkgver/localedata/SUPPORTED
+  sed -i "s|SUPPORTED-LOCALES=||" ${srcdir}/$pkgname-$pkgver/localedata/SUPPORTED
+  cat ${srcdir}/glibc/localedata/SUPPORTED >> ${pkgdir}/etc/locale.gen
+  sed -i "s|^|#|g" ${pkgdir}/etc/locale.gen
+    
   cd $pkgdir/lib
   cp -r ../libexec/* .
   rm -rf ../libexec
