@@ -1,0 +1,25 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=libmpc
+pkgver=0.8.1
+pkgrel=1
+pkgdesc="Library for the arithmetic of complex numbers with arbitrarily high precision"
+arch=('i686')
+url="http://www.multiprecision.org"
+license=('LGPL')
+depends=('mpfr' 'sh')
+options=('!libtool')
+install=libmpc.install
+source=(http://www.multiprecision.org/mpc/download/mpc-${pkgver/_/-}.tar.gz)
+md5sums=('5b34aa804d514cc295414a963aedb6bf')
+
+build() {
+  cd $srcdir/mpc-$pkgver
+  ./configure --prefix=
+  make || return 1
+  make DESTDIR=$pkgdir/ install
+  
+  make check
+  
+  mv -f $pkgdir/share/info/{mpc,libmpc}.info
+}
