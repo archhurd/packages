@@ -1,18 +1,19 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
-
-pkgname=videoproto
-pkgver=2.3.0
+pkgname=pixman
+pkgver=0.18.0
 pkgrel=1
-pkgdesc="X11 Video extension wire protocol"
-arch=(any)
-url="http://xorg.freedesktop.org/"
+pkgdesc="Pixman library"
+arch=('i686')
+url="http://xorg.freedesktop.org"
 license=('custom')
-source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('4aef2b438d45b3ab75e640996ce1267d3468f48c')
+depends=('glibc')
+options=('!libtool')
+source=(http://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
+sha1sums=('0ff0944b3335f156a94949842b429229e5ae1db4')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
+  ./configure --prefix= --disable-static || return 1
   make || return 1
 }
 
