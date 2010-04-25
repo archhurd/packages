@@ -1,27 +1,27 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
-pkgname=libxau
-pkgver=1.0.5
+
+pkgname=libpciaccess
+pkgver=0.10.9
 pkgrel=1
-pkgdesc="X11 authorisation library"
+pkgdesc="X11 PCI access library"
 arch=('i686')
+license=('custom')
 url="http://xorg.freedesktop.org/"
 depends=('glibc')
-makedepends=('xproto')
-license=('custom')
+makedepends=('pkgconfig')
 options=('!libtool')
-source=(${url}/releases/individual/lib/libXau-${pkgver}.tar.bz2)
-sha1sums=('b1c68843edf7e80ce952f7ee0541448f41bac202')
+source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('685cb20e7a6165bc010972f1183addbd')
 
 build() {
-  cd "${srcdir}/libXau-${pkgver}"
+  cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix= --sysconfdir=/etc || return 1
   make || return 1
 }
 
 package() {
-  cd "${srcdir}/libXau-${pkgver}"
+  cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install || return 1
-
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }

@@ -1,0 +1,88 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgbase="mesa"
+pkgname=('mesa' 'libgl')
+pkgver=7.8.1
+pkgrel=1
+arch=('i686')
+makedepends=('glproto' 'libxxf86vm' 'libxdamage' 'expat' 'libx11' 'libxt' 'gcc-libs' 'dri2proto' 'python')
+url="http://mesa3d.sourceforge.net"
+license=('custom')
+options=(!makeflags)
+source=(ftp://ftp.freedesktop.org/pub/mesa/${pkgver}/MesaLib-${pkgver}.tar.bz2
+        ftp://ftp.freedesktop.org/pub/mesa/${pkgver}/MesaDemos-${pkgver}.tar.bz2
+        ftp://ftp.archlinux.org/other/mesa/gl-manpages-1.0.1.tar.bz2
+        LICENSE hurd-ftbfs.diff mesa-os_time-hurd.patch)
+
+build() {
+  cd "${srcdir}/Mesa-${pkgver}"
+	patch -p1 < ../hurd-ftbfs.diff
+  patch -p1 < ../mesa-os_time-hurd.patch
+  ./configure --prefix= \
+    --disable-egl \
+    --disable-gallium-intel \
+    --enable-glx-tls \
+    --enable-xcb \
+    --disable-glut --disable-gallium || return 1
+  make || return 1
+
+  cd "${srcdir}/gl-manpages-1.0.1"
+  ./configure --prefix= || return 1
+  make || return 1
+}
+
+package_libgl() {
+  depends=('libxxf86vm' 'libxdamage' 'expat')
+  pkgdesc="Mesa 3-D graphics library and DRI software rasterizer"
+
+  cd "${srcdir}/Mesa-${pkgver}" || return 1
+  install -m755 -d "${pkgdir}/lib" || return 1
+  install -m755 -d "${pkgdir}/lib/xorg/modules/extensions"
+
+  bin/minstall lib/libGL.so* "${pkgdir}/lib/" || return 1
+
+  #install -m755 libdricore.so "${pkgdir}/lib/xorg/modules/dri/" || return 1
+  ln -s libglx.xorg "${pkgdir}/lib/xorg/modules/extensions/libglx.so" || return 1
+
+  install -m755 -d "${pkgdir}/share/licenses/libgl"
+  install -m755 "${srcdir}/LICENSE" "${pkgdir}/share/licenses/libgl/" || return 1
+}
+
+package_mesa() {
+  depends=('libgl' 'libx11' 'libxt' 'gcc-libs' 'dri2proto')
+  pkgdesc="Mesa 3-D graphics libraries and include files"
+
+  cd "${srcdir}/Mesa-${pkgver}" || return 1
+  make DESTDIR="${pkgdir}" install || return 1
+  install -m755 -d "${pkgdir}/bin"
+  install -m755 progs/xdemos/glx{gears,info} "${pkgdir}/bin/" || return 1
+
+  rm -f "${pkgdir}/lib/libGL.so"*
+  rm -rf "${pkgdir}/lib/xorg"
+  rm -f "${pkgdir}/include/GL/glew.h"
+  rm -f "${pkgdir}/include/GL/glxew.h"
+  rm -f "${pkgdir}/include/GL/wglew.h"
+
+  cd "${srcdir}/gl-manpages-1.0.1" || return 1
+  make DESTDIR="${pkgdir}" install || return 1
+
+  install -m755 -d "${pkgdir}/share/licenses/mesa"
+  install -m755 "${srcdir}/LICENSE" "${pkgdir}/share/licenses/mesa/" || return 1
+}
+
+package_intel-dri() {
+  depends=("libgl=${pkgver}")
+  pkgdesc="Mesa DRI drivers for Intel"
+
+  cd "${srcdir}/Mesa-${pkgver}/src/mesa/drivers/dri" || return 1
+  make -C i810 DESTDIR="${pkgdir}" install || return 1
+  make -C i915 DESTDIR="${pkgdir}" install || return 1
+  make -C i965 DESTDIR="${pkgdir}" install || return 1
+}
+
+md5sums=('25ec15f8e41fde6d206118cc786dbac4'
+         '9ef47f911869657c6bf2f43ebce86b61'
+         '6ae05158e678f4594343f32c2ca50515'
+         '5c65a0fe315dd347e09b1f2826a1df5a'
+         'd3871b08d80269ec79bd6d88115ebe45'
+         '743651f9dbd5fa68e3016122267c491b')

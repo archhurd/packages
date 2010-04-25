@@ -1,0 +1,28 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=libxv
+pkgver=1.0.5
+pkgrel=1
+pkgdesc="X11 Video extension library"
+arch=(i686)
+license=('custom')
+url="http://xorg.freedesktop.org/"
+depends=('libxext' 'videoproto')
+makedepends=()
+options=('!libtool')
+source=(${url}/releases/individual/lib/libXv-${pkgver}.tar.bz2)
+md5sums=('1d97798b1d8bbf8d9085e1b223a0738f')
+
+build() {
+  cd ${srcdir}/libXv-${pkgver}
+  ./configure --prefix= --disable-static 
+  make || return 1
+}
+
+package() {
+  cd ${startdir}/src/libXv-${pkgver}
+  make DESTDIR=${pkgdir} install || return 1
+
+  install -D -m644 ${srcdir}/libXv-${pkgver}/COPYING \
+                   ${pkgsir}/share/licenses/${pkgname}/COPYING
+}

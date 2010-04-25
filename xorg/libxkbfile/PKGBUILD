@@ -1,0 +1,27 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=libxkbfile
+pkgver=1.0.6
+pkgrel=1
+pkgdesc="X11 keyboard file manipulation library"
+arch=('i686')
+license=('custom')
+url="http://xorg.freedesktop.org/"
+depends=('libx11')
+options=('!libtool')
+source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('b01156e263eca8177e6b7f10441951c4')
+
+build() {
+  cd ${startdir}/src/${pkgname}-${pkgver}
+  ./configure --prefix= --sysconfdir=/etc --disable-static 
+  make || return 1
+}
+
+package() {
+  cd ${startdir}/src/${pkgname}-${pkgver}
+  make DESTDIR=${startdir}/pkg install || return 1
+
+  install -D -m644 ${startdir}/src/${pkgname}-${pkgver}/COPYING \
+                   ${startdir}/pkg/share/licenses/${pkgname}/COPYING
+}

@@ -1,0 +1,27 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=libxft
+pkgver=2.1.14
+pkgrel=1
+pkgdesc="FreeType-based font drawing library for X"
+arch=('i686' )
+license=('custom')
+url="http://xorg.freedesktop.org/"
+depends=('fontconfig' 'libxrender' 'sh')
+makedepends=()
+options=('!libtool')
+source=(${url}/releases/individual/lib/libXft-${pkgver}.tar.bz2)
+md5sums=('254e62a233491e0e1251636536163e20')
+
+build() {
+  cd ${srcdir}/libXft-${pkgver}
+  ./configure --prefix= --sysconfdir=/etc --disable-static || return 1
+  make || return 1
+}
+
+package() {
+  cd ${srcdir}/libXft-${pkgver}
+  make DESTDIR=${pkgdir} install || return 1
+  install -d -m755 ${pkgdir}/share/licenses/${pkgname}
+  install -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/ || return 1
+}

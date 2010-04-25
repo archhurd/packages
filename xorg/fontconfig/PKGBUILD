@@ -1,0 +1,39 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+pkgname=fontconfig
+pkgver=2.8.0
+pkgrel=1
+pkgdesc="A library for configuring and customizing font access"
+arch=('i686')
+url="http://www.fontconfig.org/release/"
+license=('custom')
+depends=('expat' 'freetype2')
+options=('!libtool')
+install=fontconfig.install
+source=(http://www.fontconfig.org/release/${pkgname}-${pkgver}.tar.gz
+        29-replace-bitmap-fonts.conf
+        30-urw-aliases.patch)
+md5sums=('77e15a92006ddc2adbb06f840d591c0e'
+         'f6b67e8cc79197ed6abd4701911e83da'
+         '51bc6cb633b50f3c28793361738aac5b')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -Np1 -i "${srcdir}/30-urw-aliases.patch" || return 1
+  # enable Position Independent Code for prelinking
+  export CFLAGS="${CFLAGS} -fPIC"
+  ./configure --prefix= --sysconfdir=/etc --localstatedir=/var || return 1
+  make || return 1
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  export CFLAGS="${CFLAGS} -fPIC"
+  make DESTDIR="${pkgdir}" install || return 1
+  install -m644 "${srcdir}/29-replace-bitmap-fonts.conf" \
+      "${pkgdir}/etc/fonts/conf.avail" || return 1
+  rm -f ${pkgdir}/etc/fonts/conf.d/*.conf
+
+  #Install license
+  install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+}
