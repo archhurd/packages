@@ -1,24 +1,25 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
-pkgname=videoproto
-pkgver=2.3.0
+pkgname=resourceproto
+pkgver=1.1.0
 pkgrel=1
-pkgdesc="X11 Video extension wire protocol"
+pkgdesc="X11 Resource extension wire protocol"
 arch=(any)
 url="http://xorg.freedesktop.org/"
 license=('custom')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('4aef2b438d45b3ab75e640996ce1267d3468f48c')
+sha1sums=('36b86840005c15e393c86d7075688d430ab2a11d')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
+  ./configure --prefix=
   make || return 1
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${pkgver}" 	
   make DESTDIR="${pkgdir}" install || return 1
+
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
