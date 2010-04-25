@@ -61,4 +61,5 @@ unset MANPATH
 
 #needed because python sucks at symlinks
 PYTHONHOME=/
+export PYTHONHOME
 

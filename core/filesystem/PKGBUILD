@@ -2,7 +2,7 @@
 
 pkgname=filesystem
 pkgver=2010.04
-pkgrel=3
+pkgrel=4
 pkgdesc="Base filesystem"
 arch=('any')
 license=('GPL')
@@ -20,7 +20,7 @@ md5sums=('a1afa5704722bcac4794de89385b599b'
          '5340b9287b71ffe9d4d99510bffe933f'
          '3303543320ec010f1695f23b708a3693'
          '40dac0de4c6b99c8ca97effbd7527c84'
-         '4d2dce004bc26fc04da7897f7dc4d71d')
+         'e51181c78339df07ccb4555ec6f3116d')
 
 
 build()
