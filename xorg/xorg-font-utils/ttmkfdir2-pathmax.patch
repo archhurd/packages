@@ -1,0 +1,11 @@
+--- ttmkfdir2/ttmkfdir.h	2010-04-26 16:20:26.020000000 +0000
++++ ttmkfdir2/ttmkfdir.h	2010-04-26 16:21:11.740000000 +0000
+@@ -2,6 +2,8 @@
+ #ifndef TTMKFDIR_H__
+ #define TTMKFDIR_H__
+ 
++#define PATH_MAX 1024
++
+ #include "util.h"
+ #include "commandline.h"
+ #include "directory.h"

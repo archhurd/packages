@@ -1,0 +1,4 @@
+post_install() {
+  # We have no ldconfig
+  #ldconfig -r .
+}
