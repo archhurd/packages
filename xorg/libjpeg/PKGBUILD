@@ -1,0 +1,31 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=libjpeg
+pkgver=8.0.1
+_pkgver=8a
+pkgrel=1
+pkgdesc="Library of JPEG support functions"
+arch=('i686')
+url="http://www.ijg.org/"
+license=('custom')
+depends=('glibc')
+makedepends=('libtool')
+options=('!libtool')
+source=(http://www.ijg.org/files/jpegsrc.v${_pkgver}.tar.gz)
+md5sums=('5146e68be3633c597b0d14d3ed8fa2ea')
+
+build() {
+  cd $srcdir/jpeg-${_pkgver}
+  ./configure --prefix= --enable-shared --enable-static
+  make || return 1
+}
+
+package() {
+  cd $srcdir/jpeg-${_pkgver}
+  make prefix=$pkgdir mandir=$pkgdir/share/man install
+  
+  # See FS#11116 - re-assess current need sometime...
+  install -m644 jpegint.h $pkgdir/include
+
+  install -Dm644 README $pkgdir/share/licenses/libjpeg/README
+}

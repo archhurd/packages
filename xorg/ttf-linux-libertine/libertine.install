@@ -1,0 +1,17 @@
+post_install() {
+  echo -n "Updating font cache... "
+  fc-cache -s -f > /dev/null
+  mkfontscale /share/fonts/TTF
+  mkfontdir /share/fonts/TTF
+  mkfontscale /share/fonts/OTF
+  mkfontdir /share/fonts/OTF
+  echo "done."
+}
+
+post_upgrade() {
+  post_install $1
+}
+
+post_remove() {
+  post_install $1
+}

@@ -1,0 +1,23 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=terminus-font
+pkgver=4.30
+pkgrel=1
+pkgdesc="A superb, monospace bitmap font (for X11 and console)"
+depends=(xorg-fonts-encodings xorg-fonts-alias xorg-font-utils fontconfig)
+arch=(i686 x86_64)
+source=(http://www.is-vn.bg/hamster/$pkgname-$pkgver.tar.gz)
+md5sums=('6f8bd95b593851f9f5c210a9d33cbbf1')
+url="http://www.is-vn.bg/hamster/jimmy-en.html"
+install=terminus-font.install
+license=('GPL-2')
+
+build() { 
+  cd $srcdir/$pkgname-$pkgver
+  ./configure --prefix= --x11dir=/share/fonts/local/ --psfdir=/share/kbd/consolefonts/
+}
+
+package() {
+  cd $startdir/src/$pkgname-$pkgver
+  make DESTDIR=$pkgdir install
+}

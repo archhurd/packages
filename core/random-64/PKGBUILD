@@ -1,0 +1,24 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=random-64
+# I can't find a version number anywhere
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="A translator providing random and urandom devices for Hurd"
+arch=(i686)
+url="http://kilobug.free.fr/"
+license="GPL"
+groups=(base)
+depends=(glibc)
+source=(http://kilobug.free.fr/hurd/random-64.tar.gz)
+md5sums=(255245ad19cadcd921c08b4d79111c7d)
+
+build() {
+  # Todo: fix some day (somehow)
+  echo "Makefile is messed up, includes a nonexistant file."
+}
+
+package() {
+  cd $srcdir/random
+  install -D -m755 random $pkgdir/hurd/random
+}

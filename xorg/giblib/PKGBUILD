@@ -1,0 +1,29 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=giblib
+pkgver=1.2.4
+pkgrel=1
+pkgdesc="A library that feh uses as a wrapper to imlib2"
+arch=('i686')
+url="http://freshmeat.net/projects/giblib/"
+license=('MIT')
+depends=('imlib2' 'libxext' 'freetype2')
+options=('!libtool')
+source=(ftp://ftp.archlinux.org/other/giblib/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('ff61760ef73421c5f02d2f6c8d3ac913')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix= || return 1
+  make || return 1
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  make DESTDIR="${pkgdir}" docsdir=/share/doc/giblib install || return 1
+
+  # Install custom license
+  install -Dm644 COPYING "${pkgdir}/share/licenses/${pkgname}/LICENSE" || return 1
+}

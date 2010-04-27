@@ -1,0 +1,34 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=fortune-mod
+pkgver=1.99.1
+pkgrel=1
+pkgdesc="The Fortune Cookie Program from BSD games"
+arch=('i686')
+url="http://www.redellipse.net/code/fortune"
+license=('BSD')
+depends=('recode')
+source=(ftp://ftp.archlinux.org/other/fortune-mod/$pkgname-$pkgver.tar.gz LICENSE 01_all_fortune_all-fix.patch)
+md5sums=('f208805b3b712e32997d7667e0ec52d8' '0217481ae93971296cfb7872157cabb7'\
+         'e85b073f16dc6f0e8f0ed90044797aa3')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver
+  patch -p0 < ../01_all_fortune_all-fix.patch  || return 1
+  make REGEXDEFS='-DHAVE_REGEX_H -DPOSIX_REGEX -DHAVE_STDBOOL'  \
+       COOKIEDIR=/share/fortune  \
+       LOCALDIR=/local/share/fortune || return 1
+  make COOKIEDIR=/share/fortune fortune/fortune.man || return 1
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
+  make FORTDIR=$pkgdir/bin  \
+       COOKIEDIR=$pkgdir/share/fortune  \
+       BINDIR=$pkgdir/sbin  \
+       BINMANDIR=$pkgdir/share/man/man1  \
+       FORTMANDIR=$pkgdir/share/man/man6 install || return 1
+  rm $pkgdir/share/fortune/*.u8
+  rm $pkgdir/share/fortune/off/*.u8
+  install -D -m644 ../LICENSE $pkgdir/share/licenses/$pkgname/LICENSE
+}
