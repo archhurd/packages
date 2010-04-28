@@ -1,0 +1,31 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=ttf-dejavu
+pkgver=2.30
+pkgrel=1
+pkgdesc="Font family based on the Bitstream Vera Fonts with a wider range of characters"
+arch=('any')
+url="http://dejavu.sourceforge.net/"
+license=('custom')
+depends=('fontconfig' 'xorg-fonts-encodings')
+install=ttf-dejavu.install
+source=(http://downloads.sourceforge.net/project/dejavu/dejavu/${pkgver}/dejavu-fonts-ttf-${pkgver}.tar.bz2)
+md5sums=('545b3bfc69893075a90a7c6e6f4a7e67')
+
+build() {
+  # No build
+  echo
+}
+
+package() {
+  cd "${srcdir}/dejavu-fonts-ttf-${pkgver}"
+
+  install -m755 -d "${pkgdir}/share/fonts/TTF"
+  install -m644 ttf/*.ttf "${pkgdir}/share/fonts/TTF/" || return 1
+
+  install -m755 -d "${pkgdir}/etc/fonts/conf.avail"
+  install -m644 fontconfig/*.conf "${pkgdir}/etc/fonts/conf.avail/" || return 1
+
+  install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
+  install -D -m644 LICENSE "$pkgdir/share/licenses/${pkgname}/" || return 1
+}

@@ -2,7 +2,7 @@
 
 pkgname=initscripts
 pkgver=2010.04
-pkgrel=1
+pkgrel=3
 pkgdesc="System initialization/bootup scripts"
 arch=('i686')
 url="http://www.archhurd.org"
@@ -12,7 +12,13 @@ backup=(etc/rc.conf etc/rc.local etc/rc.local.shutdown)
 depends=('glibc' 'bash' 'awk' 'grep' 'coreutils' 'sed' 'hostname' 
 		 'ncurses' 'findutils' 'hurd>=20100321-3')
 source=(${pkgname}-${pkgver}-${pkgrel}.tar.xz)
-md5sums=('f5b33a5dde8d7c099160a7db8a2184b5')
+md5sums=('5bdb8454de4a12e69ea080701e48581b')
+
+mksource(){
+    git clone ssh://melpo1@archhurd.org/~/archhurd/projects.archhurd.org/git/initscripts.git ${pkgname}-${pkgver}-${pkgrel}
+    bsdtar -Jcf ${pkgname}-${pkgver}-${pkgrel}.tar.xz ${pkgname}-${pkgver}-${pkgrel}
+    rm -rf ${pkgname}-${pkgver}-${pkgrel}
+}
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}-${pkgrel}/
