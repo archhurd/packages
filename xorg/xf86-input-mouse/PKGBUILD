@@ -1,0 +1,29 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=xf86-input-mouse
+pkgver=1.5.0
+pkgrel=1
+pkgdesc="X.org mouse input driver"
+arch=('i686')
+license=('custom')
+url="http://xorg.freedesktop.org/"
+depends=('glibc')
+makedepends=('pkgconfig' 'xorg-server>=1.8.0')
+conflicts=('xorg-server<1.8.0')
+options=('!libtool')
+groups=('xorg-input-drivers')
+source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('c58629fddf0782dad5c02da6aeb35521')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix= || return 1
+  make || return 1
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install || return 1
+  install -d -m755 "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+}

@@ -1,31 +1,29 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
-pkgname=libpciaccess
-pkgver=0.11.0
+pkgname=xf86-input-keyboard
+pkgver=1.4.0
 pkgrel=1
-pkgdesc="X11 PCI access library"
+pkgdesc="X.Org keyboard input driver"
 arch=('i686')
 license=('custom')
 url="http://xorg.freedesktop.org/"
 depends=('glibc')
-makedepends=('pkgconfig')
+makedepends=('xorg-server>=1.8.0')
+conflicts=('xorg-server<1.8.0')
 options=('!libtool')
-source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2
-				pciaccess-hurd-hack.diff)
+groups=('xorg-input-drivers')
+source=(${url}/releases/individual/driver/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('fd17158ffeacecc8cc670604460cb98b')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -p1 < ../pciaccess-hurd-hack.diff
-	autoreconf
-  ./configure --prefix= --sysconfdir=/etc || return 1
+  ./configure --prefix= || return 1
   make || return 1
 }
 
-package() {
+package() {	
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install || return 1
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
-md5sums=('686320dcec98daad0bdfb8894d4f2a2b'
-         'c3c0c1aa3f95e27ce6a2f73d0cd5ecbb')

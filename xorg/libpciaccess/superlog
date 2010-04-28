@@ -1,0 +1,116 @@
+patching file src/Makefile.am
+patching file configure.ac
+patching file src/common_init.c
+patching file src/pciaccess_private.h
+patching file src/x86_pci.c
+checking for a BSD-compatible install... /bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+checking whether to enable maintainer-specific portions of Makefiles... no
+checking for style of include used by make... GNU
+checking for gcc... gcc
+checking for C compiler default output file name... a.out
+checking whether the C compiler works... yes
+checking whether we are cross compiling... no
+checking for suffix of executables... 
+checking for suffix of object files... o
+checking whether we are using the GNU C compiler... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to accept ISO C89... none needed
+checking dependency style of gcc... gcc3
+checking how to run the C preprocessor... gcc -E
+checking for grep that handles long lines and -e... /bin/grep
+checking for egrep... /bin/grep -E
+checking for ANSI C header files... yes
+checking for sys/types.h... yes
+checking for sys/stat.h... yes
+checking for stdlib.h... yes
+checking for string.h... yes
+checking for memory.h... yes
+checking for strings.h... yes
+checking for inttypes.h... yes
+checking for stdint.h... yes
+checking for unistd.h... yes
+checking for gcc option to accept ISO C99... -std=gnu99
+checking for pkg-config... /bin/pkg-config
+checking pkg-config is at least version 0.9.0... yes
+checking build system type... i686-unknown-gnu0.3
+checking host system type... i686-unknown-gnu0.3
+checking for gcc... (cached) gcc
+checking whether we are using the GNU C compiler... (cached) yes
+checking whether gcc accepts -g... (cached) yes
+checking for gcc option to accept ISO C89... (cached) none needed
+checking dependency style of gcc... (cached) gcc3
+checking for a sed that does not truncate output... /bin/sed
+checking for fgrep... /bin/grep -F
+checking for ld used by gcc... /bin/ld
+checking if the linker (/bin/ld) is GNU ld... yes
+checking for BSD- or MS-compatible name lister (nm)... /bin/nm -B
+checking the name lister (/bin/nm -B) interface... BSD nm
+checking whether ln -s works... yes
+checking the maximum length of command line arguments... -1
+checking whether the shell understands some XSI constructs... yes
+checking whether the shell understands "+="... yes
+checking for /bin/ld option to reload object files... -r
+checking for objdump... objdump
+checking how to recognize dependent libraries... pass_all
+checking for ar... ar
+checking for strip... strip
+checking for ranlib... ranlib
+checking command to parse /bin/nm -B output from gcc object... ok
+checking for dlfcn.h... yes
+checking for objdir... .libs
+checking if gcc supports -fno-rtti -fno-exceptions... no
+checking for gcc option to produce PIC... -fPIC -DPIC
+checking if gcc PIC flag -fPIC -DPIC works... yes
+checking if gcc static flag -static works... no
+checking if gcc supports -c -o file.o... yes
+checking if gcc supports -c -o file.o... (cached) yes
+checking whether the gcc linker (/bin/ld) supports shared libraries... yes
+checking whether -lc should be explicitly linked in... no
+checking dynamic linker characteristics... gnu0.3 ld.so
+checking how to hardcode library paths into programs... immediate
+checking whether stripping libraries is possible... yes
+checking if libtool supports shared libraries... yes
+checking whether to build shared libraries... yes
+checking whether to build static libraries... yes
+checking for special C compiler options needed for large files... no
+checking for _FILE_OFFSET_BITS value needed for large files... 64
+checking asm/mtrr.h usability... no
+checking asm/mtrr.h presence... no
+checking for asm/mtrr.h... no
+checking for struct pci_io.pi_sel.pc_domain... no
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating src/Makefile
+config.status: creating pciaccess.pc
+config.status: creating config.h
+config.status: executing depfiles commands
+config.status: executing libtool commands
+make  all-recursive
+make[1]: Entering directory `/build/libpciaccess/src/libpciaccess-0.11.0'
+Making all in src
+make[2]: Entering directory `/build/libpciaccess/src/libpciaccess-0.11.0/src'
+  CC     common_bridge.lo
+  CC     common_iterator.lo
+  CC     common_init.lo
+common_init.c: In Funktion »pci_system_cleanup«:
+common_init.c:101: Warnung: »pci_device_unmap_region« ist veraltet (deklariert bei ../include/pciaccess.h:88)
+  CC     common_interface.lo
+  CC     common_io.lo
+  CC     common_capability.lo
+  CC     common_device_name.lo
+  CC     common_map.lo
+  CC     common_vgaarb_stub.lo
+  CCLD   libpciaccess.la
+  CC     scanpci.o
+  CCLD   scanpci
+./.libs/libpciaccess.so: undefined reference to `pci_system_x86_create'
+collect2: ld returned 1 exit status
+make[2]: *** [scanpci] Fehler 1
+make[2]: Leaving directory `/build/libpciaccess/src/libpciaccess-0.11.0/src'
+make[1]: *** [all-recursive] Fehler 1
+make[1]: Leaving directory `/build/libpciaccess/src/libpciaccess-0.11.0'
+make: *** [all] Fehler 2

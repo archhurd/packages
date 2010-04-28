@@ -19,11 +19,6 @@ source=(${url}/releases/individual/app/xinit-${pkgver}.tar.bz2
         xsession
         xserverrc)
 options=(!emptydirs)
-md5sums=('56f2d202b3dc10fcd21931a67bb270f7'
-         'abd072ec435ce084cf4e89c58f83d45c'
-         'cee2d70748a089fbc7db64a4a6e8fdb1'
-         '7873d97db30d6c279ed37e3559e7c59d'
-         'bb550d3b9a2d2b6cbe6e2667a3a7cd03')
 
 build() {
   cd "${srcdir}/xinit-${pkgver}"
@@ -44,3 +39,8 @@ package() {
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
+md5sums=('56f2d202b3dc10fcd21931a67bb270f7'
+         'abd072ec435ce084cf4e89c58f83d45c'
+         'cee2d70748a089fbc7db64a4a6e8fdb1'
+         '7873d97db30d6c279ed37e3559e7c59d'
+         'b15b57c742c699bc08717f5752be91d1')
