@@ -2,50 +2,63 @@
 
 pkgname=gnumach
 pkgver=20100413
-pkgrel=1
+pkgrel=2
 pkgdesc="GNU Mach"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
 license=('GPL')
 groups=('base')
 makedepends=('git' 'mig' 'glibc')
-source=()
-md5sums=()
+source=(10_cdromlock.patch
+        13_ide_dma.patch
+        24_pci_irq_fix.patch
+        40_iopl_mmap.patch)
+md5sums=('d6c47f30f78ba3881cbfd472d909c5cd'
+         '2551213686a24a7fa936200aa47515af'
+         '917fd8156f68b2806b726c96a7d5d110'
+         'c2061f76bd67a09f0bf67fba361f533e')
 
-_gitroot="git://git.sv.gnu.org/hurd/gnumach.git"
-_gitname="gnumach"
+__gitroot="git://git.sv.gnu.org/hurd/gnumach.git"
+__gitname="gnumach"
 
 build() {
   cd "$srcdir"
   msg "Connecting to GIT server...."
 
-  if [ -d $_gitname ] ; then
-    cd $_gitname && git pull origin
+  if [ -d $__gitname ] ; then
+    cd $__gitname && git pull origin
     msg "The local files are updated."
   else
-    git clone $_gitroot $_gitname
+    git clone $__gitroot $__gitname
   fi
 
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
 
-  rm -rf "$srcdir/$_gitname-build"
-  mkdir "$srcdir/$_gitname-build"
-  cd "$srcdir/$_gitname-build"
+  rm -rf "$srcdir/$__gitname-build" "$srcdir/build"
+  cp -r "$srcdir/$__gitname" "$srcdir/$__gitname-build"
+  mkdir "$srcdir/build"
+  cd "$srcdir/$__gitname-build"
+
+  # needed for xorg
+  patch -p1 < "$srcdir/10_cdromlock.patch"
+  patch -p1 < "$srcdir/13_ide_dma.patch"
+  patch -p1 < "$srcdir/24_pci_irq_fix.patch"
+  patch -p1 < "$srcdir/40_iopl_mmap.patch"
+
+  cd "$srcdir/build"
 
   #
   # BUILD HERE
   #
-  
-  # Dont think about it, only O1 works for i686
-  export CFLAGS="-march=i686 -O1 -pipe -mtune=generic -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
-  autoreconf -vif ../$_gitname
-  ../$_gitname/configure --host=i686-pc-gnu --prefix=
+  export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
+  autoreconf -vif ../$__gitname-build
+  ../$__gitname-build/configure --host=i686-pc-gnu --prefix= 
   make || return 1
 }
 
 package() {
-  cd "$srcdir/$_gitname-build"
+  cd "$srcdir/build"
   make DESTDIR="$pkgdir/" install || return 1
 } 
 
