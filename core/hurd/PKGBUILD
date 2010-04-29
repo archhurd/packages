@@ -2,7 +2,7 @@
 
 pkgname=hurd
 pkgver=20100321
-pkgrel=3
+pkgrel=4
 pkgdesc="The GNU Hurd"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/hurd.html"
@@ -75,7 +75,8 @@ build() {
   #
   export LDFLAGS=`echo $LDFLAGS | sed 's/-Wl,--as-needed//'`
   autoreconf -vif ../hurd
-  ./configure --host=i686-pc-gnu --prefix= --disable-profile
+  ./configure --host=i686-pc-gnu --prefix= --disable-profile \
+              --enable-static-progs='iso9660fs,ext2fs,ufs'
   make || return 1
 }
 
