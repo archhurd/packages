@@ -1,7 +1,0 @@
-<li><strong>OS:</strong> Arch Linux x86_64</li>
-<li><strong>GTK:</strong> Shiki Noble</li>
-<li><strong>Icons:</strong> Baku</li>
-<li><strong>WM:</strong> StumpWM</li>
-<li><strong>GTK Font:</strong> eurofurence Medium 11</li>
-<li><strong>Wallpaper:</strong> <a href="http://interfacelift.com/wallpaper_beta/details/2214/lone_rose.html">Lone Rose</a></li>
-<li><strong>Other:</strong> urxvtc, irssi, Arch Hurd (in qemu)</li>
