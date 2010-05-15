@@ -14,12 +14,12 @@ md5sums=('8fd9256c635cce2289b648a01d54202c' 'fd404c0f0787fbf99b8b3270f639128c')
 
 build() {
   cd $srcdir/$pkgname-$pkgver
-  make --prefix= || return 1
+  make || return 1
 } 
 
 package() {
   cd $srcdir/$pkgname-$pkgver
-  make DESTDIR=$pkgdir install
+  make prefix=$pkgdir install
   install -D -m644 $srcdir/evilwm.desktop \
       $pkgdir/etc/X11/sessions/evilwm.desktop
   install -D -m644 README $pkgdir/share/licenses/$pkgname/README
