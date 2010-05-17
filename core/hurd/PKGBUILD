@@ -25,12 +25,11 @@ md5sums=('af87e4b04d89392a2b6e7751361f2460'
          '15886845ff60d66e767b8eb88c501458'
          'f745ddc28dfe41fa42087fbb7dbd6b65'
          '44291124d0b08ed4a735c42f06ceec28'
-         'c39c95a2b36f66cc6b5b2fef4ad150b8'
+         '416b442bc87c5882964851c7f03af1c5'
          'b6473e67ed1aa9721f47df73e04ca427'
          '1706c9685c0ab551a4367583c542dfa1'
          'e0910b3df6fc3a18ec44de4299dcf0d0'
          'f2ae144d872ec41cc4f2e070df71dfb1')
-
 
 
 _hurdgitroot="git://git.sv.gnu.org/hurd/hurd.git"

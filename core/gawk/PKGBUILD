@@ -1,7 +1,7 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=gawk
-pkgver=3.1.7
+pkgver=3.1.8
 pkgrel=1
 pkgdesc="GNU awk"
 arch=(i686)
@@ -11,14 +11,14 @@ groups=('base')
 depends=('sh' 'glibc')
 provides=('awk')
 install=gawk.install
-source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.xz)
-md5sums=('7f16a68357c10c385ac76066b264f39d')
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.bz2)
+md5sums=('52b41c6c4418b3226dfb8f82076193bb')
 
 
 build() {
   cd ${srcdir}/$pkgname-$pkgver
 
-  ./configure --host=i686-pc-gnu --prefix= 
+  ./configure --prefix= 
   make || return 1
 } 
 
