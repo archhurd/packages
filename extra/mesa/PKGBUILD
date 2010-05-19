@@ -18,12 +18,9 @@ build() {
   cd "${srcdir}/Mesa-${pkgver}"
 	patch -p1 < ../hurd-ftbfs.diff
   ./configure --prefix= \
-    --with-dri-driverdir=/lib/xorg/modules/dri \
-		--with-dri-drivers=swrast \
 		--disable-egl \
     --disable-gallium-intel \
     --enable-glx-tls \
-		--with-driver=dri \
     --enable-xcb \
     --disable-glut --disable-gallium || return 1
   CFLAGS="${CFLAGS} -DPIPE_OS_LINUX" make || return 1
@@ -72,16 +69,6 @@ package_mesa() {
 
   install -m755 -d "${pkgdir}/share/licenses/mesa"
   install -m755 "${srcdir}/LICENSE" "${pkgdir}/share/licenses/mesa/" || return 1
-}
-
-package_intel-dri() {
-  depends=("libgl=${pkgver}" "libdrm")
-  pkgdesc="Mesa DRI drivers for Intel"
-
-  cd "${srcdir}/Mesa-${pkgver}/src/mesa/drivers/dri" || return 1
-  make -C i810 DESTDIR="${pkgdir}" install || return 1
-  make -C i915 DESTDIR="${pkgdir}" install || return 1
-  make -C i965 DESTDIR="${pkgdir}" install || return 1
 }
 
 md5sums=('25ec15f8e41fde6d206118cc786dbac4'
