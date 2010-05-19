@@ -1,0 +1,46 @@
+#! /bin/sh -e
+
+# DP: Fix build failure on hurd, working around poll() on systems
+# DP: on which it returns an error on invalid FDs.
+
+dir=
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+    dir="$3/"
+elif [ $# -ne 1 ]; then
+    echo >&2 "usage: `basename $0`: -patch|-unpatch [-d <srcdir>]"
+    exit 1
+fi
+case "$1" in
+    -patch)
+        patch $pdir -f --no-backup-if-mismatch -p0 < $0
+        ;;
+    -unpatch)
+        patch $pdir -f --no-backup-if-mismatch -R -p0 < $0
+        ;;
+    *)
+	echo >&2 "usage: `basename $0`: -patch|-unpatch [-d <srcdir>]"
+        exit 1
+esac
+exit 0
+
+--- Modules/selectmodule.c.orig
++++ Modules/selectmodule.c
+@@ -1723,7 +1723,7 @@
+ 
+ static PyMethodDef select_methods[] = {
+ 	{"select",	select_select,	METH_VARARGS,	select_doc},
+-#ifdef HAVE_POLL
++#if defined(HAVE_POLL) && !defined(HAVE_BROKEN_POLL)
+ 	{"poll",	select_poll,	METH_NOARGS,	poll_doc},
+ #endif /* HAVE_POLL */
+ 	{0,  	0},	/* sentinel */
+@@ -1747,7 +1747,7 @@
+ 	Py_INCREF(SelectError);
+ 	PyModule_AddObject(m, "error", SelectError);
+ 
+-#if defined(HAVE_POLL)
++#if defined(HAVE_POLL) && !defined(HAVE_BROKEN_POLL)
+ #ifdef __APPLE__
+ 	if (select_have_broken_poll()) {
+ 		if (PyObject_DelAttrString(m, "poll") == -1) {

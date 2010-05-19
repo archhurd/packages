@@ -1,0 +1,57 @@
+#! /bin/sh -e
+
+# DP: Comment out constant exposed on the API which are not implemented on
+# DP: GNU/Hurd. They would not work at runtime anyway.
+
+dir=
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+    dir="$3/"
+elif [ $# -ne 1 ]; then
+    echo >&2 "usage: `basename $0`: -patch|-unpatch [-d <srcdir>]"
+    exit 1
+fi
+case "$1" in
+    -patch)
+        patch $pdir -f --no-backup-if-mismatch -p0 < $0
+        ;;
+    -unpatch)
+        patch $pdir -f --no-backup-if-mismatch -R -p0 < $0
+        ;;
+    *)
+	echo >&2 "usage: `basename $0`: -patch|-unpatch [-d <srcdir>]"
+        exit 1
+esac
+exit 0
+
+--- Modules/posixmodule.c.orig
++++ Modules/posixmodule.c
+@@ -8854,12 +8854,14 @@
+ #ifdef O_LARGEFILE
+         if (ins(d, "O_LARGEFILE", (long)O_LARGEFILE)) return -1;
+ #endif
++#ifndef __GNU__
+ #ifdef O_SHLOCK
+         if (ins(d, "O_SHLOCK", (long)O_SHLOCK)) return -1;
+ #endif
+ #ifdef O_EXLOCK
+         if (ins(d, "O_EXLOCK", (long)O_EXLOCK)) return -1;
+ #endif
++#endif
+ 
+ /* MS Windows */
+ #ifdef O_NOINHERIT
+--- Modules/socketmodule.c.orig
++++ Modules/socketmodule.c
+@@ -4680,9 +4680,11 @@
+ #ifdef	SO_OOBINLINE
+ 	PyModule_AddIntConstant(m, "SO_OOBINLINE", SO_OOBINLINE);
+ #endif
++#ifndef __GNU__
+ #ifdef	SO_REUSEPORT
+ 	PyModule_AddIntConstant(m, "SO_REUSEPORT", SO_REUSEPORT);
+ #endif
++#endif
+ #ifdef	SO_SNDBUF
+ 	PyModule_AddIntConstant(m, "SO_SNDBUF", SO_SNDBUF);
+ #endif
