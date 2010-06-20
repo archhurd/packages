@@ -20,14 +20,14 @@ sha1sums=('5c054d31e350e53102221b7760c3700cf70b4327' 'eadce8c8bd72ea9c74f35300bf
 
 build() {
   cd "${srcdir}/tiff-${pkgver}"
-  patch -p1 < ../libtiff-CVE-2009-2285.patch || return 1
-  patch -p0 < ../tiff-3.9.0-CVE-2009-2347.patch || return 1
-  ./configure --prefix= --sysconfdir=/etc --mandir=/share/man || return 1
-  make || return 1
+  patch -p1 < ../libtiff-CVE-2009-2285.patch
+  patch -p0 < ../tiff-3.9.0-CVE-2009-2347.patch
+  ./configure --prefix= --sysconfdir=/etc --mandir=/share/man
+  make
 }
 
 package() {
   cd "${srcdir}/tiff-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
-  install -D -m644 COPYRIGHT "${pkgdir}/share/licenses/${pkgname}/LICENSE" || return 1
+  make DESTDIR="${pkgdir}" install
+  install -D -m644 COPYRIGHT "${pkgdir}/share/licenses/${pkgname}/LICENSE"
 }

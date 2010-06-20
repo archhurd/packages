@@ -15,15 +15,15 @@ md5sums=('ff61760ef73421c5f02d2f6c8d3ac913')
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix=
+  make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  make DESTDIR="${pkgdir}" docsdir=/share/doc/giblib install || return 1
+  make DESTDIR="${pkgdir}" docsdir=/share/doc/giblib install
 
   # Install custom license
-  install -Dm644 COPYING "${pkgdir}/share/licenses/${pkgname}/LICENSE" || return 1
+  install -Dm644 COPYING "${pkgdir}/share/licenses/${pkgname}/LICENSE"
 }

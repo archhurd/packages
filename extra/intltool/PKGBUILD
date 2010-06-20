@@ -13,16 +13,15 @@ md5sums=('d6c91bf06681919ccfdf3624035b75dc')
 sha1sums=('20b2bf222395cf1711fee1f1b7b7650b9e0f2fc2')
 
 build() {
-	cd ${srcdir}/${pkgname}-${pkgver}
+  cd ${srcdir}/${pkgname}-${pkgver}
 
-	./configure --prefix= || return 1
-	make || return 1
+  ./configure --prefix=
+  make
 }
 
 package() {
-	cd ${srcdir}/${pkgname}-${pkgver}
+  cd ${srcdir}/${pkgname}-${pkgver}
 	
-	make DESTDIR=${pkgdir} install || return 1
-	install -Dm644 doc/I18N-HOWTO \
-		${pkgdir}/share/doc/${pkgname}/I18N-HOWTO || return 1
+  make DESTDIR=${pkgdir} install
+  install -Dm644 doc/I18N-HOWTO ${pkgdir}/share/doc/${pkgname}/I18N-HOWTO
 }

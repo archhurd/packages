@@ -14,11 +14,11 @@ md5sums=('2ff9924c7249ef7f736ecfe6f08f3f9b')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= --enable-cplusplus || return 1
-  make || return 1
+  ./configure --prefix= --enable-cplusplus
+  make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install
 }

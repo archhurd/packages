@@ -35,7 +35,7 @@ build(){
       -e '/^SHELLDIR\s*=/ s|/games|/bin|' -i Makefile
   sed -e "/^MANDIR\s*=/s|/usr/man/man6|$pkgdir/share/man/man6|" -i doc/Makefile
 
-  make || return 1
+  make
 }
 
 package() {

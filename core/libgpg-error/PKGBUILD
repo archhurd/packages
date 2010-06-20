@@ -18,10 +18,10 @@ build() {
   cd ${srcdir}/${pkgname}-${pkgver}
   # keep static lib for crypsetup
   ./configure --prefix=
-  make || return 1
+  make
 }
 
 package() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  make DESTDIR=${startdir}/pkg install
+  make DESTDIR=${pkgdir} install
 }

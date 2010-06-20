@@ -16,13 +16,13 @@ sha1sums=('dc535af7328dee9a6121b85c3f8041656681a195')
 
 build() {
   cd "${srcdir}/libSM-${pkgver}"
-  ./configure --prefix= --sysconfdir=/etc || return 1
-  make || return 1
+  ./configure --prefix= --sysconfdir=/etc
+  make
 }
 
 package() {
   cd "${srcdir}/libSM-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install
   install -d -m755 "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/"
 }

@@ -21,7 +21,7 @@ md5sums=('3da231dbe82ad103373cb530ae7475d5'
 
 build() {
   cd $srcdir/$pkgname-$pkgver
-  make prefix= gitexecdir=/lib/git-core || return 1
+  make prefix= gitexecdir=/lib/git-core
 }
 
 package() {
@@ -32,14 +32,14 @@ package() {
 
   make prefix= gitexecdir=/lib/git-core \
     NO_CROSS_DIRECTORY_HARDLINKS=1 \
-    INSTALLDIRS=vendor DESTDIR=${pkgdir} install || return 1
+    INSTALLDIRS=vendor DESTDIR=${pkgdir} install
   
   # bash completion
   mkdir -p $pkgdir/etc/bash_completion.d/
-  install -m644 ./contrib/completion/git-completion.bash $pkgdir/etc/bash_completion.d/git || return 1
+  install -m644 ./contrib/completion/git-completion.bash $pkgdir/etc/bash_completion.d/git
 
   # more contrib stuff
-  cp -a ./contrib $pkgdir/share/git/ || return 1
+  cp -a ./contrib $pkgdir/share/git/
 
   # how 'bout some manpages?
   for mansect in man1 man5 man7; do
