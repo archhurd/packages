@@ -24,5 +24,10 @@ build() {
   ./configure --prefix= --mandir=/share/man \
     --infodir=/share/info --with-readline || return 1
   make LEX="flex -I" || return 1
+}
+
+package() {
+  CFLAGS="$CFLAGS -O3"
+  cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install || return 1
 }

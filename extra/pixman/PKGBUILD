@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=pixman
-pkgver=0.18.0
+pkgver=0.18.2
 pkgrel=1
 pkgdesc="Pixman library"
 arch=('i686')
@@ -9,7 +9,6 @@ license=('custom')
 depends=('glibc')
 options=('!libtool')
 source=(http://xorg.freedesktop.org/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('0ff0944b3335f156a94949842b429229e5ae1db4')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -23,3 +22,4 @@ package() {
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
+md5sums=('8f0c47bbb12a0d9c0d14242596bf6bf9')

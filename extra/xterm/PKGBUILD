@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=xterm
-pkgver=256
+pkgver=258
 pkgrel=1
 pkgdesc="X Terminal Emulator"
 arch=('i686')
@@ -10,8 +10,6 @@ depends=('libxft' 'libxaw' 'ncurses' 'xorg-apps')
 groups=('xorg')
 source=(ftp://invisible-island.net/${pkgname}/${pkgname}-${pkgver}.tgz
         LICENSE)
-md5sums=('6da5c166e1c633fc26917b66d6433f1f'
-         '10ecc3f8ee91e3189863a172f68282d2')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
@@ -51,3 +49,5 @@ package() {
   install -m644 "${srcdir}/LICENSE" \
       "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
+md5sums=('bcf4f0ba51f5f58fd5bef76b3d05e40e'
+         '10ecc3f8ee91e3189863a172f68282d2')
