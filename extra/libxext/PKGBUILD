@@ -1,25 +1,21 @@
+# $Id: PKGBUILD 65212 2010-01-25 06:34:35Z allan $
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
-pkgname=libxext
-pkgver=1.1.1
+pkgname=libevent
+pkgver=1.4.13
 pkgrel=1
-pkgdesc="X11 miscellaneous extensions library"
+pkgdesc="An event notification library"
+license=('GPL2')
 arch=('i686')
-url="http://xorg.freedesktop.org/"
-license=('custom')
-depends=('libx11' 'xextproto')
-options=('!libtool')
-source=(${url}/releases/individual/lib/libXext-${pkgver}.tar.bz2)
-md5sums=('c417c0e8df39a067f90a2a2e7133637d')
+url="http://www.monkey.org/~provos/libevent/"
+depends=('glibc')
+source=(http://www.monkey.org/~provos/libevent-$pkgver-stable.tar.gz)
+options=(!libtool)
+md5sums=('0b3ea18c634072d12b3c1ee734263664')
 
 build() {
-  cd "${srcdir}/libXext-${pkgver}"
-  ./configure --prefix= --sysconfdir=/etc --disable-static || return 1
+  cd $srcdir/$pkgname-$pkgver-stable
+  ./configure --prefix= --sysconfdir=/etc
   make || return 1
-}
-
-package() {
-  cd "${srcdir}/libXext-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
-  install -D -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/LICENSE" || return 1
+  make DESTDIR=$pkgdir install || return 1
 }
