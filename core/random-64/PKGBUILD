@@ -14,11 +14,6 @@ source=(http://kilobug.free.fr/hurd/random-64.tar.gz)
 md5sums=(255245ad19cadcd921c08b4d79111c7d)
 
 build() {
-  # Todo: fix some day (somehow)
-  echo "Makefile is messed up, includes a nonexistant file."
-}
-
-package() {
   cd $srcdir/random
   install -D -m755 random $pkgdir/hurd/random
 }

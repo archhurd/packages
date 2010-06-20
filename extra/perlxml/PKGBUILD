@@ -17,14 +17,14 @@ build() {
   cd "${srcdir}/${_realname}-${pkgver}"
   
   # install module in vendor directories.
-  perl Makefile.PL INSTALLDIRS=vendor || return 1
-  make MAN1EXT=1p MAN3EXT=3pm || return 1
+  perl Makefile.PL INSTALLDIRS=vendor
+  make MAN1EXT=1p MAN3EXT=3pm
 }
 
 package() {
   cd "${srcdir}/${_realname}-${pkgver}"
 
-  make install MAN1EXT=1p MAN3EXT=3pm DESTDIR="${pkgdir}" || return 1
+  make install MAN1EXT=1p MAN3EXT=3pm DESTDIR="${pkgdir}"
 
   # remove perllocal.pod and .packlist.
   find "${pkgdir}" -name perllocal.pod -delete

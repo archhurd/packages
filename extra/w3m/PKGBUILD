@@ -15,12 +15,12 @@ build() {
   cd "$srcdir/$pkgname-$pkgver"
   ./configure --prefix= --libexecdir=/lib --enable-ansi-color \
     --disable-mouse --disable-w3mmailer \
-    --with-termlib=ncurses || return 1
-  make || return 1
+    --with-termlib=ncurses
+  make
 }
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install
   install -Dm644 doc/README "${pkgdir}/share/licenses/$pkgname/README"
 }
