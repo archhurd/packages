@@ -1,25 +1,20 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
-pkgname=libmpc
-pkgver=0.8.1
+pkgname=libelf
+pkgver=0.8.13
 pkgrel=1
-pkgdesc="Library for the arithmetic of complex numbers with arbitrarily high precision"
+pkgdesc="libelf is a free ELF object file access library"
 arch=('i686')
-url="http://www.multiprecision.org"
-license=('LGPL')
-depends=('mpfr' 'sh')
-options=('!libtool')
-install=libmpc.install
-source=(http://www.multiprecision.org/mpc/download/mpc-${pkgver/_/-}.tar.gz)
-md5sums=('5b34aa804d514cc295414a963aedb6bf')
+url="http://www.mr511.de/software/"
+license=('GPL')
+depends=('glibc')
+source=(http://www.mr511.de/software/${pkgname}-${pkgver}.tar.gz)
+md5sums=('4136d7b4c04df68b686570afa26988ac')
 
 build() {
-  cd $srcdir/mpc-$pkgver
-  ./configure --prefix=
-  make || return 1
-  make DESTDIR=$pkgdir/ install
-  
-  make check
-  
-  mv -f $pkgdir/share/info/{mpc,libmpc}.info
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    ./configure --prefix= --enable-shared \
+      --enable-gnu-names --enable-compat || return 1
+    make || return 1
+    make prefix="${pkgdir}" install || return 1
 }
