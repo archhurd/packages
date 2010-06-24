@@ -1,0 +1,26 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=libxrender
+pkgver=0.9.6
+pkgrel=1
+pkgdesc="X Rendering Extension client library"
+arch=('i686')
+url="http://xorg.freedesktop.org/"
+license=('custom')
+depends=('libx11' 'renderproto')
+options=('!libtool')
+source=(${url}/releases/individual/lib/libXrender-${pkgver}.tar.bz2)
+
+build() {
+  cd ${srcdir}/libXrender-${pkgver}
+  ./configure --prefix= --disable-static \
+              --build=${CHOST} 
+  make 
+}
+
+package() {
+  cd ${srcdir}/libXrender-${pkgver}
+  make DESTDIR=${pkgdir} 
+  install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
+}
+md5sums=('3b3b7d076c2384b6c600c0b5f4ba971f')
