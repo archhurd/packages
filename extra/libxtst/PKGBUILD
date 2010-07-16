@@ -1,6 +1,4 @@
-# $Id: PKGBUILD 55289 2009-10-12 16:45:45Z andyrtr $
-# Maintainer: Jan de Groot <jgc@archlinux.org>
-# Packaged by Stephen Gilles <stephendgilles@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=libxtst
 pkgver=1.1.0

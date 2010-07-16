@@ -1,9 +1,4 @@
-# $Id: PKGBUILD 84348 2010-06-29 18:03:55Z andrea $
-# Maintainer: Andrea Scarpino <andrea@archlinux.org>
-# Contributor: Pierre Schmitz <pierre@archlinux.de>
-# Contributor: damir <damir@archlinux.org>
-# Contributor: Konstantinos Pachnis <kpachnis@mes-direct.com>
-# Packaged by Stephen Gilles <stephendgilles@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=cmake
 pkgver=2.8.2

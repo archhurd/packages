@@ -1,6 +1,4 @@
-# $Id: PKGBUILD 84267 2010-06-28 05:13:23Z dan $
-# Maintainer: Dan McGee <dan@archlinux.org>
-# Packaged by Stephen Gilles <stephendgilles@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=doxygen
 pkgver=1.7.1
