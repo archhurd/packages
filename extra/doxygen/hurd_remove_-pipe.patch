@@ -1,0 +1,87 @@
+diff -rup0 a/addon/doxmlparser/examples/metrics/Makefile.metrics b/addon/doxmlparser/examples/metrics/Makefile.metrics
+--- a/addon/doxmlparser/examples/metrics/Makefile.metrics	2010-06-25 05:46:37.000000000 -0400
++++ b/addon/doxmlparser/examples/metrics/Makefile.metrics	2010-07-16 10:45:27.000000000 -0400
+@@ -12,2 +12,2 @@ CXX	=	c++
+-CFLAGS	=	-pipe -Wall -W -g -fstack-protector
+-CXXFLAGS=	-pipe -D__FreeBSD__=6 -Wall -W -g -fstack-protector
++CFLAGS	=	 -Wall -W -g -fstack-protector
++CXXFLAGS=	 -D__FreeBSD__=6 -Wall -W -g -fstack-protector
+diff -rup0 a/addon/doxmlparser/src/Makefile.doxmlparser b/addon/doxmlparser/src/Makefile.doxmlparser
+--- a/addon/doxmlparser/src/Makefile.doxmlparser	2010-06-25 05:46:37.000000000 -0400
++++ b/addon/doxmlparser/src/Makefile.doxmlparser	2010-07-16 10:45:27.000000000 -0400
+@@ -12,2 +12,2 @@ CXX	=	c++
+-CFLAGS	=	-pipe -Wall -W -g -fstack-protector
+-CXXFLAGS=	-pipe -D__FreeBSD__=6 -Wall -W -g -fstack-protector
++CFLAGS	=	 -Wall -W -g -fstack-protector
++CXXFLAGS=	 -D__FreeBSD__=6 -Wall -W -g -fstack-protector
+diff -rup0 a/addon/doxmlparser/test/Makefile.xmlparse b/addon/doxmlparser/test/Makefile.xmlparse
+--- a/addon/doxmlparser/test/Makefile.xmlparse	2010-06-25 05:46:37.000000000 -0400
++++ b/addon/doxmlparser/test/Makefile.xmlparse	2010-07-16 10:45:27.000000000 -0400
+@@ -12,2 +12,2 @@ CXX	=	c++
+-CFLAGS	=	-pipe -Wall -W -g -fstack-protector
+-CXXFLAGS=	-pipe -D__FreeBSD__=6 -Wall -W -g -fstack-protector
++CFLAGS	=	 -Wall -W -g -fstack-protector
++CXXFLAGS=	 -D__FreeBSD__=6 -Wall -W -g -fstack-protector
+diff -rup0 a/addon/doxywizard/Makefile.doxywizard b/addon/doxywizard/Makefile.doxywizard
+--- a/addon/doxywizard/Makefile.doxywizard	2010-06-25 05:46:36.000000000 -0400
++++ b/addon/doxywizard/Makefile.doxywizard	2010-07-16 10:45:27.000000000 -0400
+@@ -14,2 +14,2 @@ DEFINES       = -DQT_NO_CAST_FROM_ASCII
+-CFLAGS        = -pipe -g -gdwarf-2 -arch i386 -arch ppc -Wall -W $(DEFINES)
+-CXXFLAGS      = -pipe -g -gdwarf-2 -arch i386 -arch ppc -Wall -W $(DEFINES)
++CFLAGS        =  -g -gdwarf-2 -arch i386 -arch ppc -Wall -W $(DEFINES)
++CXXFLAGS      =  -g -gdwarf-2 -arch i386 -arch ppc -Wall -W $(DEFINES)
+@@ -115 +115 @@ TARGET        = ../../bin/doxywizard.app
+-QMAKE_COMP_QMAKE_OBJECTIVE_CFLAGS = -pipe \
++QMAKE_COMP_QMAKE_OBJECTIVE_CFLAGS =  \
+diff -rup0 a/libmd5/Makefile.libmd5 b/libmd5/Makefile.libmd5
+--- a/libmd5/Makefile.libmd5	2010-06-25 05:08:38.000000000 -0400
++++ b/libmd5/Makefile.libmd5	2010-07-16 10:45:28.000000000 -0400
+@@ -12,2 +12,2 @@ CXX	=	c++
+-CFLAGS	=	-pipe -Wall -W -g -fstack-protector
+-CXXFLAGS=	-pipe -D__FreeBSD__=6 -Wall -W -g -fstack-protector
++CFLAGS	=	 -Wall -W -g -fstack-protector
++CXXFLAGS=	 -D__FreeBSD__=6 -Wall -W -g -fstack-protector
+diff -rup0 a/src/Makefile.libdoxycfg b/src/Makefile.libdoxycfg
+--- a/src/Makefile.libdoxycfg	2010-06-25 05:08:41.000000000 -0400
++++ b/src/Makefile.libdoxycfg	2010-07-16 10:45:29.000000000 -0400
+@@ -25,2 +25,2 @@ CXX	=	c++
+-CFLAGS	=	-pipe -Wall -W -g -fstack-protector
+-CXXFLAGS=	-pipe -D__FreeBSD__=6 -Wall -W -g -fstack-protector
++CFLAGS	=	 -Wall -W -g -fstack-protector
++CXXFLAGS=	 -D__FreeBSD__=6 -Wall -W -g -fstack-protector
+diff -rup0 a/tmake/lib/freebsd-g++/tmake.conf b/tmake/lib/freebsd-g++/tmake.conf
+--- a/tmake/lib/freebsd-g++/tmake.conf	2008-12-06 08:16:20.000000000 -0500
++++ b/tmake/lib/freebsd-g++/tmake.conf	2010-07-16 10:45:30.000000000 -0400
+@@ -11 +11 @@ TMAKE_CC		= gcc
+-TMAKE_CFLAGS		= -pipe
++TMAKE_CFLAGS		= 
+diff -rup0 a/tmake/lib/linux-64/tmake.conf b/tmake/lib/linux-64/tmake.conf
+--- a/tmake/lib/linux-64/tmake.conf	2008-12-06 08:16:20.000000000 -0500
++++ b/tmake/lib/linux-64/tmake.conf	2010-07-16 10:45:30.000000000 -0400
+@@ -11 +11 @@ TMAKE_CC		= gcc
+-TMAKE_CFLAGS		= -pipe
++TMAKE_CFLAGS		= 
+diff -rup0 a/tmake/lib/linux-g++/tmake.conf b/tmake/lib/linux-g++/tmake.conf
+--- a/tmake/lib/linux-g++/tmake.conf	2008-12-06 08:16:20.000000000 -0500
++++ b/tmake/lib/linux-g++/tmake.conf	2010-07-16 10:45:30.000000000 -0400
+@@ -11 +11 @@ TMAKE_CC		= gcc
+-TMAKE_CFLAGS		= -pipe
++TMAKE_CFLAGS		= 
+diff -rup0 a/tmake/lib/macosx-c++/tmake.conf b/tmake/lib/macosx-c++/tmake.conf
+--- a/tmake/lib/macosx-c++/tmake.conf	2010-05-15 11:55:57.000000000 -0400
++++ b/tmake/lib/macosx-c++/tmake.conf	2010-07-16 10:45:30.000000000 -0400
+@@ -11 +11 @@ TMAKE_CC		= cc
+-TMAKE_CFLAGS		= -pipe 
++TMAKE_CFLAGS		=  
+diff -rup0 a/tmake/lib/macosx-uni-c++/tmake.conf b/tmake/lib/macosx-uni-c++/tmake.conf
+--- a/tmake/lib/macosx-uni-c++/tmake.conf	2010-05-31 17:53:42.000000000 -0400
++++ b/tmake/lib/macosx-uni-c++/tmake.conf	2010-07-16 10:45:30.000000000 -0400
+@@ -11 +11 @@ TMAKE_CC		= cc
+-TMAKE_CFLAGS		= -pipe -arch i386 -arch ppc 
++TMAKE_CFLAGS		=  -arch i386 -arch ppc 
+diff -rup0 a/tmake/lib/qnx-g++/tmake.conf b/tmake/lib/qnx-g++/tmake.conf
+--- a/tmake/lib/qnx-g++/tmake.conf	2008-12-06 08:16:20.000000000 -0500
++++ b/tmake/lib/qnx-g++/tmake.conf	2010-07-16 10:45:30.000000000 -0400
+@@ -11 +11 @@ TMAKE_CC		= gcc
+-TMAKE_CFLAGS		= -pipe
++TMAKE_CFLAGS		= 
