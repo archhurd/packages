@@ -1,21 +1,29 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=inetutils
-pkgver=1.7
+pkgver=1.8
 pkgrel=1
 pkgdesc="A collection of common network programs"
 arch=('i686')
 url="http://www.gnu.org/software/inetutils/"
 license=('GPL')
 replaces=('hostname')
+provides=('hostname')
 depends=('readline' 'ncurses' 'pam' 'tcp_wrappers')
 backup=('etc/conf.d/ftpd' 'etc/xinetd.d/telnet' 'etc/xinetd.d/talk')
 options=('!emptydirs')
 install=inetutils.install
-source=(http://ftp.ginu.org/gnu/inetutils/${pkgname}-${pkgver}.tar.gz \
+source=(http://ftp.gnu.org/gnu/inetutils/${pkgname}-${pkgver}.tar.gz \
         ftpd.rc ftpd.conf telnet.xinetd talk.xinetd)
 
 build() {
+  ## stupid hack to fix a stupid problem.
+  ## somethings up with ./configure, and this is the fastest way to fix.
+  cd "${srcdir}/${pkgname}-${pkgver}/ifconfig"
+  mv flags.h flags.h.bak
+  echo "#include <stdlib.h>" > flags.h
+  cat flags.h.bak >> flags.h
+  ## end stupid hack
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix= --libexec=/sbin --localstatedir=/var \
     --mandir=/share/man --infodir=/share/info \
@@ -45,7 +53,7 @@ package() {
   install -D -m644 "${srcdir}/telnet.xinetd" "${pkgdir}/etc/xinetd.d/telnet" || return 1
   install -D -m644 "${srcdir}/talk.xinetd" "${pkgdir}/etc/xinetd.d/talk" || return 1
 }
-md5sums=('a1d5a01b0ab8a7e596ac4cff0cce7129'
+md5sums=('ad8fdcdf1797b9ca258264a6b04e48fd'
          'abb31b95485802d23b7df3f96fa3c75a'
          'e6e6e5990a2e8159a276fef8fbf54c04'
          '433b6535e931f22654102de62402d76e'
