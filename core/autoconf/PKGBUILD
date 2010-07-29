@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=autoconf
-pkgver=2.65
+pkgver=2.66
 pkgrel=1
 pkgdesc="A GNU tool for automatically configuring source code"
 arch=('any')
@@ -10,7 +10,6 @@ groups=('base-devel')
 depends=('awk' 'm4' 'diffutils' 'bash')
 install=autoconf.install
 source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('46cfb40e0babf4c64f8325f03da81c9b')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
@@ -29,3 +28,4 @@ package() {
   # conflict with bintuils
   rm -f ${pkgdir}/share/info/standards.info
 }
+md5sums=('fb00d77cbc468994c55919298af1ff02')

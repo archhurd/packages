@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=glib2
-pkgver=2.24.0
+pkgver=2.24.1
 pkgrel=1
 pkgdesc="Common C routines used by GTK+ 2.4 and other libs"
 url="http://www.gtk.org/"
@@ -12,9 +12,6 @@ options=('!libtool' '!docs')
 source=(http://ftp.gnome.org/pub/GNOME/sources/glib/2.24/glib-${pkgver}.tar.bz2
         glib2.sh
         glib2.csh)
-sha256sums=('7b6aa2cf21e734a6092a711bf196b8d2ddc589b971f93337610c10fa4f23400d'
-            '9456872cdedcc639fb679448d74b85b0facf81033e27157d2861b991823b5a2a'
-            '8d5626ffa361304ad3696493c0ef041d0ab10c857f6ef32116b3e2878ecf89e3')
 
 build() {
   cd "${srcdir}/glib-${pkgver}"
@@ -32,3 +29,6 @@ package() {
   install -m755 "${srcdir}/glib2.sh" "${pkgdir}/etc/profile.d/" || return 1
   install -m755 "${srcdir}/glib2.csh" "${pkgdir}/etc/profile.d/" || return 1
 }
+md5sums=('6a7db81c9a2cffe6a34dadb57d7ba2d2'
+         '803017b365bd35dc20b092ce43b8c8c5'
+         '90c7b830bef4baf225c2eb8b7ead0cab')
