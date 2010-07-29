@@ -1,7 +1,7 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=git
-pkgver=1.7.1
+pkgver=1.7.2
 pkgrel=1
 pkgdesc="The fast distributed version control system"
 arch=(i686)
@@ -15,31 +15,32 @@ optdepends=('tk: gitk and git gui'
             'subversion: git svn'
             'cvsps: git cvsimport')
 source=("http://kernel.org/pub/software/scm/git/${pkgname}-${pkgver}.tar.bz2" \
-        "http://kernel.org/pub/software/scm/git/git-manpages-${pkgver}.tar.bz2")
-md5sums=('3da231dbe82ad103373cb530ae7475d5'
-         '50c3e1119a2197de208cbb69c7da0a50')
+        "http://kernel.org/pub/software/scm/git/git-manpages-${pkgver}.tar.bz2"
+	git-daemon
+	git-daemon.conf)
+md5sums=('652f861ae161e48979ef834707e2dc4c'
+         '0ea16b997dea4aec1f2f3d9c6a74abb8'
+         'd777ff1a239b3d810dcf5d89f9d894af'
+         '9d065134210aa0dd3f2b40d12d915040')
 
 build() {
   cd $srcdir/$pkgname-$pkgver
-  make prefix= gitexecdir=/lib/git-core
+  make prefix= gitexecdir=/lib/git-core || return 1
 }
 
 package() {
   cd $srcdir/$pkgname-$pkgver
 
-  sed -i 's/ln "/cp "/' Makefile
-  sed -i 's/ln "/cp "/' */Makefile
-
   make prefix= gitexecdir=/lib/git-core \
     NO_CROSS_DIRECTORY_HARDLINKS=1 \
-    INSTALLDIRS=vendor DESTDIR=${pkgdir} install
+    INSTALLDIRS=vendor DESTDIR=${pkgdir} install || return 1
   
   # bash completion
   mkdir -p $pkgdir/etc/bash_completion.d/
-  install -m644 ./contrib/completion/git-completion.bash $pkgdir/etc/bash_completion.d/git
+  install -m644 ./contrib/completion/git-completion.bash $pkgdir/etc/bash_completion.d/git || return 1
 
   # more contrib stuff
-  cp -a ./contrib $pkgdir/share/git/
+  cp -a ./contrib $pkgdir/share/git/ || return 1
 
   # how 'bout some manpages?
   for mansect in man1 man5 man7; do

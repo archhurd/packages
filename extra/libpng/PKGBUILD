@@ -1,7 +1,8 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=libpng
-pkgver=1.4.2
+pkgver=1.4.3
+_apngver=1.4.2
 pkgrel=1
 pkgdesc="A collection of routines used to create PNG format graphics files"
 arch=('i686')
@@ -9,9 +10,9 @@ url="http://www.libpng.org/pub/png/libpng.html"
 license=('custom')
 depends=('zlib')
 options=('!libtool')
-source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.xz"
-        "http://downloads.sourceforge.net/sourceforge/libpng-apng/libpng-${pkgver}-apng.patch.gz")
-md5sums=('d22ef5878842d918d6d110c0e7cc3afc'
+source=(http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.xz
+        http://downloads.sourceforge.net/sourceforge/libpng-apng/libpng-${_apngver}-apng.patch.gz)
+md5sums=('322e2e0c0dea7a374ce6e60d9a72e604'
          '378ade7c68c25d00e099b28911d06561')
 
 build() {
@@ -19,24 +20,24 @@ build() {
 
   # Add animated PNG (apng) support
   # see http://sourceforge.net/projects/libpng-apng/
-  patch -p1 -i "${srcdir}/libpng-${pkgver}-apng.patch"
+  patch -p1 -i "${srcdir}/libpng-${_apngver}-apng.patch" || return 1
 
-  libtoolize --force --copy
-  aclocal
-  autoconf
-  automake --add-missing
+  libtoolize --force --copy || return 1
+  aclocal || return 1
+  autoconf || return 1
+  automake --add-missing || return 1
 
-  ./configure --prefix=
-
-  cd contrib/pngminus
-  make PNGLIB="-L${pkgdir}/lib -lpng" -f makefile.std png2pnm pnm2png
+  ./configure --prefix= || return 1
+  make || return 1
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make ECHO=echo DESTDIR="${pkgdir}" install
- 
+
+  make DESTDIR="${pkgdir}" install || return 1
+
   cd contrib/pngminus
+  make PNGLIB="-L${pkgdir}/lib -lpng" -f makefile.std png2pnm pnm2png
   install -m755 png2pnm pnm2png "${pkgdir}/bin/"
-  install -D -m644 ../../LICENSE "${pkgdir}/share/licenses/${pkgname}/LICENSE"
+  install -D -m644 ../../LICENSE "${pkgdir}/share/licenses/${pkgname}/LICENSE" || return 1
 }

@@ -1,8 +1,8 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=coreutils
-pkgver=8.4
-pkgrel=2
+pkgver=8.5
+pkgrel=1
 pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
 arch=(i686)
 url="http://www.gnu.org/software/coreutils"
@@ -12,11 +12,14 @@ depends=('glibc' 'acl' 'gmp' 'sh')
 options=('!emptydirs')
 install=coreutils.install
 source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.xz)
-md5sums=('1fde97f144b4699b18f36c2ec18b1f18')
+md5sums=('55170ed640e300f5b81640c6f4641513')
 
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
+
+  sed -i 's@acl_get_file=cross-compiling@acl_get_file=yes@' configure
+
 
   ./configure --host=i686-pc-gnu --prefix=
   make || return 1

@@ -1,8 +1,8 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=hurd
-pkgver=20100321
-pkgrel=4
+pkgver=20100630
+pkgrel=1
 pkgdesc="The GNU Hurd"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/hurd.html"
@@ -11,7 +11,7 @@ groups=('base')
 depends=('gnumach' 'glibc' 'initscripts')
 makedepends=('git' 'glibc')
 options=('!makeflags')
-backup=(libexec/rc libexec/runsystem etc/ttys)
+backup=(etc/ttys)
 source=(tls_support.hurd.patch
         tls_support.libpthread.patch
         libpthread_fix.patch
@@ -20,6 +20,7 @@ source=(tls_support.hurd.patch
         libpager_update_seqno.patch
         pfinet_dhcp.patch
         extern_inline_fix.patch
+        procfs.patch
         ttys)
 md5sums=('af87e4b04d89392a2b6e7751361f2460'
          '15886845ff60d66e767b8eb88c501458'
@@ -29,6 +30,7 @@ md5sums=('af87e4b04d89392a2b6e7751361f2460'
          'b6473e67ed1aa9721f47df73e04ca427'
          '1706c9685c0ab551a4367583c542dfa1'
          'e0910b3df6fc3a18ec44de4299dcf0d0'
+         'a445137162d39ba41df075838fd1518c'
          'f2ae144d872ec41cc4f2e070df71dfb1')
 
 
@@ -61,6 +63,7 @@ build() {
   patch -Np0 < $srcdir/libpager_update_seqno.patch
   patch -Np0 < $srcdir/pfinet_dhcp.patch
   patch -Np1 < $srcdir/extern_inline_fix.patch
+  patch -Np0 < $srcdir/procfs.patch
 
 
   cp -a ../libpthread .
@@ -74,7 +77,7 @@ build() {
   #
   export LDFLAGS=`echo $LDFLAGS | sed 's/-Wl,--as-needed//'`
   autoreconf -vif ../hurd
-  ./configure --host=i686-pc-gnu --prefix= --disable-profile \
+  ./configure --prefix= --disable-profile \
               --enable-static-progs='iso9660fs,ext2fs,ufs'
   make || return 1
 }
