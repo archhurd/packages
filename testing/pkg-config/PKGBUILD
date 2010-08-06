@@ -1,0 +1,25 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=pkg-config
+pkgver=0.25
+pkgrel=1
+pkgdesc="A system for managing library compile/link flags"
+arch=('i686')
+url="http://pkgconfig.freedesktop.org/wiki/"
+license=('GPL')
+groups=('base-devel')
+conflicts=('pkgconfig')
+replaces=('pkgconfig')
+depends=('glibc')
+source=(http://pkgconfig.freedesktop.org/releases/${pkgname}-${pkgver}.tar.gz)
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  ./configure --prefix=
+  make 
+}
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install
+}
+md5sums=('a3270bab3f4b69b7dc6dbdacbcae9745')

@@ -1,0 +1,29 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Michael Walker
+
+pkgname=libxfixes
+pkgver=4.0.5
+pkgrel=1
+pkgdesc="X11 miscellaneous 'fixes' extension library"
+arch=('i686')
+url="http://xorg.freedesktop.org/"
+license=('custom')
+depends=('libx11' 'fixesproto')
+options=('!libtool')
+source=(${url}/releases/individual/lib/libXfixes-${pkgver}.tar.bz2)
+
+build() {
+  cd ${srcdir}/libXfixes-${pkgver}
+  ./configure --prefix= --sysconfdir=/etc --disable-static \
+              --build=${CHOST} 
+  make 
+}
+
+package() {
+  cd ${srcdir}/libXfixes-${pkgver}
+  make DESTDIR=${pkgdir} install 
+
+  # install custom license
+  install -Dm644 $srcdir/libXfixes-$pkgver/COPYING \
+	$pkgdir/share/licenses/$pkgname/COPYING 
+}
