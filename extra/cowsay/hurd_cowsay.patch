@@ -1,0 +1,18 @@
+diff -rup1 a/install.sh b/install.sh
+--- a/install.sh	1999-11-01 15:19:21.000000000 -0500
++++ b/install.sh	2010-07-09 20:33:49.160000000 -0400
+@@ -55,3 +55,3 @@ echo I will be using $1 because I know i
+ 
+-echo Now I need an installation prefix.  I will use /usr/local unless
++echo Now I need an installation prefix.  I will use /local unless
+ printf "you give me a better idea here: "
+@@ -64,3 +64,3 @@ fi
+ 
+-PREFIX=${prefix:-/usr/local}
++PREFIX=${prefix:-/local}
+ 
+@@ -69,3 +69,3 @@ echo Okay, time to install this puppy.
+ echo s,%BANGPERL%,!$usethisperl,\; > install.pl
+-echo s,%PREFIX%,$PREFIX,\; >> install.pl
++echo s,%PREFIX%,/,\; >> install.pl
+ set -x

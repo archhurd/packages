@@ -1,0 +1,24 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+
+pkgname=cowsay
+pkgver=3.03
+pkgrel=1
+pkgdesc="Add speaking and thinking cows (and a few other creatures) to anything"
+arch=('i686')
+url="http://www.nog.net/~tony/warez/cowsay.shtml"
+license=('PerlArtistic' 'GPL')
+depends=('perl')
+source=(http://www.nog.net/~tony/warez/${pkgname}-${pkgver}.tar.gz
+	hurd_cowsay.patch
+	rms.cow)
+md5sums=('b29169797359420dadb998079021a494'
+         '0f8a0c8870d1d270701cb189ce1a8eec'
+         '4557ae3f690f170476259f87c85287bd')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  patch -p1 < ${srcdir}/hurd_cowsay.patch
+  cp ${srcdir}/rms.cow ${srcdir}/${pkgname}-${pkgver}/cows/
+  sed -i 's|/man/|/share/man/|' install.sh
+  echo "${pkgdir}" | ./install.sh
+}
