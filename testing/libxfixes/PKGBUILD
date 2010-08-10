@@ -27,3 +27,4 @@ package() {
   install -Dm644 $srcdir/libXfixes-$pkgver/COPYING \
 	$pkgdir/share/licenses/$pkgname/COPYING 
 }
+md5sums=('1b4b8386bd5d1751b2c7177223ad4629')

@@ -2,7 +2,7 @@
 
 pkgname=pkg-config
 pkgver=0.25
-pkgrel=1
+pkgrel=2
 pkgdesc="A system for managing library compile/link flags"
 arch=('i686')
 url="http://pkgconfig.freedesktop.org/wiki/"
@@ -10,6 +10,7 @@ license=('GPL')
 groups=('base-devel')
 conflicts=('pkgconfig')
 replaces=('pkgconfig')
+provides=('')
 depends=('glibc')
 source=(http://pkgconfig.freedesktop.org/releases/${pkgname}-${pkgver}.tar.gz)
 

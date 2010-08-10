@@ -2,7 +2,7 @@
 
 pkgname=libdrm
 pkgver=2.4.21
-pkgrel=1
+pkgrel=2
 pkgdesc="Userspace interface to kernel DRM services"
 arch=('i686')
 license=('custom')
@@ -21,9 +21,9 @@ build() {
   autoconf 
   automake 
  ./configure --prefix= \
-      --disable-intel --disable-radeon \
-      --disable-vmwgfx-experimental-api \
-			--disable-nouveau-experimental-api 
+    --disable-intel \
+    --disable-radeon \
+    --disable-nouveau
 
   make 
 }

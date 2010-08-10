@@ -1,0 +1,53 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+pkgname=xterm
+pkgver=260
+pkgrel=1
+pkgdesc="X Terminal Emulator"
+arch=('i686')
+url="http://invisible-island.net/xterm/"
+license=('custom')
+depends=('libxft' 'libxaw' 'ncurses' 'xorg-apps')
+groups=('xorg')
+source=(ftp://invisible-island.net/${pkgname}/${pkgname}-${pkgver}.tgz
+        LICENSE)
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix= \
+      --libdir=/etc \
+      --mandir=/share/man \
+      --with-app-defaults=/share/X11/app-defaults/ \
+      --with-x \
+      --disable-full-tgetent \
+      --disable-imake \
+      --enable-ansi-color \
+      --enable-88-color \
+      --enable-256-color \
+      --enable-broken-osc \
+      --enable-broken-st \
+      --enable-load-vt-fonts \
+      --enable-i18n \
+      --enable-wide-chars \
+      --enable-doublechars \
+      --enable-warnings \
+      --enable-tcap-query \
+      --enable-logging \
+      --enable-dabbrev \
+      --enable-freetype \
+      --enable-luit \
+      --enable-mini-luit \
+      --enable-narrowproto || return 1
+  make || return 1
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install || return 1
+  chmod 0755 "${pkgdir}/bin/xterm" || return 1
+
+  install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 "${srcdir}/LICENSE" \
+      "${pkgdir}/share/licenses/${pkgname}/" || return 1
+}
+md5sums=('1db28bd91f66278b836162e960ad4e22'
+         '10ecc3f8ee91e3189863a172f68282d2')

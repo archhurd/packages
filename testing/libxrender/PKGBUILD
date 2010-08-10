@@ -2,7 +2,7 @@
 
 pkgname=libxrender
 pkgver=0.9.6
-pkgrel=1
+pkgrel=2
 pkgdesc="X Rendering Extension client library"
 arch=('i686')
 url="http://xorg.freedesktop.org/"
@@ -13,14 +13,14 @@ source=(${url}/releases/individual/lib/libXrender-${pkgver}.tar.bz2)
 
 build() {
   cd ${srcdir}/libXrender-${pkgver}
-  ./configure --prefix= --disable-static \
-              --build=${CHOST} 
+  ./configure --prefix=/ --disable-static 
+               
   make 
 }
 
 package() {
   cd ${srcdir}/libXrender-${pkgver}
-  make DESTDIR=${pkgdir} 
+  make DESTDIR=${pkgdir} install 
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
 md5sums=('3b3b7d076c2384b6c600c0b5f4ba971f')

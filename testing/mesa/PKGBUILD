@@ -1,11 +1,12 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgbase="mesa"
-pkgname=('libgl' 'mesa')
-pkgver=7.8.2
-pkgrel=1
+pkgname=('mesa' 'libgl')
+pkgver=7.8.1
+pkgrel=3
 arch=('i686')
-makedepends=('glproto' 'libdrm' 'libxxf86vm' 'libxdamage' 'expat' 'libx11' 'libxt' 'gcc-libs' 'dri2proto' 'python')
+makedepends=('glproto' 'libxxf86vm' 'libxdamage' 'expat' 'libx11' 'libxt' 'gcc-libs' 'dri2proto' 'python')
+replaces=('libdrm')
 url="http://mesa3d.sourceforge.net"
 license=('custom')
 options=(!makeflags)
@@ -16,18 +17,22 @@ source=(ftp://ftp.freedesktop.org/pub/mesa/${pkgver}/MesaLib-${pkgver}.tar.bz2
 
 build() {
   cd "${srcdir}/Mesa-${pkgver}"
-	patch -Np1 < ../hurd-ftbfs.diff
+	patch -p1 < ../hurd-ftbfs.diff
+  autoreconf -vif
   ./configure --prefix= \
-		--disable-egl \
-    --disable-gallium-intel \
-    --disable-glx-tls \
-    --enable-xcb --disable-driglx-direct \
-    --disable-glut --disable-gallium 
-  CFLAGS="${CFLAGS} -DPIPE_OS_LINUX" make 
+    --with-dri-driverdir=/lib/xorg/modules/dri \
+		--with-dri-drivers=swrast \
+    --with-driver=dri \
+    --disable-driglx-direct \
+    --disable-gallium \
+    --enable-glx-tls \
+    --with-state-trackers=egl,dri,glx \
+    --disable-glut --disable-glw --disable-glu || return 1
+  make || return 1
 
   cd "${srcdir}/gl-manpages-1.0.1"
-  ./configure --prefix= 
-  make
+  ./configure --prefix= || return 1
+  make || return 1
 }
 
 package_libgl() {
@@ -42,6 +47,7 @@ package_libgl() {
 
   cd src/mesa/drivers/dri
 	make -C swrast DESTDIR="${pkgdir}" install || return 1
+
 	#install -m755 libdricore.so "${pkgdir}/lib/xorg/modules/dri/" || return 1
   ln -s libglx.xorg "${pkgdir}/lib/xorg/modules/extensions/libglx.so" || return 1
 
@@ -50,7 +56,7 @@ package_libgl() {
 }
 
 package_mesa() {
-  depends=('libgl' 'libx11' 'libxt' 'gcc-libs' 'libdrm' 'dri2proto')
+  depends=('libgl' 'libx11' 'libxt' 'gcc-libs' 'dri2proto')
   pkgdesc="Mesa 3-D graphics libraries and include files"
 
   cd "${srcdir}/Mesa-${pkgver}" || return 1
@@ -70,8 +76,9 @@ package_mesa() {
   install -m755 -d "${pkgdir}/share/licenses/mesa"
   install -m755 "${srcdir}/LICENSE" "${pkgdir}/share/licenses/mesa/" || return 1
 }
+
 md5sums=('6be2d343a0089bfd395ce02aaf8adb57'
          '757d9e2e06f48b1a52848be9b0307ced'
          '6ae05158e678f4594343f32c2ca50515'
          '5c65a0fe315dd347e09b1f2826a1df5a'
-         'd3871b08d80269ec79bd6d88115ebe45')
+         '504ec643bd87bfda2f053b8e05e998c2')

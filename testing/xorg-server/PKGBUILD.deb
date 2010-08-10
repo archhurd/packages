@@ -1,0 +1,39 @@
+
+
++	build_xfbdev = --disable-xfbdev
++	selinux = --disable-xselinux
+
+
++	dri = --disable-dri --disable-dri2
+
+# hurd
++	config_backend += --disable-config-udev --disable-config-hal
+
++confflags += \
++	     --disable-static \
++	     --without-dtrace \
++	     --disable-strict-compilation \
++	     --disable-debug \
++	     $(config_tests) \
++	     --with-int10=x86emu \
++	     --with-os-vendor="$(VENDOR)" \
++	     --with-builderstring="$(SOURCE_NAME) $(SOURCE_VERSION) ($(BUILDER))" \
++	     --with-xkb-path=/usr/share/X11/xkb \
++	     --with-xkb-output=/var/lib/xkb \
++	     --disable-builddocs \
++	     --disable-install-libxf86config \
++	     --enable-mitshm \
++	     --enable-xres \
++	     --disable-xcsecurity \
++	     --disable-xcalibrate \
++	     --disable-tslib \
++	     --disable-multibuffer \
++	     --enable-dbe \
++	     --disable-xf86bigfont \
++	     --enable-dpms \
++	     $(config_backend) \
++	     --enable-xorg \
++	     --disable-xquartz \
++	     --disable-xwin \
++	     --disable-xfake \
++	     --disable-install-setuid
