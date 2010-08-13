@@ -1,0 +1,33 @@
+My laptop's motherboard set its RTL8139 NIC IRQ at a value that is not
+included in the range 0<=x<16 and it's not 255.
+
+GNU Mach can't handle that, and when I try a 'devprobe eth0' I get a
+panic due to a failed assert (irq < 16). This patch tell GNU Mach to
+ignore this kind of IRQ.
+
+The real solution for this problem would be an PCI IRQ Router, which
+is what I am going to port/implement in Mach soon. For now, this patch
+helps by both removing the failed assert and by noticing the user that
+the device is not being used for unassigned IRQ.
+
+
+2006-01-28  Gianluca Guida  <glguida@gmail.com>
+
+	* linux/src/drivers/net/pci-scan.c (pci_drv_register): Skip device
+	if we are getting an invalid IRQ >= 16 and different from 255 (it
+	happens in some motherboard).
+
+
+Index: b/linux/src/drivers/net/pci-scan.c
+===================================================================
+--- a/linux/src/drivers/net/pci-scan.c
++++ b/linux/src/drivers/net/pci-scan.c
+@@ -347,7 +347,7 @@ int pci_drv_register(struct drv_id_info 
+ 				   pci_tbl[chip_idx].name, pciaddr, irq);
+ 
+ 		if ( ! (pci_flags & PCI_UNUSED_IRQ)  &&
+-			 (irq == 0 || irq == 255)) {
++			 (irq == 0 || irq >= 16)) {
+ 			if (pci_bus == 32) 	/* Broken CardBus activation. */
+ 				printk(KERN_WARNING "Resources for CardBus device '%s' have"
+ 					   " not been allocated.\n"

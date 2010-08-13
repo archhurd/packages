@@ -1,0 +1,66 @@
+# Maintainer Stephen Gilles <stephendgilles@gmail.com>
+
+pkgname=gnumach-userleveldrivers
+pkgver=20100807
+pkgrel=1
+pkgdesc="GNU Mach"
+arch=(i686)
+url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
+license=('GPL')
+groups=('dde')
+provides=('gnumach')
+makedepends=('git' 'mig' 'glibc')
+source=(10_cdromlock.patch
+        13_ide_dma.patch
+        24_pci_irq_fix.patch
+        40_iopl_mmap.patch)
+md5sums=('d6c47f30f78ba3881cbfd472d909c5cd'
+         '2551213686a24a7fa936200aa47515af'
+         '917fd8156f68b2806b726c96a7d5d110'
+         'c2061f76bd67a09f0bf67fba361f533e')
+
+__gitroot="git://git.sv.gnu.org/hurd/gnumach.git"
+__gitname="gnumach"
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [ -d $__gitname ] ; then
+    cd $__gitname && git pull origin
+    msg "The local files are updated."
+  else
+    git clone $__gitroot $__gitname
+    git checkout master-user_level_drivers
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting make..."
+
+  rm -rf "$srcdir/$__gitname-build" "$srcdir/build"
+  cp -r "$srcdir/$__gitname" "$srcdir/$__gitname-build"
+  mkdir "$srcdir/build"
+  cd "$srcdir/$__gitname-build"
+
+  # needed for xorg
+  patch -p1 < "$srcdir/10_cdromlock.patch"
+  patch -p1 < "$srcdir/13_ide_dma.patch"
+  patch -p1 < "$srcdir/24_pci_irq_fix.patch"
+  patch -p1 < "$srcdir/40_iopl_mmap.patch"
+
+  cd "$srcdir/build"
+
+  #
+  # BUILD HERE
+  #
+  export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
+  autoreconf -vif ../$__gitname-build
+  ../$__gitname-build/configure --host=i686-pc-gnu --prefix= --disable-device-drivers --enable-ide --enable-kdb
+  make || return 1
+}
+
+package() {
+  cd "$srcdir/build"
+  make DESTDIR="$pkgdir/" install || return 1
+} 
+
