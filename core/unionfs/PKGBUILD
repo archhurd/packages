@@ -1,0 +1,32 @@
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+
+pkgname=unionfs
+pkgver=20091210
+pkgrel=1
+pkgdesc="unionfs is a filesystem that joins many filesystems into one"
+arch=('i686')
+url="http://www.gnu.org/software/hurd/hurd/translator/unionfs.html"
+license=('GPL')
+groups=('base')
+depends=('glibc' 'hurd')
+source=(${pkgname}-${pkgver}-${pkgrel}.tar.xz)
+md5sums=('cd9d21f1f2c8c6400c635d155119bbe4')
+
+mksource(){
+    git clone git://git.sv.gnu.org/hurd/unionfs.git \
+    	${pkgname}-${pkgver}-${pkgrel}
+    bsdtar -Jcf ${pkgname}-${pkgver}-${pkgrel}.tar.xz ${pkgname}-${pkgver}-${pkgrel}
+    rm -rf ${pkgname}-${pkgver}-${pkgrel}
+}
+
+build() {
+	cd ${srcdir}/${pkgname}-${pkgver}-${pkgrel}/
+	make unionfs #unionfs.static
+}
+
+package() {
+	mkdir ${pkgdir}/hurd
+	cd ${srcdir}/${pkgname}-${pkgver}-${pkgrel}/
+	install -m 755 unionfs ${pkgdir}/hurd/
+#	install -m 755 unionfs.static ${pkgdir}/hurd/
+}
