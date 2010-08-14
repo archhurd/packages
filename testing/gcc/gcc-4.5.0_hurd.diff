@@ -1,0 +1,26 @@
+diff -ur b/gcc/config.gcc a/gcc/config.gcc
+--- b/gcc/config.gcc	2010-04-20 21:55:12.273922798 +0200
++++ a/gcc/config.gcc	2010-04-25 21:42:52.487249022 +0200
+@@ -3408,7 +3408,8 @@
+ 	i[34567]86-*-darwin* | x86_64-*-darwin*)
+ 		tmake_file="${tmake_file} i386/t-fprules-softfp soft-fp/t-softfp"
+ 		;;
+-	i[34567]86-*-linux* | x86_64-*-linux* | i[34567]86-*-kfreebsd*-gnu | x86_64-*-kfreebsd*-gnu)
++	i[34567]86-*-linux* | x86_64-*-linux* | i[34567]86-*-kfreebsd*-gnu | x86_64-*-kfreebsd*-gnu | \
++	i[34567]86-*-gnu*)
+ 		tmake_file="${tmake_file} i386/t-fprules-softfp soft-fp/t-softfp i386/t-linux"
+ 		;;
+ 	i[34567]86-*-solaris2*)
+diff -ur b/libgcc/config.host a/libgcc/config.host
+--- b/libgcc/config.host	2010-04-20 21:55:10.809761152 +0200
++++ a/libgcc/config.host	2010-04-20 21:56:28.816413535 +0200
+@@ -601,7 +601,8 @@
+   i[34567]86-*-kfreebsd*-gnu | x86_64-*-kfreebsd*-gnu | \
+   i[34567]86-*-linux* | x86_64-*-linux* | \
+   i[34567]86-*-solaris2* | \
+-  i[34567]86-*-cygwin* | i[34567]86-*-mingw* | x86_64-*-mingw*)
++  i[34567]86-*-cygwin* | i[34567]86-*-mingw* | x86_64-*-mingw* | \
++  i[34567]86-*-gnu*)
+ 	if test "${host_address}" = 32; then
+ 		tmake_file="${tmake_file} t-softfp i386/${host_address}/t-fprules-softfp"
+ 	fi
