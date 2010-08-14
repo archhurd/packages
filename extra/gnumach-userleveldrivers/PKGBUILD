@@ -14,6 +14,8 @@ source=(10_cdromlock.patch
         13_ide_dma.patch
         24_pci_irq_fix.patch
         40_iopl_mmap.patch)
+conflicts=('gnumach')
+
 md5sums=('d6c47f30f78ba3881cbfd472d909c5cd'
          '2551213686a24a7fa936200aa47515af'
          '917fd8156f68b2806b726c96a7d5d110'
