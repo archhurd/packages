@@ -1,7 +1,7 @@
 # Maintainer Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=libddekit
-pkgver=20100723
+pkgver=20100815
 pkgrel=1
 pkgdesc="Part of the requirements for building DDE drivers"
 arch=(i686)
@@ -9,6 +9,7 @@ url="http://www.gnu.org/software/hurd/user/zhengda.html"
 license=('GPL')
 groups=('dde')
 makedepends=('git' 'mig' 'glibc')
+depends=('gnumach-userleveldrivers' 'libpciaccess'
 
 __gitroot="git://git.sv.gnu.org/hurd/incubator.git"
 __gitname="incubator"

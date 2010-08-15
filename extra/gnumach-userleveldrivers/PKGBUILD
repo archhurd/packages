@@ -2,13 +2,14 @@
 
 pkgname=gnumach-userleveldrivers
 pkgver=20100807
-pkgrel=1
+pkgrel=2
 pkgdesc="GNU Mach"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
 license=('GPL')
 groups=('dde')
 provides=('gnumach')
+conflicts=('gnumach')
 makedepends=('git' 'mig' 'glibc')
 source=(10_cdromlock.patch
         13_ide_dma.patch
