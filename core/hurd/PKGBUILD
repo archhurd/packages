@@ -1,7 +1,7 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=hurd
-pkgver=20100630
+pkgver=20100801
 pkgrel=1
 pkgdesc="The GNU Hurd"
 arch=(i686)
