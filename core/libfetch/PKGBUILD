@@ -2,7 +2,7 @@
 #Thanks to Aaron Griffin, this is mostly his ArchLinux PKGBUILD
 
 pkgname=libfetch
-pkgver=2.31
+pkgver=2.32
 pkgrel=1
 pkgdesc="URL based download library"
 arch=(i686)
@@ -12,11 +12,9 @@ url="http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/libfetch/"
 source=($pkgname-$pkgver.tar.gz
         Makefile
         libfetch_hurd.patch)
-md5sums=('8f08b37a1d7a2d2183bd144b88e30ed3'
-         '35bb80af61a497adbbdd998c22ee15ab'
+md5sums=('f7918e221f8e19494e3285999a827ee1'
+         '298c43d709fd93457d85a1cf7428195a'
          '99cff9c19a6bb4e63610970f5dcdc9a6')
-
-         
 
 # source PKGBUILD && mksource
 mksource() {
@@ -36,6 +34,10 @@ build() {
   cp ../Makefile .
   patch -p2 < $srcdir/libfetch_hurd.patch
   make || return 1
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
   make DESTDIR=$pkgdir install
 }
 

@@ -1,8 +1,8 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=pacman
-pkgver=3.3.3
-pkgrel=6
+pkgver=3.4.0
+pkgrel=1
 pkgdesc="A library-based package manager with dependency support"
 arch=(i686)
 url="http://www.archlinux.org/pacman/"
@@ -12,40 +12,48 @@ depends=('bash' 'libarchive' 'libfetch')
 optdepends=('fakeroot: for makepkg usage as normal user')
 backup=(etc/pacman.conf etc/makepkg.conf)
 source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
-        hurd_fakeroot.patch
         pacman.conf
         makepkg.conf
         pacman_hurd.patch
+        pacman_hurd_fakeroot.patch
         mirrorlist)
-md5sums=('a8cef73d68e2a4c3a46fb46c33210719'
-         'aff8d066c76a3dfa03cb2e300ce82725'
+md5sums=('50ad71be1faaad84842c576e239d1bb5'
          '7e6f21f9990f986edfcb9e573ff4f9f2'
          '2470ff214479750c4e44bd323b0aa6ab'
-         'a3566f9fc156d88123d4cd113e18d47c'
+         '210e7165adf4fa8822c4eb935bc92935'
+         'd248452ac7df02e6988f49055aaae4ed'
          '90f2e8a6f40279d1dd47c3e05d3908cf')
 
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  patch -p2 < $srcdir/pacman_hurd.patch
+  patch -Np2 < $srcdir/pacman_hurd.patch
 
-  autoconf
-  ./configure --host=i686-pc-gnu --prefix=
+  #as-needed causes a segfault
+  export LDFLAGS=""
+  ./configure --prefix=
   make || return 1
-} 
+}
 
-package() { 
+package() {
   cd $srcdir/$pkgname-$pkgver
   make DESTDIR="$pkgdir/" install
-  
+
   mkdir -p $pkgdir/etc/pacman.d
   install -m644 $srcdir/pacman.conf $pkgdir/etc
   install -m644 $srcdir/makepkg.conf $pkgdir/etc
   install -m644 $srcdir/mirrorlist $pkgdir/etc/pacman.d
 
+  # install completion files
+  mkdir -p $pkgdir/etc/bash_completion.d/
+  install -m644 contrib/bash_completion $pkgdir/etc/bash_completion.d/pacman
+  mkdir -p $pkgdir/share/zsh/site-functions/
+  install -m644 contrib/zsh_completion $pkgdir/share/zsh/site-functions/_pacman
+
+  #patch for hurd fakeroot
   cd $pkgdir
-  patch -p1 < $srcdir/hurd_fakeroot.patch
+  patch -Np1 < $srcdir/pacman_hurd_fakeroot.patch
 }
 
 

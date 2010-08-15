@@ -1,8 +1,8 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=gnumach
-pkgver=20100413
-pkgrel=2
+pkgver=20100801
+pkgrel=1
 pkgdesc="GNU Mach"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
@@ -53,7 +53,7 @@ build() {
   #
   export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
   autoreconf -vif ../$__gitname-build
-  ../$__gitname-build/configure --host=i686-pc-gnu --prefix= 
+  ../$__gitname-build/configure --prefix= 
   make || return 1
 }
 

@@ -1,8 +1,8 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=initscripts
-pkgver=2010.04
-pkgrel=3
+pkgver=2010.08
+pkgrel=1
 pkgdesc="System initialization/bootup scripts"
 arch=('i686')
 url="http://www.archhurd.org"
@@ -12,10 +12,10 @@ backup=(etc/rc.conf etc/rc.local etc/rc.local.shutdown)
 depends=('glibc' 'bash' 'awk' 'grep' 'coreutils' 'sed' 'hostname' 
 		 'ncurses' 'findutils' 'hurd>=20100321-3')
 source=(${pkgname}-${pkgver}-${pkgrel}.tar.xz)
-md5sums=('5bdb8454de4a12e69ea080701e48581b')
+md5sums=('4acfb5f6e8b377762a4aa09f0b5242e4')
 
 mksource(){
-    git clone ssh://melpo1@archhurd.org/~/archhurd/projects.archhurd.org/git/initscripts.git ${pkgname}-${pkgver}-${pkgrel}
+    git clone ssh://melpo@archhurd.org/srv/gitosis/repositories/initscripts.git ${pkgname}-${pkgver}-${pkgrel}
     bsdtar -Jcf ${pkgname}-${pkgver}-${pkgrel}.tar.xz ${pkgname}-${pkgver}-${pkgrel}
     rm -rf ${pkgname}-${pkgver}-${pkgrel}
 }

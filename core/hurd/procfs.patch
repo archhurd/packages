@@ -1,0 +1,3213 @@
+diff --exclude=CVS -Naur foo/ChangeLog procfs/ChangeLog
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/ChangeLog	2008-09-01 23:47:03.000000000 +0200
+@@ -0,0 +1,161 @@
++2008-08-30  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	*  procfs_dir.c: (procfs_dir_create): Assign newly created directory to
++	its pointer in netnode.
++	(procfs_dir_remove): Removed function.
++	(free_entry): New function.
++	(ordered_unlink): Likewise.
++	(delete): Likewise.
++	(sweep): Likewise.
++	(procfs_dir_entries_remove): Likewise.
++	(is_in_pid_list): Removed call to make_dir_invalid ().
++	(procfs_fill_root_dir): struct stat *stat ->  struct stat stat.
++	Add Read and Execute permissions to all in stat.st_mode. 
++	Set stat.st_nlink to 1.
++	Set stat.st_size to 0.
++	Add struct proc_stat *ps definition.
++	Set struct proc_stat data from _proc_stat_create () function and
++	set stat.st_uid and stat.st_gid from the data in that structure.
++	* procfs_pid_files.c: (update_pid_entries): Add Read permissions
++	to all in stat->st_mode.
++	
++2008-08-29  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* AUTHORS: File removed.
++	* COPYING: Likewise.
++	* README: Likewise.	
++	
++2008-08-29  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* Makefile: (Copyright): 1997, 2000 -> 2008.
++	(CC): Removed.
++	(CFLAGS): Removed.
++	(INCLUDES): Removed.
++	(all): Removed.
++	($(target)): Removed.
++	(%.o): Removed.
++	(HURDLIBS): -lnetfs -> netfs, -lfshelp -> fshelp,
++	-liohelp -> iohelp, -lthreads -> threads, -lports -> ports,
++	-lihash -> ihash, -lps -> ps, -lshouldbeinlibc -> shouldbeinlibc.
++	(include): Add include ../Makeconf
++        
++2008-08-18  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* procfs_nonpid_files.c: (procfs_write_nonpid_stat): Changed to
++	procfs_read_nonpid_stat.
++	(procfs_write_nonpid_meminfo): Changed to procfs_read_nonpid_meminfo.
++	(procfs_write_nonpid_loadavg): Changed to procfs_read_nonpid_loadavg.
++	(procfs_write_nonpid_uptime): Changed to procfs_read_nonpid_uptime.
++	(procfs_write_nonpid_version):Changed to procfs_read_nonpid_version.
++	* procfs_pid_files.c: (procfs_write_stat_file): Changed to 
++	procfs_read_stat_file.
++	Changed the comment correspondingly from Write to Read.
++	(procfs_write_cmdline_file ): Changed to procfs_read_cmdline_file.
++	Changed the comment correspondingly from Write to Read.
++	(procfs_write_status_file): Changed to procfs_read_status_file.
++	Changed the comment correspondingly from Write to Read.
++	(procfs_write_statm_file): Changed to procfs_read_statm_file.
++	Changed the comment correspondingly from Write to Read.
++	(procfs_write_files_contents): Changed to procfs_read_files_contents.
++	Changed the comment correspondingly from Write to Read.
++	Changed the call to procfs_write_nonpid_stat to procfs_read_nonpid_stat.
++	Changed the call to procfs_write_stat_file to procfs_read_stat_file.
++	Changed the call to procfs_write_cmdline_file to 
++	procfs_read_cmdline_file.
++	Changed the call to procfs_write_status_file to
++	procfs_read_status_file.
++	Changed the call to procfs_write_statm_file to
++	procfs_read_statm_file.
++	Changed the call to procfs_write_nonpid_meminfo	to
++	procfs_read_nonpid_meminfo.
++	Changed the call to procfs_write_nonpid_loadavg to
++	procfs_read_nonpid_loadavg.
++	Changed the call to procfs_write_nonpid_uptime to
++	procfs_read_nonpid_uptime.
++	Changed the call to procfs_write_nonpid_version to
++	procfs_read_nonpid_version.
++	netfs.c: (netfs_attempt_read): Changed the call from 
++	procfs_write_files_contents to procfs_read_files_contents.
++        
++2008-08-18  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* README: Initial Documentation.
++
++2008-08-18  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* procfs_nonpid_files.c: (get_uptime): Changed the parameter type from
++	double to struct timeval.
++	Changed the parameter name from uptime_secs to uptime.
++	Removed uptime variable. 
++	Changed timersub to use the passed pointer instead of the local 
++	variable.
++	Removed the calculation of uptime_secs. 
++	(get_total_times): Changed the parameters type from double to struct
++	timeval.
++	Changed the parameters name from total_user_time_secs to 
++	total_user_time and total_system_time_secs to total_system_time.
++	New variables total_user_time_tmp, total_system_time_tmp and tmpval
++	of type struct timeval.
++	Call timerclear to clear the tmp variables. 
++	Remove calculation of times in seconds and do the same on struct 
++	timeval variables throughout using the timeradd macro.
++	Assign values of temporary local variables to the pointers passed
++	as parameters.
++	(procfs_write_nonpid_stat): Replaced variables that hold time in
++	seconds with struct timeval type variables and jiffy_t type variables.
++	Argument to get_uptime changed from uptime_secs to uptime.
++	Arguments to get_total_times changed from total_user_time_secs to
++	total_user_time and total_system_time_secs to total_system_time.
++	Replace arithematic time subtraction with timersub macro.
++	Convert all the times in struct timeval type variables to jiffy_t type.
++	Changed the type casting for the asprintf arguments to be compatible
++	with jiffy_t type.
++	(procfs_write_nonpid_uptime): Replaced variables that hold time in 
++	seconds with struct timeval type variables.
++	Argument to get_uptime changed from uptime_secs to uptime.
++	Arguments to get_total_times changed from total_user_time_secs to 
++	total_user_time and total_system_time_secs to total_system_time.
++	Replace arithematic time subtraction with timersub macro.
++	Convert all the times in struct timeval type variables to seconds.       
++
++2008-08-18  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* procfs_nonpid_files.c: (procfs_write_nonpid_version): New function.
++	* procfs_pid_files.c: (procfs_write_files_contents): Add a check
++	to find if the read is requested for the version file and 
++	corresponding a call to it.
++
++2008-08-14  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* procfs.h: (jiffy_t): New typedef.
++	* procfs_pid.h: "procfs.h" is included.
++	(struct procfs_pid_files): Changed all the occurrences of time_t to 
++	jiffy_t.
++	* procfs_pid_files.c: Removed "procfs.h".
++	(adjust_jiffy_time): Changed return type from time_t to jiffy_t.
++	Changed the type of jiffy_time variable from time_t to jiffy_t.
++	(get_live_threads_time): Changed the type of utime and stime from 
++	time_t to jiffy_t.
++	(get_stat_data): Changed the type of utime and stime from time_t to
++	jiffy_t.
++
++2008-08-14  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* ChangeLog: New file.
++	* AUTHORS: New file.
++	* COPYING: New file.
++	* README: New file.
++	* Makefile: New file.
++	* bootstrap.c: New file.
++	* netfs.c: New file.
++	* node.c: New file.
++	* procfs.c: New file.
++	* procfs.h: New file.
++	* procfs_dir.c: New file.
++	* procfs_nonpid_files.c: New file.
++	* procfs_pid.h: New file.
++	* procfs_pid_files.c: New file.
++                        
++2008-05-13  Madhusudan.C.S  <madhusudancs@gmail.com>
++
++	* /sources/hurd/procfs: New directory added to the repository.
+diff --exclude=CVS -Naur foo/Makefile procfs/Makefile
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/Makefile	2008-08-29 19:28:42.000000000 +0200
+@@ -0,0 +1,30 @@
++#   Makefile - for procfs
++# 
++#   Copyright (C) 2008 Free Software Foundation, Inc.
++#
++#   This program is free software; you can redistribute it and/or
++#   modify it under the terms of the GNU General Public License as
++#   published by the Free Software Foundation; either version 2, or (at
++#   your option) any later version.
++#
++#   This program is distributed in the hope that it will be useful, but
++#   WITHOUT ANY WARRANTY; without even the implied warranty of
++#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++#   General Public License for more details.
++#
++#   You should have received a copy of the GNU General Public License
++#   along with this program; if not, write to the Free Software
++#   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++
++dir := procfs
++makemode := server
++
++target = procfs
++
++SRCS = procfs.c bootstrap.c netfs.c procfs_dir.c node.c procfs_pid_files.c procfs_nonpid_files.c
++LCLHDRS = procfs.h procfs_pid.h
++
++OBJS = $(SRCS:.c=.o)
++HURDLIBS = netfs fshelp iohelp threads ports ihash ps shouldbeinlibc
++	
++include ../Makeconf
+diff --exclude=CVS -Naur foo/bootstrap.c procfs/bootstrap.c
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/bootstrap.c	2008-08-14 15:24:49.000000000 +0200
+@@ -0,0 +1,95 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   bootstrap.c -- This file is functions for starting up 
++                  and initializers for the procfs translator
++                  defined in procfs.h
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++*/
++
++#include <stddef.h>
++#include <hurd/ihash.h>
++#include <hurd/netfs.h>
++
++#include "procfs.h"
++
++struct ps_context *ps_context;
++
++/* This function is used to initialize the whole translator, can be
++   effect called as bootstrapping the translator. */
++error_t procfs_init ()
++{
++  error_t err;
++  
++  err = ps_context_create (getproc (), &ps_context);
++  
++  return err; 
++}
++
++/* Create a new procfs filesystem.  */
++error_t procfs_create (char *procfs_root, int fsid,
++                       struct procfs **fs)
++{
++  error_t err;
++  /* This is the enclosing directory for this filesystem's
++     root node  */
++  struct procfs_dir *topmost_root_dir;
++ 
++  /* And also a topmost-root node, just used for locking
++     TOPMOST_ROOT_DIR.  */
++  struct node *topmost_root;
++  
++  /* The new node for the filesystem's root.  */
++  struct procfs *new = malloc (sizeof (struct procfs));
++
++  if (! new)
++    return ENOMEM;
++
++  new->fsid = fsid;
++  new->next_inode = 2;
++
++  hurd_ihash_init (&new->inode_mappings,
++		   offsetof (struct procfs_dir_entry, inode_locp));
++  spin_lock_init (&new->inode_mappings_lock);
++
++  topmost_root = netfs_make_node (0);
++  if (! topmost_root)
++    err = ENOMEM;
++  else
++    {
++      err = procfs_dir_create (new, topmost_root, procfs_root,
++                               &topmost_root_dir);
++      if (! err)
++        {
++          /* ADDITIONAL BOOTSTRAPPING OF THE ROOT NODE */
++	  err = procfs_dir_null_lookup (topmost_root_dir, &new->root);   
++        }
++    }
++
++  if (err)
++    {
++      hurd_ihash_destroy (&new->inode_mappings);
++      free (new);
++    }
++  else
++    *fs = new;
++
++  return err;
++}
++
+diff --exclude=CVS -Naur foo/netfs.c procfs/netfs.c
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/netfs.c	2008-09-02 00:16:23.000000000 +0200
+@@ -0,0 +1,466 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++*/
++
++#include <stddef.h>
++#include <stdlib.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <dirent.h>
++#include <string.h>
++
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <hurd/netfs.h>
++
++#include "procfs.h"
++
++/* Trivial definitions.  */
++
++/* Make sure that NP->nn_stat is filled with current information.  CRED
++   identifies the user responsible for the operation.  */
++error_t
++netfs_validate_stat (struct node *node, struct iouser *cred)
++{
++  return procfs_refresh_node (node);
++}
++
++/* This should sync the file NODE completely to disk, for the user CRED.  If
++   WAIT is set, return only after sync is completely finished.  */
++error_t
++netfs_attempt_sync (struct iouser *cred, struct node *node, int wait)
++{
++  return 0;
++}
++
++/* Attempt to create a new directory named NAME in DIR for USER with mode
++   MODE.  */
++error_t netfs_attempt_mkdir (struct iouser *user, struct node *dir,
++			     char *name, mode_t mode)
++{
++  return EROFS;
++}
++
++/* Attempt to remove directory named NAME in DIR for USER. */
++error_t netfs_attempt_rmdir (struct iouser *user,
++			     struct node *dir, char *name)
++{
++  return EROFS;
++}
++
++/* Attempt to set the passive translator record for FILE to ARGZ (of length
++   ARGZLEN) for user CRED. */
++error_t netfs_set_translator (struct iouser *cred, struct node *node,
++			      char *argz, size_t argzlen)
++{
++  return EROFS;
++}
++
++/* Attempt to create a file named NAME in DIR for USER with MODE.  Set *NODE
++   to the new node upon return.  On any error, clear *NODE.  *NODE should be
++   locked on success; no matter what, unlock DIR before returning.  */
++error_t
++netfs_attempt_create_file (struct iouser *user, struct node *dir,
++			   char *name, mode_t mode, struct node **node)
++{
++  *node = NULL;
++  mutex_unlock (&dir->lock);
++  return EROFS;
++}
++
++/* Node NODE is being opened by USER, with FLAGS.  NEWNODE is nonzero if we
++   just created this node.  Return an error if we should not permit the open
++   to complete because of a permission restriction. */
++error_t
++netfs_check_open_permissions (struct iouser *user, struct node *node,
++			      int flags, int newnode)
++{
++  error_t err = procfs_refresh_node (node);
++  if (!err && (flags & O_READ))
++    err = fshelp_access (&node->nn_stat, S_IREAD, user);
++  if (!err && (flags & O_WRITE))
++    err = fshelp_access (&node->nn_stat, S_IWRITE, user);
++  if (!err && (flags & O_EXEC))
++    err = fshelp_access (&node->nn_stat, S_IEXEC, user);
++  return err;
++}
++
++/* This should attempt a utimes call for the user specified by CRED on node
++   NODE, to change the atime to ATIME and the mtime to MTIME. */
++error_t
++netfs_attempt_utimes (struct iouser *cred, struct node *node,
++		      struct timespec *atime, struct timespec *mtime)
++{
++  error_t err = procfs_refresh_node (node);
++  int flags = TOUCH_CTIME;
++
++  if (! err)
++    err = fshelp_isowner (&node->nn_stat, cred);
++
++  if (! err)
++    {
++      if (atime)
++	node->nn_stat.st_atim = *atime;
++      else
++	flags |= TOUCH_ATIME;
++
++      if (mtime)
++	node->nn_stat.st_mtim = *mtime;
++      else
++	flags |= TOUCH_MTIME;
++
++      fshelp_touch (&node->nn_stat, flags, procfs_maptime);
++    }
++
++  return err;
++}
++
++/* Return the valid access types (bitwise OR of O_READ, O_WRITE, and O_EXEC)
++   in *TYPES for file NODE and user CRED.  */
++error_t
++netfs_report_access (struct iouser *cred, struct node *node, int *types)
++{
++  error_t err = procfs_refresh_node (node);
++
++  if (! err)
++    {
++      *types = 0;
++      if (fshelp_access (&node->nn_stat, S_IREAD, cred) == 0)
++	*types |= O_READ;
++      if (fshelp_access (&node->nn_stat, S_IWRITE, cred) == 0)
++	*types |= O_WRITE;
++      if (fshelp_access (&node->nn_stat, S_IEXEC, cred) == 0)
++	*types |= O_EXEC;
++    }
++
++  return err;
++}
++
++/* The granularity with which we allocate space to return our result.  */
++#define DIRENTS_CHUNK_SIZE	(8*1024)
++
++/* Returned directory entries are aligned to blocks this many bytes long.
++   Must be a power of two.  */
++#define DIRENT_ALIGN 4
++#define DIRENT_NAME_OFFS offsetof (struct dirent, d_name)
++
++/* Length is structure before the name + the name + '\0', all
++   padded to a four-byte alignment.  */
++#define DIRENT_LEN(name_len)						      \
++  ((DIRENT_NAME_OFFS + (name_len) + 1 + (DIRENT_ALIGN - 1))		      \
++   & ~(DIRENT_ALIGN - 1))
++
++
++
++/* Fetch a directory  */
++error_t
++netfs_get_dirents (struct iouser *cred, struct node *dir,
++		 int first_entry, int max_entries, char **data,
++		 mach_msg_type_number_t *data_len,
++		 vm_size_t max_data_len, int *data_entries)
++{
++  error_t err = procfs_refresh_node (dir);
++  struct procfs_dir_entry *dir_entry;
++
++  if (! err)
++    {
++      if (dir->nn->dir) 
++        {
++          if (! procfs_dir_refresh (dir->nn->dir, dir == dir->nn->fs->root))
++            {
++              for (dir_entry = dir->nn->dir->ordered; first_entry > 0 &&
++                  dir_entry; first_entry--,
++                  dir_entry = dir_entry->ordered_next);
++              if (! dir_entry )
++                max_entries = 0;
++                
++              if (max_entries != 0)
++                {  
++                  size_t size = 0;
++                  char *p;
++                  int count = 0;
++
++             
++                  if (max_data_len == 0) 
++                    size = DIRENTS_CHUNK_SIZE;
++                  else if (max_data_len > DIRENTS_CHUNK_SIZE)
++                    size = DIRENTS_CHUNK_SIZE;
++                  else 
++                    size = max_data_len;  
++                
++                  *data = mmap (0, size, PROT_READ|PROT_WRITE,
++		            MAP_ANON, 0, 0);
++		             
++	          err = ((void *) *data == (void *) -1) ? errno : 0;
++	       
++	          if (! err)
++	            {
++	              p = *data;
++	           
++	              /* This gets all the actual entries present.  */
++
++                      while ((max_entries == -1 || count < max_entries) && dir_entry)
++                        {
++                          struct dirent hdr;
++                          size_t name_len = strlen (dir_entry->name);
++                          size_t sz = DIRENT_LEN (name_len);
++                          int entry_type = IFTODT (dir_entry->stat.st_mode);
++
++                          if ((p - *data) + sz > size)
++       		            {
++		              if (max_data_len > 0)
++		                break;
++		              else   /* The Buffer Size must be increased. */
++                                {
++		                  vm_address_t extension = (vm_address_t)(*data + size);
++		                  err = vm_allocate (mach_task_self (), &extension,
++					 DIRENTS_CHUNK_SIZE, 0);
++					 
++		                  if (err)
++			            break;
++			           
++		                  size += DIRENTS_CHUNK_SIZE;
++		                }
++		            }
++
++	                  hdr.d_namlen = name_len;
++                          hdr.d_fileno = dir_entry->stat.st_ino;
++	                  hdr.d_reclen = sz;
++	                  hdr.d_type = entry_type;
++
++	                  memcpy (p, &hdr, DIRENT_NAME_OFFS);
++	                  strcpy (p + DIRENT_NAME_OFFS, dir_entry->name);
++
++	                  p += sz;
++
++                          count++;
++	                  dir_entry = dir_entry->ordered_next;
++                        }
++                        
++                      if (err)
++                        munmap (*data, size);
++                      else
++                        {
++	                  vm_address_t alloc_end = (vm_address_t)(*data + size);
++	                  vm_address_t real_end = round_page (p);
++	                  if (alloc_end > real_end)
++		            munmap ((caddr_t) real_end, alloc_end - real_end);
++	                  *data_len = p - *data;
++	                  *data_entries = count;
++	                }  
++	            }
++                }
++              else
++                {
++                  *data_len = 0;
++                  *data_entries = 0;
++                }
++            }
++        }
++      else
++        return ENOTDIR;          
++    }      
++  procfs_dir_entries_remove (dir->nn->dir);  
++  return err;
++}		 
++
++/* Lookup NAME in DIR for USER; set *NODE to the found name upon return.  If
++   the name was not found, then return ENOENT.  On any error, clear *NODE.
++   (*NODE, if found, should be locked, this call should unlock DIR no matter
++   what.) */
++error_t netfs_attempt_lookup (struct iouser *user, struct node *dir,
++			      char *name, struct node **node)
++{
++  error_t err = procfs_refresh_node (dir);
++
++  if (! err)
++    err = procfs_dir_lookup (dir->nn->dir, name, node);
++
++  return err;
++}
++
++/* Delete NAME in DIR for USER. */
++error_t netfs_attempt_unlink (struct iouser *user, struct node *dir,
++			      char *name)
++{
++  return EROFS;
++}
++
++/* Note that in this one call, neither of the specific nodes are locked. */
++error_t netfs_attempt_rename (struct iouser *user, struct node *fromdir,
++			      char *fromname, struct node *todir,
++			      char *toname, int excl)
++{
++  return EROFS;
++}
++
++/* This should attempt a chmod call for the user specified by CRED on node
++   NODE, to change the owner to UID and the group to GID. */
++error_t netfs_attempt_chown (struct iouser *cred, struct node *node,
++			     uid_t uid, uid_t gid)
++{
++  return EROFS;
++}
++
++/* This should attempt a chauthor call for the user specified by CRED on node
++   NODE, to change the author to AUTHOR. */
++error_t netfs_attempt_chauthor (struct iouser *cred, struct node *node,
++				uid_t author)
++{
++  return EROFS;
++}
++
++/* This should attempt a chmod call for the user specified by CRED on node
++   NODE, to change the mode to MODE.  Unlike the normal Unix and Hurd meaning
++   of chmod, this function is also used to attempt to change files into other
++   types.  If such a transition is attempted which is impossible, then return
++   EOPNOTSUPP.  */
++error_t netfs_attempt_chmod (struct iouser *cred, struct node *node,
++			     mode_t mode)
++{
++  return EROFS;
++}
++
++/* Attempt to turn NODE (user CRED) into a symlink with target NAME. */
++error_t netfs_attempt_mksymlink (struct iouser *cred, struct node *node,
++				 char *name)
++{
++  return EROFS;
++}
++
++/* Attempt to turn NODE (user CRED) into a device.  TYPE is either S_IFBLK or
++   S_IFCHR. */
++error_t netfs_attempt_mkdev (struct iouser *cred, struct node *node,
++			     mode_t type, dev_t indexes)
++{
++  return EROFS;
++}
++
++
++/* This should attempt a chflags call for the user specified by CRED on node
++   NODE, to change the flags to FLAGS. */
++error_t netfs_attempt_chflags (struct iouser *cred, struct node *node,
++			       int flags)
++{
++  return EROFS;
++}
++
++/* This should attempt to set the size of the file NODE (for user CRED) to
++   SIZE bytes long. */
++error_t netfs_attempt_set_size (struct iouser *cred, struct node *node,
++				off_t size)
++{
++  return EROFS;
++}
++
++/* This should attempt to fetch filesystem status information for the remote
++   filesystem, for the user CRED. */
++error_t
++netfs_attempt_statfs (struct iouser *cred, struct node *node,
++		      struct statfs *st)
++{
++  bzero (st, sizeof *st);
++  st->f_type = PROCFILESYSTEM;
++  st->f_fsid = getpid ();
++  return 0;
++}
++
++/* This should sync the entire remote filesystem.  If WAIT is set, return
++   only after sync is completely finished.  */
++error_t netfs_attempt_syncfs (struct iouser *cred, int wait)
++{
++  return 0;
++}
++
++/* Create a link in DIR with name NAME to FILE for USER.  Note that neither
++   DIR nor FILE are locked.  If EXCL is set, do not delete the target, but
++   return EEXIST if NAME is already found in DIR.  */
++error_t netfs_attempt_link (struct iouser *user, struct node *dir,
++			    struct node *file, char *name, int excl)
++{
++  return EROFS;
++}
++
++/* Attempt to create an anonymous file related to DIR for USER with MODE.
++   Set *NODE to the returned file upon success.  No matter what, unlock DIR. */
++error_t netfs_attempt_mkfile (struct iouser *user, struct node *dir,
++			      mode_t mode, struct node **node)
++{
++  *node = NULL;
++  mutex_unlock (&dir->lock);
++  return EROFS;
++}
++
++/* Read the contents of NODE (a symlink), for USER, into BUF. */
++error_t netfs_attempt_readlink (struct iouser *user, struct node *node, char *buf)
++{
++  error_t err = procfs_refresh_node (node);
++  if (! err)
++    {
++      struct procfs_dir_entry *dir_entry = node->nn->dir_entry;
++      if (dir_entry)
++	bcopy (dir_entry->symlink_target, buf, node->nn_stat.st_size);
++      else
++	err = EINVAL;
++    }
++  return err;
++}
++
++/* Read from the file NODE for user CRED starting at OFFSET and continuing for
++   up to *LEN bytes.  Put the data at DATA.  Set *LEN to the amount
++   successfully read upon return.  */
++error_t netfs_attempt_read (struct iouser *cred, struct node *node,
++			    off_t offset, size_t *len, void *data)
++{
++  error_t err;
++  err = procfs_refresh_node (node);
++
++  if (! err)
++    {
++      if (*len > 0)
++        procfs_read_files_contents (node, offset,
++                                    len, data);
++      if (*len > 0)
++        if (offset >= *len)
++          *len = 0;
++    }
++
++  return err;
++}
++
++/* Write to the file NODE for user CRED starting at OFFSET and continuing for up
++   to *LEN bytes from DATA.  Set *LEN to the amount seccessfully written upon
++   return. */
++error_t netfs_attempt_write (struct iouser *cred, struct node *node,
++			     off_t offset, size_t *len, void *data)
++{
++  return EROFS;
++}
++
++/* The user must define this function.  Node NP is all done; free
++   all its associated storage. */
++void netfs_node_norefs (struct node *np)
++{
++	mutex_lock (&np->lock);
++	*np->prevp = np->next;
++	np->next->prevp = np->prevp;
++	procfs_remove_node (np);
++}
++
+diff --exclude=CVS -Naur foo/node.c procfs/node.c
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/node.c	2008-08-14 15:24:49.000000000 +0200
+@@ -0,0 +1,195 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   node.c -- This file contains function defintions to handle
++             node creation and destruction.
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++*/
++#include <stdio.h>
++#include <stdlib.h>
++#include <fcntl.h>
++#include <string.h>
++#include <errno.h>
++#include <hurd/ihash.h>
++#include <hurd/fshelp.h>
++#include <hurd/iohelp.h>
++
++#include <hurd/netfs.h>
++
++#include "procfs.h"
++
++/* Return a new node in NODE, with a name NAME, and return the
++   new node with a single reference in NODE. */
++error_t procfs_create_node (struct procfs_dir_entry *dir_entry, 
++                            const char *fs_path, struct node **node)
++{
++  struct node *new;
++  struct netnode *nn = malloc (sizeof (struct netnode));
++  error_t err;
++
++  if (! nn)
++    return ENOMEM;
++  if (! fs_path)
++    fs_path = strdup ("");
++  nn->fs = dir_entry->dir->fs;
++  nn->dir_entry = dir_entry;
++  nn->dir = NULL;
++  nn->fs_path = strdup (fs_path);
++
++  new = netfs_make_node (nn);
++  if (! new)
++    {
++      free (nn);
++      return ENOMEM;
++    }
++
++  fshelp_touch (&new->nn_stat, TOUCH_ATIME|TOUCH_MTIME|TOUCH_CTIME,
++		procfs_maptime);
++
++  spin_lock (&nn->fs->inode_mappings_lock);
++  err = hurd_ihash_add (&nn->fs->inode_mappings, dir_entry->stat.st_ino, dir_entry);
++  spin_unlock (&nn->fs->inode_mappings_lock);
++
++  if (err)
++    {
++      free (nn);
++      free (new);
++      return err;
++    }
++ 
++  dir_entry->node = new;
++  *node = new;
++
++  return 0;
++}
++
++/* Update the directory entry for NAME to reflect ST and SYMLINK_TARGET.
++   True is returned if successful, or false if there was a memory allocation
++   error.  TIMESTAMP is used to record the time of this update.  */
++static void
++update_entry (struct procfs_dir_entry *dir_entry, const struct stat *st,
++	      const char *symlink_target, time_t timestamp)
++{
++  ino_t ino;
++  struct procfs *fs = dir_entry->dir->fs;
++
++  if (dir_entry->stat.st_ino)
++    ino = dir_entry->stat.st_ino;
++  else
++    ino = fs->next_inode++;
++
++  dir_entry->name_timestamp = timestamp;
++
++  if (st)
++    /* The ST and SYMLINK_TARGET parameters are only valid if ST isn't 0.  */
++    {
++      dir_entry->stat = *st;
++      dir_entry->stat_timestamp = timestamp;
++
++      if (!dir_entry->symlink_target || !symlink_target
++	  || strcmp (dir_entry->symlink_target, symlink_target) != 0)
++	{
++	  if (dir_entry->symlink_target)
++	    free (dir_entry->symlink_target);
++	  dir_entry->symlink_target = symlink_target ? strdup (symlink_target) : 0;
++	}
++    }
++
++  /* The st_ino field is always valid.  */
++  dir_entry->stat.st_ino = ino;
++  dir_entry->stat.st_fsid = fs->fsid;
++  dir_entry->stat.st_fstype = PROCFILESYSTEM;
++}
++
++/* Refresh stat information for NODE */
++error_t procfs_refresh_node (struct node *node)
++{
++  struct netnode *nn = node->nn;
++  struct procfs_dir_entry *dir_entry = nn->dir_entry;
++
++  if (! dir_entry)
++    /* This is a deleted node, don't attempt to do anything.  */
++    return 0;
++  else
++    {
++      error_t err = 0;
++      
++      struct timeval tv;
++      maptime_read (procfs_maptime, &tv); 
++  
++      time_t timestamp = tv.tv_sec;
++
++      struct procfs_dir *dir = dir_entry->dir;
++
++      mutex_lock (&dir->node->lock);
++
++      if (! dir_entry->self_p)
++	/* This is a deleted entry, just awaiting disposal; do so.  */
++	{
++#if 0
++	  nn->dir_entry = 0;
++	  free_entry (dir_entry);
++	  return 0;
++#endif
++	}
++      
++      else if (dir_entry->noent)
++	err = ENOENT;
++      else 
++        {
++          if (*(dir_entry->name))
++            {
++              err =  procfs_dir_refresh (dir_entry->dir, 
++              dir_entry->dir->node == dir_entry->dir->fs->root);
++	      if (!err && dir_entry->noent)
++	        err = ENOENT;
++
++              if (err == ENOENT)
++	        {
++	          dir_entry->noent = 1; /* A negative entry.  */
++	          dir_entry->name_timestamp = timestamp;
++	        }
++            }
++          else
++	    {
++	      /* Refresh the root node with the old stat
++                 information.  */             
++              update_entry (dir_entry, &netfs_root_node->nn_stat, NULL, timestamp);     
++	    }
++	}
++
++      node->nn_stat = dir_entry->stat;
++      node->nn_translated = S_ISLNK (dir_entry->stat.st_mode) ? S_IFLNK : 0;
++      if (!nn->dir && S_ISDIR (dir_entry->stat.st_mode))
++	procfs_dir_create (nn->fs, node, nn->fs_path, &nn->dir);
++
++      mutex_unlock (&dir->node->lock);
++
++      return err;
++    }
++}
++
++/* Remove NODE from its entry */
++error_t procfs_remove_node (struct node *node)
++{
++
++    /* STUB */
++    
++  return 0;    
++}
+diff --exclude=CVS -Naur foo/procfs.c procfs/procfs.c
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/procfs.c	2008-08-14 15:24:50.000000000 +0200
+@@ -0,0 +1,149 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++             
++   procfs.c -- This file is the main file of the translator.
++               This has important definitions and initializes
++               the translator
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++*/
++
++#include <stdio.h>
++#include <argp.h>
++#include <string.h>
++#include <stdlib.h>
++
++#include <unistd.h>
++#include <error.h>
++#include <sys/stat.h>
++#include <hurd/netfs.h>
++
++#include "procfs.h"
++
++/* Defines this Tanslator Name */
++char *netfs_server_name = PROCFS_SERVER_NAME;
++char *netfs_server_version = PROCFS_SERVER_VERSION;
++int netfs_maxsymlinks = 12;
++
++static const struct argp_child argp_children[] = 
++  {
++    {&netfs_std_startup_argp, 0, NULL, 0},
++    {0}
++  };
++
++
++const char *argp_program_version = "/proc pseudo-filesystem (" PROCFS_SERVER_NAME
++ ") " PROCFS_SERVER_VERSION "\n"
++"Copyright (C) 2008 Free Software Foundation\n"
++"This is free software; see the source for copying conditions.  There is NO\n"
++"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
++"\n";
++
++static char *args_doc = "PROCFSROOT";
++static char *doc = "proc pseudo-filesystem for Hurd implemented as a translator. "
++"This is still under very humble and initial stages of development.\n"
++"Any Contribution or help is welcome. The code may not even compile";
++
++
++/* The Filesystem */
++struct procfs *procfs;
++
++/* The FILESYSTEM component of PROCFS_FS.  */
++char *procfs_root = "";
++
++volatile struct mapped_time_value *procfs_maptime;
++
++/* Startup options.  */
++static const struct argp_option procfs_options[] = 
++  {
++    { 0 }
++  };
++
++  
++/* argp parser function for parsing single procfs command line options  */  
++static error_t
++parse_procfs_opt (int key, char *arg, struct argp_state *state)
++{
++  switch (key) 
++    {
++    case ARGP_KEY_ARG:
++      if (state->arg_num > 1) 
++        argp_usage (state);
++      break;
++      
++    case ARGP_KEY_NO_ARGS:
++      argp_usage(state);
++      break;
++      
++    default:
++      return ARGP_ERR_UNKNOWN;
++    }
++}
++
++/* Program entry point. */
++int 
++main (int argc, char **argv)
++{
++  error_t err;
++  mach_port_t bootstrap, underlying_node;
++  struct stat underlying_stat;
++  
++  struct argp argp = 
++    {
++      procfs_options, parse_procfs_opt,
++      args_doc, doc, argp_children,
++      NULL, NULL  
++    }; 
++    
++   
++  /* Parse the command line arguments */
++//  argp_parse (&argp, argc, argv, 0, 0, 0);
++
++  task_get_bootstrap_port (mach_task_self (), &bootstrap);
++
++  netfs_init ();
++        
++  if (maptime_map (0, 0, &procfs_maptime)) 
++    {
++      perror (PROCFS_SERVER_NAME ": Cannot map time");
++      return 1;
++    }
++  
++  procfs_init ();
++
++  err = procfs_create (procfs_root, getpid (), &procfs);
++  if (err)
++    error (4, err, "%s", procfs_root);
++     
++  /* Create our root node */
++  netfs_root_node = procfs->root;
++
++  /* Start netfs activities */  
++  underlying_node = netfs_startup (bootstrap, 0);
++  if (io_stat (underlying_node, &underlying_stat))
++    error (1, err, "cannot stat underling node");
++
++  /* Initialize stat information of the root node.  */
++  netfs_root_node->nn_stat = underlying_stat;
++  netfs_root_node->nn_stat.st_mode =
++    S_IFDIR | (underlying_stat.st_mode & ~S_IFMT & ~S_ITRANS);
++  
++  for (;;)  
++    netfs_server_loop ();
++  return 1;
++}
+diff --exclude=CVS -Naur foo/procfs.h procfs/procfs.h
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/procfs.h	2008-08-18 17:15:33.000000000 +0200
+@@ -0,0 +1,220 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   procfs.h -- This file is the main header file of this
++               translator. This has important header 
++               definitions for constants and functions 
++               used in the translator.
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++   
++   A portion of the code in this file is based on ftpfs code
++   present in the hurd repositories copyrighted to FSF. The
++   Copyright notice from that file is given below.
++   
++   Copyright (C) 1997,98,2002 Free Software Foundation, Inc.
++   Written by Miles Bader <miles@gnu.org>
++   This file is part of the GNU Hurd.
++*/
++
++#ifndef __PROCFS_H__
++#define __PROCFS_H__
++
++#define PROCFS_SERVER_NAME "procfs"
++#define PROCFS_SERVER_VERSION "0.0.1"
++
++/* /proc Filesystem type. */
++#define PROCFILESYSTEM "procfs"
++
++#define NUMBER_OF_FILES_PER_PID 1
++#define JIFFY_ADJUST 100
++#define PAGES_TO_BYTES(pages) ((pages) * sysconf(_SC_PAGESIZE))
++#define BYTES_TO_PAGES(bytes) ((bytes) / sysconf(_SC_PAGESIZE))
++
++#include <stdlib.h>
++#include <unistd.h>
++#include <cthreads.h>
++#include <maptime.h>
++#include <hurd/ihash.h>
++#include <ps.h>
++
++typedef unsigned long long jiffy_t;
++
++/* A single entry in a directory.  */
++struct procfs_dir_entry
++{
++  char *name;			/* Name of this entry */
++  size_t hv;			/* Hash value of NAME  */
++
++  /* The active node referred to by this name (may be 0).
++     NETFS_NODE_REFCNT_LOCK should be held while frobbing this.  */
++  struct node *node;
++
++  struct stat stat;
++  char *symlink_target;
++  time_t stat_timestamp;
++
++  /* The directory to which this entry belongs.  */
++  struct procfs_dir *dir;
++
++  /* Link to next entry in hash bucket, and address of previous entry's (or
++     hash table's) pointer to this entry.  If the SELF_P field is 0, then
++     this is a deleted entry, awaiting final disposal.  */
++  struct procfs_dir_entry *next, **self_p;
++
++  /* Next entry in 'directory order', or 0 if none known.  */
++  struct procfs_dir_entry *ordered_next, **ordered_self_p;
++
++  /* When the presence/absence of this file was last checked.  */
++  time_t name_timestamp;
++
++  hurd_ihash_locp_t inode_locp;	/* Used for removing this entry */
++
++  int noent : 1;		/* A negative lookup result.  */
++  int valid : 1;		/* Marker for GC'ing.  */
++};
++
++/* A directory.  */
++struct procfs_dir
++{
++  /* Number of entries in HTABLE.  */
++  size_t num_entries;
++
++  /* The number of entries that have nodes attached.  We keep an additional
++     reference to our node if there are any, to prevent it from going away.  */
++  size_t num_live_entries;
++
++  /* Hash table of entries.  */
++  struct procfs_dir_entry **htable;
++  size_t htable_len;		/* # of elements in HTABLE (not bytes).  */
++
++  /* List of dir entries in 'directory order', in a linked list using the
++     ORDERED_NEXT and ORDERED_SELF_P fields in each entry.  Not all entries
++     in HTABLE need be in this list.  */
++  struct procfs_dir_entry *ordered;
++
++  /* The filesystem node that this is the directory for.  */
++  struct node *node;
++
++  /* The filesystem this directory is in.  */
++  struct procfs *fs;
++
++  /* The path to this directory in the filesystem.  */
++  const char *fs_path;
++
++  time_t stat_timestamp;
++  time_t name_timestamp;
++
++};
++
++
++/* libnetfs node structure */
++struct netnode 
++{ 
++  /* Name of this node */
++  char *name; 
++
++  /* The path in the filesystem that corresponds
++     this node. */
++  char *fs_path;
++    
++  /* The directory entry for this node.  */
++  struct procfs_dir_entry *dir_entry;
++  
++  /* The proc filesystem */
++  struct procfs *fs;
++  
++  /* inode number, assigned to this netnode structure. */
++  unsigned int inode_num;
++  
++  /* If this is a directory, the contents, or 0 if not fetched.  */
++  struct procfs_dir *dir;
++  
++  /* pointer to node structure, assigned to this node. */
++  struct node *node;
++  
++  /* links to the previous and next nodes in the list */
++  struct netnode *nextnode, *prevnode;
++  
++  /* link to parent netnode of this file or directory */
++  struct netnode *parent;
++  
++  /* link to the first child netnode of this directory */
++  struct netnode *child_first;
++};
++
++/* The actual procfs filesystem structure */
++struct procfs 
++{
++  /* Root of the filesystem. */
++  struct node *root;
++  
++  /* Inode numbers are assigned sequentially in order of creation.  */
++  ino_t next_inode;
++  int fsid;
++  
++  /* A hash table mapping inode numbers to directory entries.  */
++  struct hurd_ihash inode_mappings;
++  spin_lock_t inode_mappings_lock;
++};
++
++extern struct procfs *procfs;
++
++extern volatile struct mapped_time_value *procfs_maptime;
++
++extern struct ps_context *ps_context;
++
++/* Create a new procfs filesystem.  */
++error_t procfs_create (char *procfs_root, int fsid,
++                       struct procfs **fs);
++
++/* Initialize the procfs filesystem for use. */
++error_t procfs_init ();
++
++/* Refresh stat information for NODE */
++error_t procfs_refresh_node (struct node *node);
++
++/* Return a new node in NODE, with a name NAME, 
++   and return the new node with a single
++   reference in NODE. */
++error_t procfs_create_node (struct procfs_dir_entry *dir_entry, 
++                            const char *fs_path,
++                            struct node **node);
++
++/* Remove NODE from its entry */
++error_t procfs_remove_node (struct node *node);
++
++/* Return in DIR a new procfs directory, in the filesystem FS,
++   with node NODE and path PATH. */
++error_t procfs_dir_create (struct procfs *fs, struct node *node,
++			  const char *path, struct procfs_dir **dir);
++
++/* Remove the specified DIR and free all its allocated
++   storage. */
++void procfs_dir_remove (struct procfs_dir *dir);
++
++/* Refresh DIR.  */
++error_t procfs_dir_refresh (struct procfs_dir *dir, int isroot);
++
++/* Lookup NAME in DIR, returning its entry, or an error. 
++   *NODE will contain the result node, locked, and with
++   an additional reference, or 0 if an error occurs.  */
++error_t procfs_dir_lookup (struct procfs_dir *dir, const char *name,
++			  struct node **node);
++
++#endif /* __PROCFS_H__ */
+diff --exclude=CVS -Naur foo/procfs_dir.c procfs/procfs_dir.c
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/procfs_dir.c	2008-09-01 23:47:03.000000000 +0200
+@@ -0,0 +1,664 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   procfs_dir.c -- This file contains definitions to perform
++                   directory operations such as creating,
++                   removing and refreshing directories.
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++   
++   A portion of the code in this file is based on ftpfs code
++   present in the hurd repositories copyrighted to FSF. The
++   Copyright notice from that file is given below.
++   
++   Copyright (C) 1997,98,2002 Free Software Foundation, Inc.
++   Written by Miles Bader <miles@gnu.org>
++   This file is part of the GNU Hurd.
++*/
++
++
++#include <stdio.h>
++#include <unistd.h>
++#include <hurd/netfs.h>
++#include <hurd/ihash.h>
++#include <sys/stat.h>
++
++#include "procfs.h"
++
++/* Initial HASHTABLE length for the new directories to be created. */
++#define INIT_HTABLE_LEN 5
++
++struct procfs_dir_entry **cur_entry;
++
++/* Return in DIR a new procfs directory, in the filesystem FS,
++   with node NODE and path PATH. */
++error_t procfs_dir_create (struct procfs *fs, struct node *node,
++			  const char *path, struct procfs_dir **dir)
++{
++  struct procfs_dir *new = malloc (sizeof (struct procfs_dir));
++  if (!new) 
++    return ENOMEM;
++  struct procfs_dir_entry **htable = calloc (INIT_HTABLE_LEN,
++                            sizeof (struct procfs_dir_entry *));
++  if (!htable)
++    return ENOMEM;
++
++  /* Hold a reference to the new dir's node.  */
++  spin_lock (&netfs_node_refcnt_lock);
++  node->references++;
++  spin_unlock (&netfs_node_refcnt_lock);
++
++  new->num_entries = 0;
++  new->num_live_entries = 0;
++  new->htable_len = INIT_HTABLE_LEN;
++  new->htable = htable;
++  new->ordered = NULL;
++  new->fs_path = path;
++  new->fs = fs;
++  new->node = node;
++  new->stat_timestamp = 0;
++  new->name_timestamp = 0;
++
++  *dir = new;
++
++  if (fs->root != 0)
++    node->nn->dir = new;
++
++  return 0;
++}
++
++/* Put the directory entry DIR_ENTRY into the hash table HTABLE. */
++static void
++insert (struct procfs_dir_entry *dir_entry,
++	struct procfs_dir_entry **htable, size_t htable_len)
++{
++  struct procfs_dir_entry **new_htable = &htable[dir_entry->hv % htable_len];
++  if (*new_htable)
++    (*new_htable)->self_p = &dir_entry->next;
++  dir_entry->next = *new_htable;
++  dir_entry->self_p = new_htable;
++  *new_htable = dir_entry;
++}
++
++/* Calculate NAME's hash value.  */
++static size_t
++hash (const char *name)
++{
++  size_t hash_value = 0;
++  while (*name)
++    hash_value = ((hash_value << 5) + *name++) & 0xFFFFFF;
++  return hash_value;
++}
++
++/* Extend the existing hashtable for DIR to accomodate values for new length
++   NEW_LEN. We retain all the previous entries. */
++static error_t
++rehash (struct procfs_dir *dir, size_t new_len)
++{
++  int count;
++  size_t old_len = dir->htable_len;
++  struct procfs_dir_entry **old_htable = dir->htable;
++  struct procfs_dir_entry **new_htable = (struct procfs_dir_entry **)
++    malloc (new_len * sizeof (struct procfs_dir_entry *));
++
++  if (! new_htable)
++    return ENOMEM;
++
++  bzero (new_htable, new_len * sizeof (struct procfs_dir_entry *));
++
++  for (count = 0; count < old_len; count++)
++    while (old_htable[count])
++      {
++	struct procfs_dir_entry *dir_entry = old_htable[count];
++
++	/* Remove DIR_ENTRY from the old table */
++	old_htable[count] = dir_entry->next;
++
++	insert (dir_entry, new_htable, new_len);
++      }
++
++  free (old_htable);
++
++  dir->htable = new_htable;
++  dir->htable_len = new_len;
++
++  return 0;
++}
++
++/* Lookup NAME in DIR and return its entry.  If there is no such entry, and
++   DNEW, the decision variable, is true, then a new entry is allocated and
++   returned, otherwise 0 is returned (if DNEW is true then 0 can be returned
++   if a memory allocation error occurs).  */
++struct procfs_dir_entry *
++lookup_entry (struct procfs_dir *dir, const char *name, int dnew)
++{
++  size_t hv = hash (name);
++  struct procfs_dir_entry *dir_entry = dir->htable[hv % dir->htable_len];
++
++  while (dir_entry && strcmp (name, dir_entry->name) != 0)
++    dir_entry = dir_entry->next;
++
++  if (!dir_entry && dnew)
++    {
++      if (dir->num_entries > dir->htable_len)
++	/* Grow the hash table.  */
++	if (rehash (dir, (dir->htable_len + 1) * 2 - 1) != 0)
++	  return 0;
++
++      dir_entry = 
++      (struct procfs_dir_entry *) malloc (sizeof (struct procfs_dir_entry));
++
++      if (dir_entry)
++	{
++	  dir_entry->hv = hv;
++	  dir_entry->name = strdup (name);
++	  dir_entry->node = 0;
++	  dir_entry->dir = dir;
++	  dir_entry->stat_timestamp = 0;
++	  bzero (&dir_entry->stat, sizeof dir_entry->stat);
++	  dir_entry->symlink_target = 0;
++	  dir_entry->noent = 0;
++	  dir_entry->valid = 0;
++	  dir_entry->name_timestamp = 0;
++	  dir_entry->ordered_next = 0;
++	  dir_entry->ordered_self_p = 0;
++	  dir_entry->next = 0;
++	  dir_entry->self_p = 0;
++	  insert (dir_entry, dir->htable, dir->htable_len);
++	  dir->num_entries++;
++	}
++    }
++
++  return dir_entry;
++}
++
++
++/* Lookup NAME in DIR, returning its entry, or an error. 
++   *NODE will contain the result node, locked, and with
++   an additional reference, or 0 if an error occurs.  */
++error_t procfs_dir_lookup (struct procfs_dir *dir, const char *name,
++			  struct node **node)
++{
++  struct procfs_dir_entry *dir_entry = 0;
++  error_t err = 0;
++  char *fs_path = dir->fs_path;
++  
++  struct timeval tv;
++  maptime_read (procfs_maptime, &tv); 
++  
++  time_t timestamp = tv.tv_sec;
++ 
++  if (*name == '\0' || strcmp (name, ".") == 0)
++    /* Current directory -- just add an additional reference to DIR's node
++       and return it.  */
++    {
++      netfs_nref (dir->node);
++      *node = dir->node;
++      return 0;
++    }
++  else if (strcmp (name, "..") == 0)
++    /* Parent directory.  */
++    {
++      if (dir->node->nn->dir_entry)
++	{
++	  *node = dir->node->nn->dir_entry->dir->node;
++	  mutex_lock (&(*node)->lock);
++	  netfs_nref (*node);
++	}
++      else
++	{
++	  err = ENOENT;		/* No .. */
++	  *node = 0;
++	}
++
++      mutex_unlock (&dir->node->lock);
++
++      return err;
++    }
++
++  err =  procfs_dir_refresh (dir, dir->node == dir->fs->root);
++  if (!err && !dir_entry)
++    dir_entry = lookup_entry (dir, name, 0);
++   
++  if (! err)
++    {
++      if (dir_entry && !dir_entry->noent)
++	/* We've got a dir entry, get a node for it.  */
++	{
++	  /* If there's already a node, add a ref so that it doesn't go
++             away.  */
++	  spin_lock (&netfs_node_refcnt_lock);
++	  if (dir_entry->node)
++	    dir_entry->node->references++;
++	  spin_unlock (&netfs_node_refcnt_lock);
++
++	  if (! dir_entry->node)
++	    /* No node; make one and install it into E.  */
++	    {
++	      if (! fs_path)
++                err = EROFS;
++
++	      if (! err)
++		{
++		  err = procfs_create_node (dir_entry, fs_path, &dir_entry->node);
++
++		  if (!err && dir->num_live_entries++ == 0)
++		    /* Keep a reference to dir's node corresponding to
++		       children.  */
++		    {
++		      spin_lock (&netfs_node_refcnt_lock);
++		      dir->node->references++;
++		      spin_unlock (&netfs_node_refcnt_lock);
++		    }
++		}
++	    }
++
++	  if (! err)
++	    {
++	      *node = dir_entry->node;
++	      /* We have to unlock DIR's node before locking the child node
++		 because the locking order is always child-parent.  We know
++		 the child node won't go away because we already hold the
++		 additional reference to it.  */
++	      mutex_unlock (&dir->node->lock);
++	      mutex_lock (&dir_entry->node->lock);
++	    }
++	}
++      else
++	err = ENOENT;
++    }
++
++  if (err)
++    {
++      *node = 0;
++      mutex_unlock (&dir->node->lock);
++    }
++
++#if 0
++  if (fs_path)
++    free (fs_path);
++#endif
++
++  return err;
++}
++
++/* Lookup the null name in DIR, and return a node for it in NODE.  Unlike
++   procfs_dir_lookup, this won't attempt to validate the existance of the
++   entry (to avoid opening a new connection if possible) -- that will happen
++   the first time the entry is refreshed.  Also unlink ftpfs_dir_lookup, this
++   function doesn't expect DIR to be locked, and won't return *NODE locked.
++   This function is only used for bootstrapping the root node.  */
++error_t
++procfs_dir_null_lookup (struct procfs_dir *dir, struct node **node)
++{
++  struct procfs_dir_entry *dir_entry;
++  error_t err = 0;
++
++  dir_entry = lookup_entry (dir, "", 1);
++  if (! dir_entry)
++    return ENOMEM;
++
++  if (! dir_entry->noent)
++    /* We've got a dir entry, get a node for it.  */
++    {
++      /* If there's already a node, add a ref so that it doesn't go away.  */
++      spin_lock (&netfs_node_refcnt_lock);
++      if (dir_entry->node)
++	dir_entry->node->references++;
++      spin_unlock (&netfs_node_refcnt_lock);
++
++      if (! dir_entry->node)
++	/* No node; make one and install it into DIR_ENTRY.  */
++	{
++	  err = procfs_create_node (dir_entry, dir->fs_path, &dir_entry->node);
++
++	  if (!err && dir->num_live_entries++ == 0)
++	    /* Keep a reference to dir's node corresponding to children.  */
++	    {
++	      spin_lock (&netfs_node_refcnt_lock);
++	      dir->node->references++;
++	      spin_unlock (&netfs_node_refcnt_lock);
++	    }
++	}
++
++      if (! err)
++	*node = dir_entry->node;
++    }
++  else
++    err = ENOENT;
++
++  return err;
++}
++
++/* Free the directory entry DIR_ENTRY and all resources it consumes.  */
++void
++free_entry (struct procfs_dir_entry *dir_entry)
++{
++
++  assert (! dir_entry->self_p);	      /* We should only free deleted nodes.  */
++  free (dir_entry->name);
++  if (dir_entry->symlink_target)
++    free (dir_entry->symlink_target);
++  free (dir_entry->node->nn->dir);
++  free (dir_entry->node->nn);
++  free (dir_entry->node);
++  free (dir_entry); 
++}
++
++/* Remove DIR_ENTRY from its position in the ordered_next chain.  */
++static void
++ordered_unlink (struct procfs_dir_entry *dir_entry)
++{
++  if (dir_entry->ordered_self_p)
++    *dir_entry->ordered_self_p = dir_entry->ordered_next;
++  if (dir_entry->ordered_next)
++    dir_entry->ordered_next->self_p = dir_entry->ordered_self_p;
++}
++
++/* Delete DIR_ENTRY from its directory, freeing any resources it holds.  */
++static void
++delete (struct procfs_dir_entry *dir_entry, struct procfs_dir *dir)
++{
++  dir->num_entries--;
++  
++  /* Take out of the hash chain.  */
++  if (dir_entry->self_p)
++    *dir_entry->self_p = dir_entry->next;
++  if (dir_entry->next)
++    dir_entry->next->self_p = dir_entry->self_p;
++
++  /* Take out of the directory ordered list.  */
++  ordered_unlink (dir_entry); 
++
++  /* If there's a node attached, we'll delete the entry whenever it goes
++     away, otherwise, just delete it now.  */
++  if (! dir_entry->node)
++    free_entry (dir_entry);    
++}
++
++/* Make all the directory entries invalid  */
++static void
++make_dir_invalid (struct procfs_dir *dir)
++{
++  int count;
++  size_t len = dir->htable_len;
++  struct procfs_dir_entry **htable = dir->htable;
++  struct procfs_dir_entry *dir_entry;
++
++  for (count = 0; count < len; count++)
++    {
++      dir_entry = htable[count];
++      while (dir_entry)
++        {
++          dir_entry->valid = 0;
++          dir_entry = dir_entry->next;
++        }
++    }  
++}
++
++/* Delete any entries in DIR which don't have their valid bit set.  */
++static void
++sweep (struct procfs_dir *dir)
++{
++  size_t len = dir->htable_len, i;
++  struct procfs_dir_entry **htable = dir->htable, *dir_entry;
++
++  for (i = 0; i < len; i++)
++    {
++      dir_entry = htable[i];
++      while (dir_entry)
++        {
++          if (!dir_entry->valid && !dir_entry->noent && dir->num_entries)
++            delete (dir_entry, dir);	
++          dir_entry = dir_entry->next;
++        }
++      if (htable[i])
++        {
++          free (htable[i]);
++          htable[i] = 0;
++        }
++
++    }      
++
++}
++
++/* Remove the specified DIR and free all its allocated
++   storage. */
++void procfs_dir_entries_remove (struct procfs_dir *dir)
++{
++  /* Free all entries.  */
++  make_dir_invalid (dir);
++  sweep (dir);  
++}
++
++/* Checks if the DIR name is in list of 
++   Active pids. */
++int is_in_pid_list (struct procfs_dir *dir)
++{
++  int dir_name;
++  int count;
++  pid_t *pids = NULL;
++  int pidslen = 0;
++  error_t err;
++
++  if (dir->node->nn)
++    {
++      dir_name = atoi (dir->node->nn->dir_entry->name);
++      err = proc_getallpids (getproc (), &pids, &pidslen);
++
++      for (count = 0; count < pidslen; ++count)
++        if (pids[count] == dir_name)
++          return 1;
++    }
++
++  return 0;
++
++}
++
++/* Checks if DIR is a directory that
++   represents a pid. */
++int check_parent (struct procfs_dir *dir)
++{
++  if (dir == dir->fs->root)
++    return 0;
++  else
++    if (is_in_pid_list (dir))
++      return 1;
++    else
++      return 0;
++
++}
++
++/* Refresh DIR.  */
++error_t procfs_dir_refresh (struct procfs_dir *dir, int isroot)
++{
++  error_t err;
++  int is_parent_pid;
++  struct node *node;
++  
++  struct timeval tv;
++  maptime_read (procfs_maptime, &tv); 
++  
++  time_t timestamp = tv.tv_sec;
++  cur_entry = &dir->ordered;
++  if (isroot)
++    err = procfs_fill_root_dir(dir, timestamp);
++  else
++    {
++      err = update_dir_entries (dir, timestamp);
++      is_parent_pid = check_parent (dir);
++      if (is_parent_pid)
++          err = procfs_create_files (dir, &node, timestamp);    
++    }
++
++  return err;
++}
++
++/* Update the directory entry for NAME to reflect STAT and SYMLINK_TARGET. 
++   This also creates a valid linked list of entries imposing ordering on
++   them. */
++struct procfs_dir_entry*
++update_entries_list (struct procfs_dir *dir, const char *name,
++                             const struct stat *stat, time_t timestamp,
++                             const char *symlink_target)
++{
++  ino_t ino;
++  struct procfs_dir_entry *dir_entry = lookup_entry (dir, name, 1);
++  struct procfs *fs = dir->fs;
++  
++  if (! dir_entry)
++    return ENOMEM;
++
++  if (dir_entry->stat.st_ino)
++    ino = dir_entry->stat.st_ino;
++  else
++    ino = fs->next_inode++;
++
++  dir_entry->name_timestamp = timestamp;
++
++  if (stat)
++    /* The ST and SYMLINK_TARGET parameters are only valid if ST isn't 0.  */
++    {
++      dir_entry->stat = *stat;
++      dir_entry->stat_timestamp = timestamp;
++
++      if (!dir_entry->symlink_target || !symlink_target
++	  || strcmp (dir_entry->symlink_target, symlink_target) != 0)
++	{
++	  if (dir_entry->symlink_target)
++	    free (dir_entry->symlink_target);
++	  dir_entry->symlink_target = symlink_target ? strdup (symlink_target) : 0;
++	}
++    }
++
++  /* The st_ino field is always valid.  */
++  dir_entry->stat.st_ino = ino;
++  dir_entry->stat.st_fsid = fs->fsid;
++  dir_entry->stat.st_fstype = PROCFILESYSTEM;
++ 
++  dir_entry->valid = 1;
++
++  if (! dir_entry->ordered_self_p)
++    /* Position DIR_ENTRY in the ordered chain following the previously seen entry.  */
++    {
++      /* The PREV_ENTRY_NEXT_P field holds a pointer to the NEXT-field of the
++	 previous entry, or a pointer to the ORDERED field in the directory. */
++      dir_entry->ordered_self_p = cur_entry;
++
++      if (*dir_entry->ordered_self_p)
++	/* Update the self_p pointer of the previous successor.  */
++	(*dir_entry->ordered_self_p)->ordered_self_p = &dir_entry->ordered_next;
++
++      /* DIR_ENTRY comes before the previous successor.  */
++      dir_entry->ordered_next = *dir_entry->ordered_self_p;
++
++      *dir_entry->ordered_self_p = dir_entry;	/* Put DIR_ENTRY there.  */
++    }
++
++  /* Put the next entry after this one. */
++  cur_entry = &dir_entry->ordered_next;
++
++  return dir_entry;
++}
++
++/* Fills DIR, the root directory with all the pids of 
++   processes running in the system as directories. */
++error_t 
++procfs_fill_root_dir(struct procfs_dir *dir, time_t timestamp)
++{
++  error_t err;
++  char *data;
++  pid_t *pids;
++  int pidslen;
++  struct stat stat;
++  stat.st_mode = S_IFDIR | S_IRUSR | S_IXUSR | S_IRGRP | S_IXGRP | 
++                  S_IROTH | S_IXOTH;
++  stat.st_nlink = 1;
++  stat.st_size = 0;
++
++  int count;
++  char *dir_name_pid;
++  struct node *node;
++  struct procfs_dir *new_dir;
++  struct procfs_dir_entry *dir_entry;
++  struct proc_stat *ps;
++    
++  pids = NULL;
++  pidslen = 0;
++  err = proc_getallpids (getproc (), &pids, &pidslen);
++
++  if (!err)
++    {
++      for (count = 0; count < pidslen; count++)
++	{
++          if (asprintf (&dir_name_pid, "%d", pids[count]) == -1)
++	    return errno;
++
++#if 0
++          node = (struct node *) malloc (sizeof (struct node));
++          new_dir = (struct procfs_dir *) malloc (sizeof (struct procfs_dir ));
++
++          if (! node || ! new_dir )
++           return ENOMEM;
++#endif
++          err = _proc_stat_create (pids[count], ps_context, &ps);
++          if (! err)
++            {
++              err = set_field_value (ps, PSTAT_PROC_INFO);
++              if (! err)
++                {
++                  stat.st_uid = proc_stat_proc_info (ps)->owner;
++                  stat.st_gid = proc_stat_proc_info (ps)->pgrp;
++
++                  dir_entry = update_entries_list (dir, dir_name_pid,
++                                 &stat, timestamp, NULL);
++                  err = procfs_create_node (dir_entry, dir_name_pid, &node);
++
++                  procfs_dir_create (dir->fs, node, 
++                                      dir_name_pid, &new_dir);
++                }
++              _proc_stat_free (ps);
++            }
++          free(dir_name_pid);
++	}
++    }
++
++  if ((err = procfs_create_uptime (dir, &node, timestamp)) != 0)
++    return err;
++
++  if ((err = procfs_create_stat (dir, &node, timestamp)) != 0)
++    return err;
++  
++  if ((err = procfs_create_version (dir, &node, timestamp)) != 0)
++    return err;
++
++  if ((err = procfs_create_meminfo (dir, &node, timestamp)) != 0)
++    return err;
++
++  if ((err = procfs_create_loadavg (dir, &node, timestamp)) != 0)
++    return err;
++
++  return 0;
++}
++
++error_t update_dir_entries (struct procfs_dir *dir)
++{
++  /* STUB */
++  return 0;
++}
+diff --exclude=CVS -Naur foo/procfs_nonpid_files.c procfs/procfs_nonpid_files.c
+--- /dev/null				1970-01-01 01:00:00.000000000 +0100
++++ procfs/procfs_nonpid_files.c	2008-08-18 20:26:23.000000000 +0200
+@@ -0,0 +1,514 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   procfs_nonpid_files.c -- This file contains function definitions
++                            to create and update the non-Per PID
++                            files and their contents.
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++   
++   A portion of the code in this file is based on vmstat.c code
++   present in the hurd repositories copyrighted to FSF. The
++   Copyright notice from that file is given below.
++   
++   Copyright (C) 1997,98,2002 Free Software Foundation, Inc.
++   Written by Miles Bader <miles@gnu.org>
++   This file is part of the GNU Hurd.
++*/
++
++#include <stdio.h>
++#include <unistd.h>
++#include <hurd/netfs.h>
++#include <hurd/ihash.h>
++#include <fcntl.h>
++#include <sys/stat.h>
++#include <sys/sysinfo.h>
++#include <mach/vm_statistics.h>
++#include <mach/default_pager.h>
++#include <hurd.h>
++#include <hurd/paths.h>
++#include <mach.h>
++#include <ps.h>
++#include <time.h>
++
++#include "procfs.h"
++
++typedef long long val_t;
++#define BADVAL ((val_t) - 1LL)
++
++/* default pager port (must be privileged to fetch this).  */
++mach_port_t def_pager;
++struct default_pager_info def_pager_info;
++
++error_t procfs_create_uptime (struct procfs_dir *dir, 
++                           struct node **node,
++                           time_t timestamp)
++{
++  int err;
++  char *file_name, *file_path;
++  struct procfs_dir_entry *dir_entry;
++ 
++  if (asprintf (&file_name, "%s", "uptime") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s", "uptime") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  return err;
++}
++
++error_t procfs_create_version(struct procfs_dir *dir, 
++                           struct node **node,
++                             time_t timestamp)
++{
++  int err;
++  char *file_name, *file_path;
++  struct procfs_dir_entry *dir_entry;
++ 
++  if (asprintf (&file_name, "%s", "version") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s", "version") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  return 0;
++}
++
++error_t procfs_create_stat (struct procfs_dir *dir, 
++                           struct node **node,
++                           time_t timestamp)
++{
++  int err;
++  char *file_name, *file_path;
++  struct procfs_dir_entry *dir_entry;
++ 
++  if (asprintf (&file_name, "%s", "stat") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s", "stat") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  return err;
++}
++
++error_t procfs_create_meminfo (struct procfs_dir *dir, 
++                           struct node **node,
++                           time_t timestamp)
++{
++  int err;
++  char *file_name, *file_path;
++  struct procfs_dir_entry *dir_entry;
++ 
++  if (asprintf (&file_name, "%s", "meminfo") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s", "meminfo") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  return err;
++}
++
++error_t procfs_create_loadavg (struct procfs_dir *dir, 
++                           struct node **node,
++                           time_t timestamp)
++{
++  int err;
++  char *file_name, *file_path;
++  struct procfs_dir_entry *dir_entry;
++ 
++  if (asprintf (&file_name, "%s", "loadavg") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s", "loadavg") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  return err;
++}
++
++error_t get_uptime (struct timeval *uptime)
++{
++  struct timeval boot_time, now;
++  error_t err;
++  struct proc_stat *ps;
++  
++  err = _proc_stat_create (1, ps_context, &ps);
++  
++  if (err)
++    return err;
++    
++  err = proc_stat_set_flags (ps, PSTAT_TASK_BASIC);
++  if (!err && !(ps->flags & PSTAT_TASK_BASIC))
++    err = EGRATUITOUS;
++  
++  if (! err)
++    {
++      time_value_t *const tv = &proc_stat_task_basic_info (ps)->creation_time;
++      boot_time.tv_sec = tv->seconds;
++      boot_time.tv_usec = tv->microseconds;
++      if (gettimeofday (&now, 0) < 0)
++        error (0, errno, "gettimeofday");
++      timersub (&now, &boot_time, uptime);      
++    }
++    
++  _proc_stat_free (ps); 
++  return err;
++}
++
++error_t get_total_times (struct timeval *total_user_time,
++                        struct timeval *total_system_time)
++{
++  error_t err;
++  pid_t *pids;
++  int pidslen = 0, count;
++  struct proc_stat *ps;
++  struct task_thread_times_info live_threads_times;
++  
++  struct timeval total_user_time_tmp;
++  struct timeval total_system_time_tmp;
++  struct timeval tmpval;
++  
++  timerclear (&total_user_time_tmp);
++  timerclear (&total_system_time_tmp);
++  
++  pids = NULL;
++  err = proc_getallpids (getproc (), &pids, &pidslen);
++  
++  if (!err)
++    for (count = 0; count < pidslen; count++)
++      {
++        err = _proc_stat_create (pids[count], ps_context, &ps);
++        if (err)
++          return err;
++          
++        err = proc_stat_set_flags (ps, PSTAT_TASK_BASIC);
++        if (!err && !(ps->flags & PSTAT_TASK_BASIC))
++          err = EGRATUITOUS;
++        
++        if (! err)
++          {
++            tmpval.tv_sec = proc_stat_task_basic_info (ps)->user_time.seconds;
++            tmpval.tv_usec = proc_stat_task_basic_info (ps)->user_time.seconds;
++            timeradd (&total_user_time_tmp, &tmpval, &total_user_time_tmp);
++
++            tmpval.tv_sec = proc_stat_task_basic_info (ps)->system_time.seconds;
++            tmpval.tv_usec = proc_stat_task_basic_info (ps)->system_time.seconds;
++            timeradd (&total_system_time_tmp, &tmpval, &total_system_time_tmp);
++              
++            error_t err = set_field_value (ps, PSTAT_TASK); 
++            if (! err)
++              {
++                err = get_task_thread_times (ps->task, &live_threads_times);
++                if (! err)
++                  {
++                    tmpval.tv_sec = live_threads_times.user_time.seconds;
++                    tmpval.tv_usec = live_threads_times.user_time.microseconds;
++                    timeradd (&total_user_time_tmp, &tmpval, &total_user_time_tmp);
++
++                    tmpval.tv_sec = live_threads_times.system_time.seconds;
++                    tmpval.tv_usec = live_threads_times.system_time.microseconds;
++                    timeradd (&total_system_time_tmp, &tmpval, &total_system_time_tmp);
++                  }          
++              }
++          }
++        _proc_stat_free (ps); 
++      }   
++      
++  total_user_time->tv_sec = total_user_time_tmp.tv_sec;
++  total_user_time->tv_usec = total_user_time_tmp.tv_usec;
++  
++  total_system_time->tv_sec = total_system_time_tmp.tv_sec;
++  total_system_time->tv_usec = total_system_time_tmp.tv_usec; 
++   
++  return err;
++}
++
++error_t procfs_read_nonpid_stat (struct dir_entry *dir_entry,
++                        off_t offset, size_t *len, void *data)
++{  
++  char *stat_data;
++  error_t err;
++  jiffy_t total_user_time_jiffy, total_system_time_jiffy;
++  jiffy_t idle_time_jiffy;
++  struct timeval uptime, total_user_time, total_system_time;
++  struct timeval idle_time;
++
++  err = get_uptime (&uptime);
++  
++  if (! err)
++    {
++      err = get_total_times (&total_user_time, &total_system_time); 
++      
++      if (! err)
++        {
++          timersub (&uptime, &total_system_time,
++                  &idle_time);
++          
++          total_user_time_jiffy = 100 * ((double) total_user_time.tv_sec + 
++                       (double) total_user_time.tv_usec / (1000 * 1000));
++          total_system_time_jiffy = 100 * ((double) total_system_time.tv_sec + 
++                       (double) total_system_time.tv_usec / (1000 * 1000));
++          idle_time_jiffy = 100 * ((double) idle_time.tv_sec + 
++                       (double) idle_time.tv_usec / (1000 * 1000));
++                       
++          if (asprintf (&stat_data, "cpu  %llu %llu %llu %llu %llu %llu %d %d %d\n"
++                   "cpu0 %llu %llu %llu %llu %llu %llu %d %d %d\n"
++                   "intr %llu %llu %llu %llu %llu %llu %d %d %d\n",
++                        total_user_time_jiffy, (long long unsigned) 0,
++                        total_system_time_jiffy, idle_time_jiffy, 
++                        (long long unsigned) 0, (long long unsigned) 0,
++                        0, 0, 0, 
++                        total_user_time_jiffy, (long long unsigned) 0,
++                        total_system_time_jiffy, idle_time_jiffy, 
++                        (long long unsigned) 0, (long long unsigned) 0,
++                        0, 0, 0,
++                        (long long unsigned) 0,
++                        (long long unsigned) 0, (long long unsigned) 0, (long long unsigned) 0,
++                        (long long unsigned) 0, 
++                        (long long unsigned) 0, (long long unsigned) 0,
++                        (long long unsigned) 0, (long long unsigned) 0) == -1)
++            return errno;
++        }    
++    }      
++
++  memcpy (data, stat_data, strlen(stat_data));
++  *len = strlen (data);
++
++  free (stat_data);
++  return err;
++}
++
++/* Makes sure the default pager port and associated 
++   info exists, and returns 0 if not (after printing
++   an error).  */
++static int
++ensure_def_pager_info ()
++{
++  error_t err;
++
++  if (def_pager == MACH_PORT_NULL)
++    {
++      mach_port_t host;
++
++      err = get_privileged_ports (&host, 0);
++      if (err == EPERM)
++	{
++	  /* We are not root, so try opening the /servers file.  */
++	  def_pager = file_name_lookup (_SERVERS_DEFPAGER, O_READ, 0);
++	  if (def_pager == MACH_PORT_NULL)
++	    {
++	      error (0, errno, _SERVERS_DEFPAGER);
++	      return 0;
++	    }
++	}
++      if (def_pager == MACH_PORT_NULL)
++	{
++	  if (err)
++	    {
++	      error (0, err, "get_privileged_ports");
++	      return 0;
++	    }
++
++	  err = vm_set_default_memory_manager (host, &def_pager);
++	  mach_port_deallocate (mach_task_self (), host);
++
++	  if (err)
++	    {
++	      error (0, err, "vm_set_default_memory_manager");
++	      return 0;
++	    }
++	}
++    }
++
++  if (!MACH_PORT_VALID (def_pager))
++    {
++      if (def_pager == MACH_PORT_NULL)
++	{
++	  error (0, 0,
++		 "No default pager running, so no swap information available");
++	  def_pager = MACH_PORT_DEAD; /* so we don't try again */
++	}
++      return 0;
++    }
++
++  err = default_pager_info (def_pager, &def_pager_info);
++  if (err)
++    error (0, err, "default_pager_info");
++  return (err == 0);
++}
++
++#define SWAP_FIELD(getter, expr) \
++  static val_t getter () \
++  { return ensure_def_pager_info () ? (val_t) (expr) : BADVAL; }
++
++SWAP_FIELD (get_swap_size, def_pager_info.dpi_total_space)
++SWAP_FIELD (get_swap_free, def_pager_info.dpi_free_space)
++SWAP_FIELD (get_swap_page_size, def_pager_info.dpi_page_size)
++SWAP_FIELD (get_swap_active, (def_pager_info.dpi_total_space
++			      - def_pager_info.dpi_free_space))
++
++error_t procfs_read_nonpid_meminfo (struct dir_entry *dir_entry,
++                        off_t offset, size_t *len, void *data)
++{  
++  char *meminfo_data;
++  error_t err;
++  struct vm_statistics vmstats;
++
++  err = vm_statistics (mach_task_self (), &vmstats);
++  
++  unsigned long mem_size = ((vmstats.free_count + 
++    vmstats.active_count + vmstats.inactive_count +
++    vmstats.wire_count) * vmstats.pagesize) / 1024;
++
++  if (! err)
++    if (asprintf (&meminfo_data, "MemTotal:\t%lu kB\n"
++        "MemFree:\t%lu kB\n"
++        "Buffers:\t%ld kB\n"
++        "Cached:\t\t%ld kB\n"
++        "SwapCached:\t%ld kB\n"
++        "Active:\t\t%lu kB\n"
++        "Inactive:\t%lu kB\n"
++        "HighTotal:\t%lu kB\n"
++        "HighFree:\t%lu kB\n" 
++        "LowTotal:\t%lu kB\n" 
++        "LowFree:\t%lu kB\n" 
++        "SwapTotal:\t%lu kB\n"
++        "SwapFree:\t%lu kB\n", 
++         mem_size, (PAGES_TO_BYTES(vmstats.free_count)) / 1024 , 0, 0, 0, 
++         (PAGES_TO_BYTES(vmstats.active_count)) / 1024, 
++         (PAGES_TO_BYTES(vmstats.inactive_count)) / 1024, 0, 0, 0, 0, 
++         get_swap_size () / 1024, get_swap_free () / 1024) == -1)
++      return errno;
++
++  memcpy (data, meminfo_data, strlen(meminfo_data));
++  *len = strlen (data);
++
++  free (meminfo_data);
++  return err;
++}
++
++error_t procfs_read_nonpid_loadavg (struct dir_entry *dir_entry,
++                        off_t offset, size_t *len, void *data)
++{  
++  char *loadavg_data;
++  error_t err;
++  processor_set_info_t	info;
++  natural_t *count;
++  struct host_load_info *load;
++  mach_port_t host;
++
++  err = ps_host_load_info (&load);
++  if (err)
++    error (0, err, "ps_host_load_info");
++    
++  if (! err)
++    if (asprintf (&loadavg_data, "%.2f %.2f %.2f %d/%d %d\n", 
++          (double)load->avenrun[0] / (double)LOAD_SCALE,
++	  (double)load->avenrun[1] / (double)LOAD_SCALE,
++	  (double)load->avenrun[2] / (double)LOAD_SCALE, 0, 0, 0) == -1)
++      return errno;
++
++  memcpy (data, loadavg_data, strlen(loadavg_data));
++  *len = strlen (data);
++
++  free (loadavg_data);
++  return err;
++}
++
++error_t procfs_read_nonpid_uptime (struct dir_entry *dir_entry,
++                        off_t offset, size_t *len, void *data)
++{  
++  char *uptime_data;
++  error_t err;
++  double uptime_secs, idle_time_secs;
++
++  struct timeval uptime_val;
++  struct timeval uptime, total_user_time, total_system_time;
++  struct timeval idle_time;
++ 
++  
++  err = get_uptime (&uptime);
++  if (! err)
++    {
++      err = get_total_times (&total_user_time,
++                           &total_system_time);
++      if (! err)
++        {
++          timersub (&uptime, &total_system_time,
++                    &idle_time);
++                    
++          uptime_secs = (double) uptime.tv_sec + 
++                       (double) uptime.tv_usec / (1000 * 1000);
++                       
++          idle_time_secs = (double) idle_time.tv_sec + 
++                       (double) idle_time.tv_usec / (1000 * 1000);
++
++          if (asprintf (&uptime_data, "%.2f %.2f\n", 
++	          uptime_secs, idle_time_secs) == -1)
++            return errno;
++         }                         
++    }                       
++
++
++  memcpy (data, uptime_data, strlen(uptime_data));
++  *len = strlen (data);
++
++  free (uptime_data);
++  return err;
++}
++
++error_t procfs_read_nonpid_version (struct dir_entry *dir_entry,
++                        off_t offset, size_t *len, void *data)
++{  
++  char *version_data;
++  error_t err = 0;
++  
++  if (asprintf (&version_data, "Linux version 2.6.18\n", NULL) == -1)
++    return errno;
++
++  memcpy (data, version_data, strlen(version_data));
++  *len = strlen (data);
++
++  free (version_data);
++  return err;
++}
+diff --exclude=CVS -Naur foo/procfs_pid.h procfs/procfs_pid.h
+--- /dev/null		1970-01-01 01:00:00.000000000 +0100
++++ procfs/procfs_pid.h	2008-08-18 17:15:33.000000000 +0200
+@@ -0,0 +1,88 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   procfs_pid.h -- This is the header file of which contains defintions
++                   for structure of directory with PID as the name and
++                   structure of each file in this directory.
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++*/
++
++#ifndef __PROCFS_PID_H__
++#define __PROCFS_PID_H__
++
++#include "procfs.h"
++
++struct procfs_pid_files
++{
++  struct procfs_cwd *procfs_cwd;
++  struct procfs_environ *procfs_environ;
++  struct procfs_cpu *procfs_cpu;
++  struct procfs_root *procfs_root;
++  struct procfs_exe *procfs_exe;
++  struct procfs_stat *_procfs_stat;
++  struct procfs_statm *procfs_statm;
++};
++
++struct procfs_stat
++{
++  pid_t pid;
++  char *comm;
++  char *state;
++  pid_t ppid;
++  pid_t pgid;
++  pid_t sid;
++  int tty_nr;
++  pid_t tty_pgrp;
++  unsigned flags;	
++  long unsigned minflt;
++  long unsigned cminflt;
++  long unsigned majflt;
++  long unsigned cmajflt;
++  jiffy_t utime;
++  jiffy_t stime;
++  jiffy_t cutime;
++  jiffy_t cstime;
++  long priority;
++  long nice;
++  long num_threads;
++  long itrealvalue;
++  long long unsigned starttime;
++  long unsigned vsize;
++  long rss;
++  long unsigned rlim;
++  long unsigned startcode;
++  long unsigned endcode;
++  long unsigned startstack;
++  long unsigned kstkesp;
++  long unsigned kstkeip;
++  long unsigned signal;
++  long unsigned blocked;
++  long unsigned sigignore;
++  long unsigned sigcatch;
++  long unsigned wchan;
++  long unsigned nswap;
++  long unsigned cnswap;
++  int exit_signal;
++  int processor;
++  unsigned rt_priority;
++  unsigned policy;
++  long long unsigned delayacct_blkio_ticks;
++};
++
++#endif
+diff --exclude=CVS -Naur foo/procfs_pid_files.c procfs/procfs_pid_files.c
+--- /dev/null			1970-01-01 01:00:00.000000000 +0100
++++ procfs/procfs_pid_files.c	2008-09-01 23:47:03.000000000 +0200
+@@ -0,0 +1,576 @@
++/* procfs -- a translator for providing GNU/Linux compatible 
++             proc pseudo-filesystem
++
++   procfs_pid_files.c -- This file contains definitions to perform
++                         file operations such as creating, writing to,
++                         reading from and removing files that holds
++                         information for each process with PID
++               
++   Copyright (C) 2008, FSF.
++   Written as a Summer of Code Project
++   
++
++   procfs is free software; you can redistribute it and/or
++   modify it under the terms of the GNU General Public License as
++   published by the Free Software Foundation; either version 2, or (at
++   your option) any later version.
++
++   procfs is distributed in the hope that it will be useful, but
++   WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program; if not, write to the Free Software
++   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. 
++   
++   A portion of the code in this file is based on ftpfs code
++   present in the hurd repositories copyrighted to FSF. The
++   Copyright notice from that file is given below.
++
++*/
++
++#include <hurd/netfs.h>
++#include <fcntl.h>
++#include <string.h>
++#include <stdio.h>
++#include <mach/task_info.h>
++#include <sys/resource.h>
++
++#include "procfs_pid.h"
++
++/* Update the files named NAME within the directory named
++   PID also with SYMLINK TARGET if necessary. */
++struct procfs_dir_entry*
++update_pid_entries (struct procfs_dir *dir, const char *name,
++                          time_t timestamp,
++                          const char *symlink_target)
++{
++  struct procfs_dir_entry *dir_entry;
++  struct stat stat = {};
++  stat.st_mode = S_IFREG | S_IRUSR | S_IRGRP | S_IROTH;
++
++  dir_entry = update_entries_list (dir, name, &stat, 
++                                 timestamp, symlink_target);
++
++  return dir_entry;
++}
++
++/* Creates files to store process information for DIR 
++   whose names are pids and returns these files in *NODE. */
++error_t
++procfs_create_files (struct procfs_dir *dir, 
++                                    struct node **node,
++                                    time_t timestamp)
++{
++  int err;
++  char *file_name, *file_path;
++  struct procfs_dir_entry *dir_entry;
++ 
++  if (asprintf (&file_name, "%s", "stat") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s/%s", dir->node->nn->dir_entry->name, "stat") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  if (asprintf (&file_name, "%s", "status") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s/%s", dir->node->nn->dir_entry->name, "status") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  if (asprintf (&file_name, "%s", "cmdline") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s/%s", dir->node->nn->dir_entry->name, "cmdline") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++
++  if (asprintf (&file_name, "%s", "statm") == -1)
++    return errno;
++  if (asprintf (&file_path, "%s/%s", dir->node->nn->dir_entry->name, "statm") == -1)
++    return errno;
++    
++  dir_entry = update_pid_entries (dir, file_name, timestamp, NULL);
++  err = procfs_create_node (dir_entry, file_path, node);
++
++  free (file_name);
++  free (file_path);
++  
++#if 0
++  nodes_list = &node_stat; 
++  nodes_list++;
++  node = nodes_list;
++#endif
++
++  return err;
++}
++
++/* Check if the PSTAT_FLAG is set in the corresponding PS
++   structure, if not set it and check again and return error
++   status accordingly. */
++error_t set_field_value (struct proc_stat *ps, int pstat_flag)
++{
++  error_t err;
++
++  if (! (ps->flags & pstat_flag))
++    {
++      err = proc_stat_set_flags (ps, pstat_flag);
++      if (err)
++        return err;
++
++      /* This second check is done since ps.h specifies to
++         do so since the previous call would not have set
++         the required value. */
++      if (! (ps->flags & pstat_flag))
++        return EGRATUITOUS;
++    }
++
++  return 0;
++}
++
++/* Adjusts TIME_VAL structure having Seconds and
++   Microseconds into the value in jiffies. The
++   value of jiffy is a hack to adjust to what
++   procps uses. */
++jiffy_t adjust_jiffy_time (time_value_t time_val)
++{
++  jiffy_t jiffy_time = time_val.seconds * JIFFY_ADJUST;
++  jiffy_time += (time_val.microseconds * JIFFY_ADJUST) 
++                 / (1000 * 1000);
++
++  return jiffy_time;
++}
++
++/* Extract the user and system time for the live threads of 
++   the process. This information is directly retrieved from
++   MACH since neither libps not proc makes this available. */
++error_t get_task_thread_times (task_t task,
++           struct task_thread_times_info *live_threads_times)
++{
++  error_t err;
++  size_t tkcount = TASK_THREAD_TIMES_INFO_COUNT;
++  
++  err = task_info (task, TASK_THREAD_TIMES_INFO,
++                  (task_info_t) live_threads_times, &tkcount);
++  if (err == MACH_SEND_INVALID_DEST)
++    err = ESRCH;
++    
++  return err;
++}
++
++/* Obtains the User Time in UTIME and System Time in STIME from
++   MACH directly since this is neither made available by libps 
++   nor by proc server. */
++error_t get_live_threads_time (struct proc_stat *ps,
++                               jiffy_t *utime, jiffy_t *stime)
++{
++  struct task_thread_times_info live_threads_times;
++  error_t err = set_field_value (ps, PSTAT_TASK);
++  
++  if (! err)
++    {
++      err = get_task_thread_times (ps->task, &live_threads_times);
++      if (! err)
++        {
++          *utime = adjust_jiffy_time (
++               live_threads_times.user_time);
++          *stime = adjust_jiffy_time (
++               live_threads_times.system_time);
++        }   
++    }
++    
++  return err;
++}
++
++/* Get the data for stat file into the structure
++   PROCFS_STAT. */
++error_t get_stat_data (pid_t pid, 
++                       struct procfs_stat **procfs_stat)
++{
++  error_t err;
++  struct procfs_stat *new = (struct procfs_stat *)
++                    malloc (sizeof (struct procfs_stat));
++
++  struct proc_stat *ps;
++  jiffy_t utime, stime;
++  
++  err = _proc_stat_create (pid, ps_context, &ps);
++
++  new->pid = pid;
++
++  if (! err)
++    {
++      err = set_field_value (ps, PSTAT_ARGS);
++      if (! err)
++        asprintf (&new->comm, "%s", ps->args);
++    }
++
++  err = set_field_value (ps, PSTAT_STATE);
++  if (! err)
++    {
++      if (ps->state & PSTAT_STATE_P_STOP) 
++        new->state = strdup ("T");
++      if (ps->state & PSTAT_STATE_P_ZOMBIE)
++        new->state = strdup ("Z");
++      if (ps->state & PSTAT_STATE_P_FG)
++        new->state = strdup ("+");
++      if (ps->state & PSTAT_STATE_P_SESSLDR)
++        new->state = strdup ("s");
++      if (ps->state & PSTAT_STATE_P_LOGINLDR)
++        new->state = strdup ("l");
++      if (ps->state & PSTAT_STATE_P_FORKED)
++        new->state = strdup ("f");
++      if (ps->state & PSTAT_STATE_P_NOMSG)
++        new->state = strdup ("m");
++      if (ps->state & PSTAT_STATE_P_NOPARENT)
++        new->state = strdup ("p");
++      if (ps->state & PSTAT_STATE_P_ORPHAN)
++        new->state = strdup ("o");
++      if (ps->state & PSTAT_STATE_P_TRACE)
++        new->state = strdup ("x");
++      if (ps->state & PSTAT_STATE_P_WAIT)
++        new->state = strdup ("w");
++      if (ps->state & PSTAT_STATE_P_GETMSG)
++        new->state = strdup ("g");     
++    }
++
++  err = set_field_value (ps, PSTAT_PROC_INFO);
++  if (! err)
++    {
++      new->ppid = ps->proc_info->ppid;
++      new->pgid = ps->proc_info->pgrp;
++      new->sid = ps->proc_info->session;
++      new->tty_pgrp = ps->proc_info->pgrp;
++    }
++  else
++    {
++      new->ppid = 0;
++      new->pgid = 0;
++      new->sid = 0;
++      new->tty_pgrp = 0;
++    }
++
++  err = set_field_value (ps, PSTAT_STATE);
++  if (! err)
++    new->flags = ps->state;
++  else
++    new->flags = 0;
++
++  err = set_field_value (ps, PSTAT_TASK_EVENTS);
++  if (! err)
++    {
++      new->minflt = ps->task_events_info->faults;
++      new->majflt = ps->task_events_info->pageins;
++    }
++  else 
++    {
++      new->minflt = 0;
++      new->majflt = 0;
++    }
++
++  /* This seems to be a bit inconsistent with setting of other
++     fields in this code. There are two reasons for this. 
++     1. The actual information required is not made available 
++        by libps which should be directly obtained from MACH.
++     2. The same code which is required to get the information
++        have to be reused in procfs_nonpid_files.c */  
++  err = get_live_threads_time (ps, &utime, &stime);
++  if (! err)
++    {
++      new->utime = utime;
++      new->stime = stime;      
++    }
++  else
++    {
++      new->utime = 0;
++      new->stime = 0;
++    }
++
++  err = set_field_value (ps, PSTAT_TASK_BASIC);
++  if (! err)
++    {
++      new->cutime = adjust_jiffy_time (
++           ps->task_basic_info->user_time);
++      new->cstime = adjust_jiffy_time (
++           ps->task_basic_info->system_time);
++
++      new->priority = ps->task_basic_info->base_priority;
++      new->starttime = adjust_jiffy_time ( 
++          ps->task_basic_info->creation_time);
++              
++      new->vsize = ps->task_basic_info->virtual_size;
++      new->rss = ps->task_basic_info->resident_size;
++    }   
++  else
++    {
++      new->cutime = 0;
++      new->cstime = 0;
++      new->priority = 0;
++      new->starttime = 0; 
++      new->vsize = 0;
++      new->rss = 0;
++    }
++
++  new->nice = getpriority (0, pid);
++  
++  err = set_field_value (ps, PSTAT_NUM_THREADS);
++  if (! err)
++    new->num_threads = ps->num_threads;
++  else
++    new->num_threads = 0;
++    
++  /* Not Supported in Linux 2.6 or later. */
++  new->tty_nr = 0;
++  new->itrealvalue = 0;
++  new->nswap = 0;
++  new->cnswap = 0;
++      
++  /* Temporarily set to 0 until correct 
++     values are found .*/
++  new->cminflt = 0;
++  new->cmajflt = 0;     
++  new->rlim = 0;
++  new->startcode = 0;
++  new->endcode = 0;
++  new->startstack = 0;
++  new->kstkesp = 0;
++  new->kstkeip = 0;
++  new->signal = 0;
++  new->blocked = 0;
++  new->sigignore = 0;
++  new->sigcatch = 0; 
++  new->wchan = 0;
++  new->exit_signal = 0;
++  new->processor = 0;
++  new->rt_priority = 0; 
++  new->policy = 0; 
++  new->delayacct_blkio_ticks = 0;
++  
++  *procfs_stat = new;
++  _proc_stat_free (ps);
++
++  return err;
++}
++
++/* Reads required process information from stat file
++   within the directory represented by pid. Return
++   the data in DATA and actual length to be written
++   in LEN. */
++error_t
++procfs_read_stat_file (struct procfs_dir_entry *dir_entry, 
++                        off_t offset, size_t *len, void *data)
++{
++  error_t err;
++  char *stat_data;
++  struct procfs_stat *procfs_stat;
++  pid_t pid = atoi (dir_entry->dir->node->nn->dir_entry->name);
++
++  err = get_stat_data (pid, &procfs_stat);
++  
++  if (asprintf (&stat_data, "%d (%s) %s %d %d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %llu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d %u %u %llu \n", 
++           procfs_stat->pid, procfs_stat->comm, 
++           procfs_stat->state, procfs_stat->ppid,
++           procfs_stat->pgid, procfs_stat->sid,
++           procfs_stat->tty_nr, procfs_stat->tty_pgrp, 
++           procfs_stat->flags, procfs_stat->minflt,
++           procfs_stat->cminflt, procfs_stat->majflt,
++           procfs_stat->cmajflt, procfs_stat->utime,
++           procfs_stat->stime, procfs_stat->cutime,
++           procfs_stat->cstime, procfs_stat->priority, 
++           procfs_stat->nice, procfs_stat->num_threads, 
++           procfs_stat->itrealvalue, procfs_stat->starttime, 
++           procfs_stat->vsize, BYTES_TO_PAGES(procfs_stat->rss), 
++           procfs_stat->rlim, procfs_stat->startcode,
++           procfs_stat->endcode, procfs_stat->startstack, 
++           procfs_stat->kstkesp, procfs_stat->kstkeip, 
++           procfs_stat->signal, procfs_stat->blocked, 
++           procfs_stat->sigignore, procfs_stat->sigcatch, 
++           procfs_stat->wchan, procfs_stat->nswap, 
++           procfs_stat->cnswap, procfs_stat->exit_signal, 
++           procfs_stat->processor, procfs_stat->rt_priority, 
++           procfs_stat->policy, 
++           procfs_stat->delayacct_blkio_ticks) == -1)
++    return errno;
++
++
++  memcpy (data, stat_data, strlen(stat_data));
++  *len = strlen (data);
++  
++  free (stat_data);
++  free (procfs_stat);
++  
++  return err;  
++}
++
++/* Reads required process's command line information
++   from cmline file within the directory represented
++   by pid. Return the data in DATA and actual length
++   to be written in LEN. */
++error_t
++procfs_read_cmdline_file (struct procfs_dir_entry *dir_entry, 
++                        off_t offset, size_t *len, void *data)
++{	
++  char *cmdline_data;
++  error_t err;
++  struct proc_stat *ps;
++  pid_t pid = atoi (dir_entry->dir->node->nn->dir_entry->name);
++  err = _proc_stat_create (pid, ps_context, &ps);
++
++  err = set_field_value (ps, PSTAT_ARGS);
++
++  if (! err)
++    if (asprintf (&cmdline_data, "%s \n", ps->args) == -1)
++      return errno;
++
++  memcpy (data, cmdline_data, strlen(cmdline_data));
++  *len = strlen (data);
++
++  _proc_stat_free (ps); 
++  free (cmdline_data);
++  return err;
++}
++
++/* Reads required process's information that is represented by
++   stat and statm in a human readable format from status file
++   within the directory represented by pid. Return the data
++   in DATA and actual length to be written in LEN. */
++error_t
++procfs_read_status_file (struct procfs_dir_entry *dir_entry, 
++                        off_t offset, size_t *len, void *data)
++{	
++  char *status_data;
++  error_t err;
++  struct proc_stat *ps;
++  struct procfs_stat *procfs_stat;
++
++  pid_t pid = atoi (dir_entry->dir->node->nn->dir_entry->name);
++  err = _proc_stat_create (pid, ps_context, &ps);
++
++  err = get_stat_data (pid, &procfs_stat);
++
++  if (! err)
++    if (asprintf (&status_data, "Name:\t%s\nState:\t%s\nTgid:\t%d\nPid:\t%d\n", procfs_stat->comm, procfs_stat->state, procfs_stat->pid, procfs_stat->pid) == -1)
++      return errno;
++
++  memcpy (data, status_data, strlen(status_data));
++  *len = strlen (data);
++
++  _proc_stat_free (ps); 
++
++  free (status_data);
++  free (procfs_stat);
++
++  return err;
++}
++
++/* Reads required process information from statm file
++   within the directory represented by pid. Return
++   the data in DATA and actual length to be written
++   in LEN. */
++error_t
++procfs_read_statm_file (struct procfs_dir_entry *dir_entry, 
++                        off_t offset, size_t *len, void *data)
++{	
++  char *statm_data;
++  error_t err;
++  struct proc_stat *ps;
++  struct procfs_stat *procfs_stat;
++
++  pid_t pid = atoi (dir_entry->dir->node->nn->dir_entry->name);
++  err = _proc_stat_create (pid, ps_context, &ps);
++
++  err = get_stat_data (pid, &procfs_stat);
++
++  if (! err)
++    if (asprintf (&statm_data, "%lu %ld %d %d %d %d %d\n", 
++       BYTES_TO_PAGES(procfs_stat->vsize), 
++       BYTES_TO_PAGES(procfs_stat->rss),
++       0, 0, 0, 0, 0) == -1)
++      return errno;
++
++  memcpy (data, statm_data, strlen(statm_data));
++  *len = strlen (data);
++
++  _proc_stat_free (ps); 
++
++  free (statm_data);
++  free (procfs_stat);
++
++  return err;
++}
++
++/* Reads required process information from each of files
++   within directory represented by pid, for files specified
++   by NODE. Return the data in DATA and actual length of 
++   data in LEN. */
++error_t 
++procfs_read_files_contents (struct node *node,
++                 off_t offset, size_t *len, void *data)
++{
++  error_t err;
++  
++  if (! strcmp (node->nn->dir_entry->name, "stat"))
++    if (! strcmp (node->nn->dir_entry->dir->fs_path, ""))
++      err = procfs_read_nonpid_stat (node->nn->dir_entry,
++                                      offset, len, data);
++    else 
++      err = procfs_read_stat_file (node->nn->dir_entry, 
++                                     offset, len, data);
++
++  if (! strcmp (node->nn->dir_entry->name, "cmdline"))
++      err = procfs_read_cmdline_file (node->nn->dir_entry, 
++                                     offset, len, data);
++
++  if (! strcmp (node->nn->dir_entry->name, "status"))
++      err = procfs_read_status_file (node->nn->dir_entry, 
++                                     offset, len, data);
++                                     
++  if (! strcmp (node->nn->dir_entry->name, "statm"))
++      err = procfs_read_statm_file (node->nn->dir_entry, 
++                                     offset, len, data);
++                                                                          
++  if (! strcmp (node->nn->dir_entry->name, "meminfo"))
++    if (! strcmp (node->nn->dir_entry->dir->fs_path, ""))
++      err = procfs_read_nonpid_meminfo (node->nn->dir_entry,
++                                      offset, len, data); 
++    else
++      err = ENOENT;
++      
++  if (! strcmp (node->nn->dir_entry->name, "loadavg"))
++    if (! strcmp (node->nn->dir_entry->dir->fs_path, ""))
++      err = procfs_read_nonpid_loadavg (node->nn->dir_entry,
++                                      offset, len, data);
++    else 
++      err = ENOENT;  
++      
++  if (! strcmp (node->nn->dir_entry->name, "uptime"))
++    if (! strcmp (node->nn->dir_entry->dir->fs_path, ""))
++      err = procfs_read_nonpid_uptime (node->nn->dir_entry,
++                                      offset, len, data);
++    else 
++      err = ENOENT;                                                                    
++    
++  if (! strcmp (node->nn->dir_entry->name, "version"))
++    if (! strcmp (node->nn->dir_entry->dir->fs_path, ""))
++      err = procfs_read_nonpid_version (node->nn->dir_entry,
++                                      offset, len, data);
++    else 
++      err = ENOENT; 
++      
++  return err;
++}
+--- Makefile.orig	2008-09-02 02:14:58.000000000 +0200
++++ Makefile	2008-08-29 15:23:04.000000000 +0200
+@@ -41,7 +41,7 @@
+ 	       login daemons nfsd boot console \
+ 	       hostmux usermux ftpfs trans \
+ 	       console-client utils sutils ufs-fsck ufs-utils \
+-	       benchmarks fstests
++	       benchmarks fstests procfs
+ 
+ # Other directories
+ other-subdirs = hurd doc config release include
