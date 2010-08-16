@@ -1,7 +1,7 @@
 # Maintainer Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=gnumach-userleveldrivers
-pkgver=20100807
+pkgver=20100815
 pkgrel=1
 pkgdesc="GNU Mach"
 arch=(i686)
@@ -9,6 +9,7 @@ url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
 license=('GPL')
 groups=('dde')
 provides=('gnumach')
+conflicts=('gnumach')
 makedepends=('git' 'mig' 'glibc')
 source=(10_cdromlock.patch
         13_ide_dma.patch
