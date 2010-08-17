@@ -1,0 +1,71 @@
+diff -upr abs/abs abs-archhurd//abs
+--- abs/abs	2010-01-25 13:01:25.000000000 +0000
++++ abs-archhurd//abs	2010-08-16 16:57:28.770000000 +0000
+@@ -26,7 +26,6 @@ ABS_VERSION="%%ABS_VERSION%%"
+ CONFDIR="%%CONF_DIR%%"
+ SYNCCMD='rsync'
+ SYNCARGS='-mrtv --no-motd --delete-after --no-p --no-o --no-g'
+-BUG_REPORT_EMAIL=pacman-dev@archlinux.org
+ 
+ ##
+ # Script Exit Reasons
+@@ -138,7 +137,7 @@ update_rsync() {
+ 	fi
+ 
+ 	msg "Starting ABS sync..."
+-	$SYNCCMD $SYNCARGS $INCLUDE $EXCLUDE ${SYNCSERVER}::abs/{${ARCH},any}/ $ABSROOT
++	$SYNCCMD $SYNCARGS $INCLUDE $EXCLUDE ${SYNCSERVER}::abs/ $ABSROOT
+ }
+ 
+ update_tarball() {
+diff -upr abs/conf/abs.conf abs-archhurd//conf/abs.conf
+--- abs/conf/abs.conf	2010-01-25 13:01:25.000000000 +0000
++++ abs-archhurd//conf/abs.conf	2010-08-16 16:58:30.500000000 +0000
+@@ -8,7 +8,7 @@
+ #
+ # Server to sync from
+ # 
+-SYNCSERVER="rsync.archlinux.org"
++SYNCSERVER="archhurd.org"
+ 
+ #
+ # The architecture to fetch abs for
+@@ -28,5 +28,5 @@ MIRRORLIST="/etc/pacman.d/mirrorlist"
+ # Note: If a repo is removed, it is still fetched!
+ # Repos must be preceded with a ! to prevent fetching
+ #
+-REPOS=(core extra community testing community-testing)
++REPOS=(core extra testing sound)
+ 
+diff -upr abs/Makefile abs-archhurd//Makefile
+--- abs/Makefile	2010-01-25 13:01:25.000000000 +0000
++++ abs-archhurd//Makefile	2010-08-16 17:04:08.290000000 +0000
+@@ -11,7 +11,7 @@ all: config_abs
+ config_abs: 
+ 	sed -i -e 's#%%ABS_VERSION%%#$(ABS_VERSION)#g' \
+ 	       -e 's#%%CONF_DIR%%#$(CONFDIR)#g' \
+-			abs makeworld scripts/svn2abs
++			abs makeworld 
+ 
+ install:
+ 	# install the scripts
+@@ -64,7 +64,6 @@ zip:
+ 	cp COPYING $(BUILDDIR)/abs/
+ 	cp -R conf $(BUILDDIR)/abs/
+ 	cp -R prototypes $(BUILDDIR)/abs/
+-	cp -R scripts $(BUILDDIR)/abs/
+ 	cd $(BUILDDIR) && tar czf abs-$(ABS_VERSION).tar.gz "abs/"
+ 	mv $(BUILDDIR)/abs-$(ABS_VERSION).tar.gz .
+ 	rm -rf $(BUILDDIR)
+diff -upr abs/makeworld abs-archhurd//makeworld
+--- abs/makeworld	2010-01-25 13:01:25.000000000 +0000
++++ abs-archhurd//makeworld	2010-08-16 17:00:24.050000000 +0000
+@@ -20,7 +20,6 @@
+ #
+ 
+ ABS_VERSION="%%ABS_VERSION%%"
+-BUG_REPORT_EMAIL='pacman-dev@archlinux.org'
+ toplevel=$(pwd)
+ 
+ ##
+Nur in abs: scripts.
