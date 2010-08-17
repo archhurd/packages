@@ -9,7 +9,7 @@ url="http://www.gnu.org/software/hurd/user/zhengda.html"
 license=('GPL')
 groups=('dde')
 makedepends=('git' 'mig' 'glibc')
-depends=('gnumach-userleveldrivers' 'libpciaccess'
+depends=('gnumach-userleveldrivers' 'libpciaccess')
 
 __gitroot="git://git.sv.gnu.org/hurd/incubator.git"
 __gitname="incubator"

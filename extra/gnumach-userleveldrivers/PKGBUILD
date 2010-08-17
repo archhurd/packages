@@ -1,8 +1,8 @@
 # Maintainer Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=gnumach-userleveldrivers
-pkgver=20100807
-pkgrel=2
+pkgver=20100815
+pkgrel=1
 pkgdesc="GNU Mach"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/microkernel/mach/gnumach.html"
