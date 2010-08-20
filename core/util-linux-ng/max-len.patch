@@ -1,0 +1,18 @@
+diff -upr util-linux-ng-2.18/misc-utils/write.c util-linux-ng-2.18.patch//misc-utils/write.c
+--- util-linux-ng-2.18/misc-utils/write.c	2010-02-04 11:53:56.000000000 +0000
++++ util-linux-ng-2.18.patch//misc-utils/write.c	2010-08-20 23:15:39.000000000 +0000
+@@ -64,6 +64,14 @@
+ #include "carefulputc.h"
+ #include "nls.h"
+  
++#ifndef MAXPATHLEN
++#define MAXPATHLEN 4096
++#endif
++ 
++#ifndef MAXHOSTNAMELEN
++#define MAXHOSTNAMELEN 1024 
++#endif
++
+ void search_utmp(char *, char *, char *, uid_t);
+ void do_write(char *, char *, uid_t);
+ void wr_fputs(char *);

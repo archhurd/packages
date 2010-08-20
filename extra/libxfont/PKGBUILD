@@ -1,7 +1,7 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=libxfont
-pkgver=1.4.1
+pkgver=1.4.2
 pkgrel=1
 pkgdesc="X11 font rasterisation library"
 arch=(i686)
@@ -11,17 +11,17 @@ depends=('libfontenc' 'freetype2' 'fontsproto')
 makedepends=('xtrans' 'fontcacheproto' 'xproto')
 options=('!libtool')
 source=(${url}/archive/individual/lib/libXfont-${pkgver}.tar.bz2)
-md5sums=('4f2bed2a2be82e90a51a24bb3a22cdf0')
 
 build() {
   cd "${srcdir}/libXfont-${pkgver}"
-  ./configure --prefix= --sysconfdir=/etc --disable-static || return 1
-  make || return 1
+  ./configure --prefix= --sysconfdir=/etc --disable-static 
+  make 
 }
 
 package() {
   cd "${srcdir}/libXfont-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
+md5sums=('503911759734998f9235b926eed82eb8')
