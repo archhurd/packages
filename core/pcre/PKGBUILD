@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=pcre
-pkgver=8.02
+pkgver=8.10
 pkgrel=1
 pkgdesc="A library that implements Perl 5-style regular expressions"
 arch=('i686') 
@@ -10,20 +10,18 @@ license=('BSD')
 depends=('gcc-libs')
 options=('!libtool' '!makeflags')
 source=(ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('27948c1b5f5c1eabc23cba1ebe4c316f')
-sha1sums=('2cf2f7f04988813c7ce45c43eb934f3b8b1c3b34')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= --enable-utf8 --enable-unicode-properties || return 1
-  make || return 1
+  ./configure --build=${CHOST} --prefix= --enable-utf8 --enable-unicode-properties 
+  make 
 }
 
 package(){
   cd "${srcdir}/${pkgname}-${pkgver}"
 
-  make DESTDIR="${pkgdir}" install || return 1
-  grep uses pcre, so we need the libs in /lib
-  ln -sf $pkgdir/lib/libpcre.so.0 "${pkgdir}/lib/libpcre.so" || return 1
-  install -D -m644 LICENCE "${pkgdir}/share/licenses/${pkgname}/LICENSE" || return 1
+  make DESTDIR="${pkgdir}" install 
+  ln -sf $pkgdir/lib/libpcre.so.0 "${pkgdir}/lib/libpcre.so" 
+  install -D -m644 LICENCE "${pkgdir}/share/licenses/${pkgname}/LICENSE" 
 }
+md5sums=('780867a700e9d4e4b9cb47aa5453e4b2')
