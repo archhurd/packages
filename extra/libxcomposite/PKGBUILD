@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=libxcomposite
-pkgver=0.4.1
+pkgver=0.4.2
 pkgrel=1
 pkgdesc="X11 Composite extension library"
 arch=('i686')
@@ -9,16 +9,16 @@ license=('custom')
 depends=('libxfixes' 'libxext' 'compositeproto')
 options=(!libtool)
 source=(${url}/releases/individual/lib/libXcomposite-${pkgver}.tar.bz2)
-md5sums=('0f1367f57fdf5df17a8dd71d0fa68248')
 
 build() {
   cd ${srcdir}/libXcomposite-${pkgver}
   ./configure --prefix= --sysconfdir=/etc --disable-static 
-  make || return 1
+  make 
 }
 
 package() {
   cd ${srcdir}/libXcomposite-${pkgver}
-  make DESTDIR=${pkgdir} install || return 1
+  make DESTDIR=${pkgdir} install 
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
+md5sums=('e38dc98509149083f6c31b49b484e63c')

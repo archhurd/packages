@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=xterm
-pkgver=258
+pkgver=260
 pkgrel=1
 pkgdesc="X Terminal Emulator"
 arch=('i686')
