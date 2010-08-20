@@ -2,7 +2,7 @@
 
 pkgname=tcl
 pkgver=8.5.8
-pkgrel=1
+pkgrel=2
 pkgdesc="The Tcl scripting language"
 arch=('i686')
 url="http://tcl.sourceforge.net/"
