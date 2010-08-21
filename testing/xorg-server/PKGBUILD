@@ -3,16 +3,14 @@
 # Maintainer: Jan de Groot <jgc@archlinux.org>
 
 pkgname=xorg-server
-pkgver=1.8.2
-pkgrel=2
+pkgver=1.9.0
+pkgrel=1
 pkgdesc="X.Org X servers"
 arch=('i686')
 license=('custom')
 url="http://xorg.freedesktop.org"
-depends=('dbus' 'libgl' 'libxfont' 'libgcrypt' 'libpciaccess' 'libxv' 'pixman' 'xcursor-themes' 'xkeyboard-config' 'xorg-server-utils' 'xorg-fonts-misc' 'xbitmaps' 'diffutils' 'inputproto')
+depends=('libgl' 'libxfont' 'libgcrypt' 'libpciaccess' 'libxv' 'pixman' 'xcursor-themes' 'xkeyboard-config' 'xorg-server-utils' 'xorg-fonts-misc' 'xbitmaps' 'diffutils' 'inputproto')
 makedepends=('libx11' 'mesa' 'xf86driproto' 'xtrans' 'libxkbfile' 'randrproto' 'renderproto' 'xcmiscproto' 'bigreqsproto' 'resourceproto' 'videoproto' 'compositeproto' 'scrnsaverproto' 'xf86dgaproto' 'libgl' 'glproto' 'xorg-util-macros' 'xineramaproto' 'recordproto')
-conflicts=('catalyst-utils<=9.2' 'xf86-input-calcomp' 'xf86-input-citron' 'xf86-input-digitaledge' 'xf86-input-dmc' 'xf86-input-dynapro' 'xf86-input-elo2300'
-	'xf86-input-jamstudio' 'xf86-input-magellan' 'xf86-input-magictouch' 'xf86-input-microtouch' 'xf86-input-palmax' 'xf86-input-spaceorb' 'xf86-input-summa' 'xf86-input-tek4957' 'xf86-input-ur98' 'xf86-video-vga' 'xf86-video-intel-legacy' 'nvidia-96xx-utils<96.43.14' 'nvidia-173xx-utils<173.14.21')
 options=('!libtool')
 provides=('x-server')
 groups=('xorg')
@@ -28,13 +26,13 @@ source=(${url}/releases/individual/xserver/${pkgname}-${pkgver}.tar.bz2
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   
-  patch -Np3 -i "${srcdir}/xorg-redhat-die-ugly-pattern-die-die-die.patch" 
+#  patch -Np3 -i "${srcdir}/xorg-redhat-die-ugly-pattern-die-die-die.patch" 
 
-  sed -i -e 's:\$(prefix)/etc:/etc:g' config/Makefile.*
+#  sed -i -e 's:\$(prefix)/etc:/etc:g' config/Makefile.*
 
-  autoreconf 
+#  autoreconf  
   ./configure --prefix= \
-      --disable-ipv6 \
+      --enable-ipv6 \
       --disable-dri \
       --disable-dri2 \
       --disable-xselinux \
@@ -45,6 +43,7 @@ build() {
       --enable-xorg \
       --enable-xephyr \
       --enable-glx \
+      --enable-glx-tls \
       --enable-kdrive \
       --enable-install-setuid \
       --disable-config-udev \
@@ -87,6 +86,12 @@ package() {
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
 md5sums=('c4156e3e71123a54413e629f4806fc71'
+         '1a336eb22e27cbf443ec5a2ecddfa93c'
+         '52fd3effd80d7bc6c1660d4ecf23d31c'
+         '376c70308715cd2643f7bff936d9934b'
+         'e930e153d69968a795fe4e2ef5d9a5dc'
+         'd4f7dfc6be4ef4e2c6dd7632a9d88abe')
+md5sums=('ba1173998a5a4216fd7b40eded96697e'
          '1a336eb22e27cbf443ec5a2ecddfa93c'
          '52fd3effd80d7bc6c1660d4ecf23d31c'
          '376c70308715cd2643f7bff936d9934b'
