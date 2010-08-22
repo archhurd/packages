@@ -1,0 +1,30 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 50362 2009-08-25 20:05:20Z jgc $
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+# Contributor: Alexander Baldeck <alexander@archlinux.org>
+pkgname=libxss
+pkgver=1.2.0
+pkgrel=1
+pkgdesc="X11 Screen Saver extension library"
+arch=(i686)
+license=('custom:XFREE86')
+url="http://xorg.freedesktop.org/"
+depends=('libxext>=1.0.5' 'scrnsaverproto>=1.2.0')
+makedepends=('pkg-config')
+options=('!libtool')
+source=(${url}/releases/individual/lib/libXScrnSaver-${pkgver}.tar.bz2)
+sha1sums=('ea2935eb67efa77fd90372337f2d782a8ef74cea')
+
+build() {
+  cd "${srcdir}/libXScrnSaver-${pkgver}"
+  ./configure --prefix= --sysconfdir=/etc
+  make || return 1
+}
+
+package() {
+  cd "${srcdir}/libXScrnSaver-${pkgver}"
+  make DESTDIR="${pkgdir}" install || return 1
+
+  install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+}

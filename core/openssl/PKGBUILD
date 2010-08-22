@@ -2,7 +2,8 @@
 # Thanks to Pierre Schmitz, this is mostly his archlinux PKGBUILD
 
 pkgname=openssl
-pkgver=1.0.0
+_ver=1.0.0a
+pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
 pkgrel=1
 pkgdesc="The Open Source toolkit for Secure Sockets Layer and Transport Layer Security"
 arch=(i686)
@@ -12,19 +13,14 @@ depends=('glibc')
 mkdepends=('perl')
 options=('!makeflags')
 backup=('etc/ssl/openssl.cnf')
-source=("http://openssl.org/source/$pkgname-$pkgver.tar.gz"
+source=("http://openssl.org/source/$pkgname-${_ver}.tar.gz"
         'fix-manpages.patch'
         'no-rpath.patch'
         'ca-dir.patch'
         'hurd-target.patch')
-md5sums=('89eaa86e25b2845f920ec00ae4c864ed'
-         'f540cd9e0e3047d589d0581fe7a2d0f2'
-         'dc78d3d06baffc16217519242ce92478'
-         '3bf51be3a1bbd262be46dc619f92aa90'
-         '599b06153165eab7913e7d8e1d04caf9')
 
 build() {
-    cd $srcdir/$pkgname-$pkgver
+    cd $srcdir/$pkgname-${_ver}
     
      # avoid conflicts with other man pages: http://www.linuxfromscratch.org/patches/blfs/svn/
      patch -p0 -i $srcdir/fix-manpages.patch
@@ -37,14 +33,14 @@ build() {
     
     ./Configure hurd-x86 shared\
         --install-prefix=$pkgdir --prefix= --openssldir=/etc/ssl \
-        -Wa,--noexecstack
+        --libdir=lib zlib enable-md2 -Wa,--noexecstack
         
-    make || return 1
+    make 
 }
 
 package() {
-    cd $srcdir/$pkgname-$pkgver
-    make MANDIR=/share/man INSTALLTOP=/ install || return 1
+    cd $srcdir/$pkgname-${_ver}
+    make MANDIR=/share/man INSTALLTOP=/ install 
     install -D -m644 LICENSE $pkgdir/share/licenses/$pkgname/LICENSE
 }
 
