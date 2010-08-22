@@ -1,7 +1,7 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=hurd
-pkgver=20100801
+pkgver=20100817
 pkgrel=1
 pkgdesc="The GNU Hurd"
 arch=(i686)
@@ -21,6 +21,7 @@ source=(tls_support.hurd.patch
         pfinet_dhcp.patch
         extern_inline_fix.patch
         procfs.patch
+        stubs-pthread.h
         ttys)
 md5sums=('af87e4b04d89392a2b6e7751361f2460'
          '15886845ff60d66e767b8eb88c501458'
@@ -31,6 +32,7 @@ md5sums=('af87e4b04d89392a2b6e7751361f2460'
          '1706c9685c0ab551a4367583c542dfa1'
          'e0910b3df6fc3a18ec44de4299dcf0d0'
          'a445137162d39ba41df075838fd1518c'
+         '710affee4a40101db4070654bd2e793f'
          'f2ae144d872ec41cc4f2e070df71dfb1')
 
 
@@ -78,7 +80,8 @@ build() {
   export LDFLAGS=`echo $LDFLAGS | sed 's/-Wl,--as-needed//'`
   autoreconf -vif ../hurd
   ./configure --prefix= --disable-profile \
-              --enable-static-progs='iso9660fs,ext2fs,ufs'
+              --enable-static-progs='iso9660fs,ext2fs,ufs' \
+              --without-parted
   make || return 1
 }
 
@@ -101,5 +104,8 @@ package() {
   mv $pkgdir/sbin/halt $pkgdir/sbin/internal_halt
   mv $pkgdir/sbin/reboot $pkgdir/sbin/internal_reboot
 
-} 
+  #for pthread weirdness
+  mkdir -p ${pkgdir}/include/gnu
+  cp ${srcdir}/stubs-pthread.h ${pkgdir}/include/gnu/
+}
 

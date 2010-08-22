@@ -3,7 +3,7 @@
 
 pkgname=openssl
 pkgver=1.0.0a
-pkgrel=1
+pkgrel=2
 pkgdesc="The Open Source toolkit for Secure Sockets Layer and Transport Layer Security"
 arch=(i686)
 url="http://www.openssl.org/"
@@ -43,7 +43,7 @@ build() {
      patch -p0 -i $srcdir/fix-double-free.patch
 
 
-    ./Configure hurd-x86 shared zlib \
+    ./Configure hurd-x86 shared zlib enable-md2 \
         --install-prefix=$pkgdir --prefix= --openssldir=/etc/ssl \
         -Wa,--noexecstack
 
