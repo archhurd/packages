@@ -44,3 +44,8 @@ package() {
     install -D -m644 LICENSE $pkgdir/share/licenses/$pkgname/LICENSE
 }
 
+md5sums=('e3873edfffc783624cfbdb65e2249cbd'
+         'f540cd9e0e3047d589d0581fe7a2d0f2'
+         'dc78d3d06baffc16217519242ce92478'
+         '3bf51be3a1bbd262be46dc619f92aa90'
+         '599b06153165eab7913e7d8e1d04caf9')
