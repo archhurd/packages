@@ -1,0 +1,28 @@
+# Maintainer: Matthias Lanzinger
+
+pkgname=pacman-mirrorlist
+pkgver=20100822
+pkgrel=1
+pkgdesc="Arch Hurd mirror list for use by pacman"
+arch=('any')
+url="http://www.archhurd.org/mirrors.php"
+license=('GPL')
+backup=(etc/pacman.d/mirrorlist)
+source=(mirrorlist)
+depends=('pacman>=3.4.0-2')
+md5sums=('049f7eceb4ed84bafdbdc815279102a1')
+
+# NOTE on building this package:
+# * Go to the trunk/ directory
+# * Run bash -c ". PKGBUILD; updatelist"
+# * Update the checksums, update pkgver
+# * Build the package
+updatelist() {
+  wget -O mirrorlist http://files.archhurd.org/mirrorlist
+}
+
+build() {
+  mkdir -p $pkgdir/etc/pacman.d
+  install -m644 $srcdir/mirrorlist $pkgdir/etc/pacman.d/
+}
+
