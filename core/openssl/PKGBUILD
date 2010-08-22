@@ -2,30 +2,33 @@
 # Thanks to Pierre Schmitz, this is mostly his archlinux PKGBUILD
 
 pkgname=openssl
-pkgver=1.0.0
+pkgver=1.0.0a
 pkgrel=1
 pkgdesc="The Open Source toolkit for Secure Sockets Layer and Transport Layer Security"
 arch=(i686)
 url="http://www.openssl.org/"
 license=('custom:BSD')
-depends=('glibc')
-mkdepends=('perl')
+depends=('perl')
+optdepends=('ca-certificates')
 options=('!makeflags')
 backup=('etc/ssl/openssl.cnf')
 source=("http://openssl.org/source/$pkgname-$pkgver.tar.gz"
         'fix-manpages.patch'
         'no-rpath.patch'
         'ca-dir.patch'
-        'hurd-target.patch')
-md5sums=('89eaa86e25b2845f920ec00ae4c864ed'
+        'hurd-target.patch'
+        'fix-double-free.patch')
+md5sums=('e3873edfffc783624cfbdb65e2249cbd'
          'f540cd9e0e3047d589d0581fe7a2d0f2'
          'dc78d3d06baffc16217519242ce92478'
          '3bf51be3a1bbd262be46dc619f92aa90'
-         '599b06153165eab7913e7d8e1d04caf9')
+         'dd11e07340c08e9439009bee759d1ed2'
+         'ccb896e23a44b89a3c93ac094c592c1f')
+
 
 build() {
     cd $srcdir/$pkgname-$pkgver
-    
+
      # avoid conflicts with other man pages: http://www.linuxfromscratch.org/patches/blfs/svn/
      patch -p0 -i $srcdir/fix-manpages.patch
      # remove rpath: http://bugs.archlinux.org/task/14367
@@ -34,17 +37,24 @@ build() {
      patch -p0 -i $srcdir/ca-dir.patch
      # fix target settings for hurd
      patch -p1 -i $srcdir/hurd-target.patch
-    
-    ./Configure hurd-x86 shared\
+     # fix double free
+     # see http://marc.info/?l=openssl-dev&m=128118163216952&w=2
+     # and http://marc.info/?l=openssl-dev&m=128128256314328&w=2
+     patch -p0 -i $srcdir/fix-double-free.patch
+
+
+    ./Configure hurd-x86 shared zlib \
         --install-prefix=$pkgdir --prefix= --openssldir=/etc/ssl \
         -Wa,--noexecstack
-        
+
     make || return 1
+#    make test
 }
 
 package() {
     cd $srcdir/$pkgname-$pkgver
-    make MANDIR=/share/man INSTALLTOP=/ install || return 1
+    make MANDIR=/share/man INSTALL_PREFIX=${pkgdir} install || return 1
     install -D -m644 LICENSE $pkgdir/share/licenses/$pkgname/LICENSE
+    mv ${pkgdir}/etc/ssl/{lib,bin,include} ${pkgdir}
 }
 
