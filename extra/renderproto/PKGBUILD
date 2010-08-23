@@ -1,23 +1,23 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.org>
 
 pkgname=renderproto
-pkgver=0.11
+pkgver=0.11.1
 pkgrel=1
 pkgdesc="X11 Render extension wire protocol"
 arch=('any')
 url="http://xorg.freedesktop.org/"
 license=('custom')
 source=(http://xorg.freedesktop.org/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('b160a9733fe91b666e74fca284333148')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
   ./configure --prefix=
-  make || return 1
+  make 
 }
 
 package() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  make DESTDIR=${pkgdir} install || return 1
+  make DESTDIR=${pkgdir} install 
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
+md5sums=('a914ccc1de66ddeb4b611c6b0686e274')
