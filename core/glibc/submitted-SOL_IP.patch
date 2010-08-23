@@ -3,11 +3,9 @@
 	* bits/in.h (SOL_IP, SOL_IPV6, SOL_ICMPV6): New macros.
 
 ---
- in.h |    7 +++++++
+ bits/in.h |    7 +++++++
  1 file changed, 7 insertions(+)
 
-diff --git a/bits/in.h b/bits/in.h
-index 4687a29..4b22e92 100644
 --- a/bits/in.h
 +++ b/bits/in.h
 @@ -22,6 +22,9 @@
@@ -20,7 +18,7 @@ index 4687a29..4b22e92 100644
  /* Options for use with `getsockopt' and `setsockopt' at the IP level.
     The first word in the comment at the right is the data type used;
     "bool" means a boolean value stored in an `int'.  */
-@@ -48,6 +51,10 @@ struct ip_opts
+@@ -48,6 +51,10 @@
      char ip_opts[40];		/* Actually variable in size.  */
    };
  
@@ -30,4 +28,4 @@ index 4687a29..4b22e92 100644
 +
  /* IPV6 socket options.  */
  #define IPV6_ADDRFORM		1
- #define IPV6_RXINFO		2
+ #define IPV6_PKTINFO		2

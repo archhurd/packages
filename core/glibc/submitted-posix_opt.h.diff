@@ -21,11 +21,9 @@
  sysdeps/mach/hurd/bits/posix_opt.h |   28 +++++++++++++++++++++++-----
  2 files changed, 29 insertions(+), 5 deletions(-)
 
-diff --git a/posix/tst-sysconf.c b/posix/tst-sysconf.c
-index e297229..105c7c2 100644
 --- a/posix/tst-sysconf.c
 +++ b/posix/tst-sysconf.c
-@@ -29,8 +29,12 @@ static struct
+@@ -29,8 +29,12 @@
      N (MEMORY_PROTECTION),
      N (MESSAGE_PASSING),
      N (MONOTONIC_CLOCK),
@@ -38,7 +36,7 @@ index e297229..105c7c2 100644
      N (RAW_SOCKETS),
      N (READER_WRITER_LOCKS),
      N (REALTIME_SIGNALS),
-@@ -42,7 +46,9 @@ static struct
+@@ -42,7 +46,9 @@
      N (SPAWN),
      N (SPIN_LOCKS),
      N (SPORADIC_SERVER),
@@ -48,8 +46,6 @@ index e297229..105c7c2 100644
      N (THREAD_ATTR_STACKADDR),
      N (THREAD_ATTR_STACKSIZE),
      N (THREAD_CPUTIME),
-diff --git a/sysdeps/mach/hurd/bits/posix_opt.h b/sysdeps/mach/hurd/bits/posix_opt.h
-index 775c921..4c1b06b 100644
 --- a/sysdeps/mach/hurd/bits/posix_opt.h
 +++ b/sysdeps/mach/hurd/bits/posix_opt.h
 @@ -31,6 +31,9 @@

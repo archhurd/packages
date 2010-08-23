@@ -2,192 +2,136 @@
 # Note: For now there is now way around the ridiculous amount of patching :(
 
 pkgname=glibc
-pkgver=2.11.1
-pkgrel=2
+pkgver=2.11.20100413git
+pkgrel=4
 pkgdesc="GNU C Library"
 arch=(i686)
 url="http://www.gnu.org/software/libc"
 license=('GPL','LGPL')
 groups=('base')
-depends=('hurd')
+depends=('hurd>=20010817')
 makedepends=('hurd' 'gcc>=4.3')
+options=('!strip')
 
-source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.bz2
-        local-gcc-4.1-init-first.diff
-        local-tls-support.diff
-        libc-lock.diff
-        local-atomic-no-multiple_threads.diff
-        local-stdio-lock.diff
-        submitted-stat.diff
-        submitted-libc_once.diff
-        local-longjmp_chk.diff
-        submitted-ptr-mangle.diff
-        local-check_native.diff
-        local-_dl_random.diff
-        local-gscope.diff
-        submitted-strtoul.diff
-        local-tls.diff
-        local-unwind-resume.diff
-        submitted-net.diff
-        submitted-popen.diff
-        submitted-sched_h.diff
-        local-no-SOCK_NONBLOCK.diff
+source=(locale.gen.txt
+        locale-gen
         i686-cpuclock_which.patch
-        submitted-dl-sysdep.diff
-        cvs-getcwd.diff
-        cvs-setsid.diff
-        local-mlock.diff
-        submitted-dup2-fix.diff
-        submitted-sbrk.diff
-        submitted-critical-sections.diff
         submitted-posix_opt.h.diff
-        submitted-ioctl-decode-argument.diff
-        submitted-ioctl-unsigned-size_t.diff
-        submitted-ECANCELED.diff
-        submitted-IPV6_PKTINFO.diff
-        submitted-extern_inline.diff
-        submitted-itimer-lock.diff
-        submitted-null-pathname.diff
-        submitted-SOL_IP.patch
-        local-bigmem.diff
-        local-disable-ioctls.diff
         local-pthread_posix-option.diff
-        submitted-getnprocs.diff
-        local-pthread.diff 
-        local-dl-dynamic-weak.diff
-        local-thread-cancel.diff
+        local-pthread.diff
         local-pthread_types.diff
-        local-unlockpt-chroot.diff
-        glibc-__i686.patch
-        locale.gen.txt
-        locale-gen) 
+        local-pthread-unsupported-stubs.diff
+        local-mlock.diff
+        local-dl-dynamic-weak.diff
+        submitted-ioctl-unsigned-size_t.diff
+        submitted-sysvshm.diff
+        submitted-critical-sections.diff
+        submitted-ioctl-decode-argument.diff
+        submitted-IPV6_PKTINFO.diff
+        submitted-ECANCELED.diff
+        submitted-null-pathname.diff
+        submitted-sbrk.diff
+        submitted-readlinkat.diff
+        local-bigmem.diff
+        submitted-SOL_IP.patch
+        local-thread-cancel.diff
+        local-disable-ioctls.diff
+        local-locarchive.diff
+        cvs-linkat.diff
+        submitted-ttyname.diff
+        local-mkdir_root.diff)
 
-md5sums=('6856d5d8b1239556687f0d1217f3f266'
-         'be6eb77fc81ed3116392b0c194bdf0fe'
-         'd86420fee1baa42810893152ccd63e25'
-         'efd419e392d7de011f38e70e90dff760'
-         'a1639985d2e1284d03e5e3f1a82a1f3f'
-         'bb35ad9b947eea31d31b3b2636b3ad0d'
-         '8d0a6017bf347e1bdcd7e4f3eaf86a4f'
-         '8c0eda0e556f8302b13f97ba560e9931'
-         '9a269163236af278fa499aeb452fafe6'
-         '02f40f285529fb105922a88a73551b6d'
-         'ca87f96754d5231fa960b04439ea9d64'
-         '121f7f64f6547fc44aa5694e64abbcba'
-         '2701e4ea8f89ab2877628daba335318e'
-         '4c1f7825eb78a25e913e8612c311f3f4'
-         'f1d45b49fd3a2c6f5be2ac7b78e30d15'
-         '03eecaa535040abd9d38a125893c80cf'
-         '78fae3441021ea011c9a867d5372d242'
-         '642aed10f42dc86fe30dcf19f56087d5'
-         'f48252958d8be8ef00c279ec8eaee0fa'
-         'cc14fe13fc4ca278c07b17a6be8b48f9'
+md5sums=('07ac979b6ab5eeb778d55f041529d623'
+         '476e9113489f93b348b21e144b6a8fcf'
          '1a6638ab233513400c520e9230612ece'
-         'e3ae72d58fd3ec6447fe5f48c84829f7'
-         'd4276a95e6a9f30e9b3e6d0166af21ac'
-         'c4d72dcb4df11499dc19f5fed460c839'
-         '139d74c68e9b8c31f263ac7b442b63ec'
-         '32ed697517c85e217bb9bf6654c1c2c6'
-         '87cc8871fe2183baebae95ff5cd69b3f'
-         '4b9dc0f1f8a97c9cd48948b03f59cdd1'
-         '27c3aaaa846ede48938ff3d191cb6384'
-         'a9405f6901922f08d717d78efaeee6ec'
-         '6b868ad42836c45f39161e3d8a5d1ad4'
-         'c395cd788e5fe600c06188ad395a9825'
-         'da0c98a4bb54cfd75027f3f5c933fa68'
-         'dbc6832fff14ec2213058dd5e25311b9'
-         'd1c93cfbe7ad6a1a63e09bab3cdccdc7'
-         '069946fd414c60e0ae08f16efe4b1f59'
-         'f8dbbaf7f2d7da91d8c17820e0056c2e'
-         '0c1e22753988cc9779f9d861e4dc25c1'
-         '147f7ff378c7818f41c1c965a49217e5'
-         'a0070eaa18ad119c742e1da576109add'
-         '8d4f2ce29907990d6fb7893ac0abc508'
+         'e4ff9dc224aaa00765ad74ba0fcb4425'
+         '50fe2822b00a7dc970d532bae918a6de'
          '5325c498384ca533c3d20f6fd1047cca'
-         '120995353c98d85f62f0c29e3edba797'
-         'ffd0e44875970ae2b17824c551a982bd'
          '293e19249d7b20a2d2f221fd93b7d231'
-         '0de47307f7d8dfccab740048875f435f'
-         '40cd342e21f71f5e49e32622b25acc52'
-         '07ac979b6ab5eeb778d55f041529d623'
-         '476e9113489f93b348b21e144b6a8fcf')
+         '0d8bb94dc5a9f97cbf6e8502ba818fcd'
+         '139d74c68e9b8c31f263ac7b442b63ec'
+         '4c6c13001eeb1679f72464e43f018951'
+         '6b868ad42836c45f39161e3d8a5d1ad4'
+         'aced139b7b7452ac3fd4f32683dde3c5'
+         '4b9dc0f1f8a97c9cd48948b03f59cdd1'
+         'a9405f6901922f08d717d78efaeee6ec'
+         'da0c98a4bb54cfd75027f3f5c933fa68'
+         'c395cd788e5fe600c06188ad395a9825'
+         '09c7d497fd3ac679464cefcb41267774'
+         '224cc7696de3adf00e0f449e61ee9ef8'
+         'b27368831fabf9ff72ee1a050a402a20'
+         'eab54e54c25cea9b95092813a1eb1c00'
+         '6599be3678ce7f9499086b5d4e559e87'
+         '42ba8ed433571b6002529e67e2f0fdd3'
+         '4af96a5c4125eb9362f6e32b78133c28'
+         '8d9e3914e6ce9980aa736ef5d53d5106'
+         'fd2301f383ad5e1417b442397ad8b907'
+         '1edf76c8b5a30a1b8a2e0e2ecedd9a48'
+         '439d0965d12c62db39cb6dd0c53c71be')
 
 
+__gitroot="git://git.sv.gnu.org/hurd/glibc.git"
 
 build() {
-  cd "$srcdir/$pkgname-$pkgver"
-  
-  msg "Patching..."
-  # tlsdesc.sym from packages doesn't work, use the one from local-tls-support patch
-  rm -f sysdeps/mach/hurd/i386/tlsdesc.sym
-  
-  patch -Np1 < ${srcdir}/local-gcc-4.1-init-first.diff
-  patch -Np1 < ${srcdir}/local-tls-support.diff
-  patch -Np1 < ${srcdir}/libc-lock.diff
-  patch -Np1 < ${srcdir}/local-atomic-no-multiple_threads.diff
-  patch -Np1 < ${srcdir}/local-stdio-lock.diff
-  patch -Np1 < ${srcdir}/submitted-stat.diff
-  patch -Np1 < ${srcdir}/submitted-libc_once.diff
-  patch -Np1 < ${srcdir}/local-longjmp_chk.diff
-  patch -Np1 < ${srcdir}/submitted-ptr-mangle.diff
-  patch -Np1 < ${srcdir}/local-check_native.diff
-  patch -Np1 < ${srcdir}/local-_dl_random.diff
-  patch -Np1 < ${srcdir}/local-gscope.diff
-  patch -Np1 < ${srcdir}/submitted-strtoul.diff
-  patch -Np1 < ${srcdir}/local-tls.diff
-  patch -Np1 < ${srcdir}/local-unwind-resume.diff
-  patch -Np1 < ${srcdir}/submitted-net.diff
-  patch -Np1 < ${srcdir}/submitted-popen.diff
-  patch -Np1 < ${srcdir}/submitted-sched_h.diff
-  patch -Np1 < ${srcdir}/local-no-SOCK_NONBLOCK.diff
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [ -d glibc-git ] ; then
+    cd glibc-git && git pull origin tschwinge/Roger_Whittaker
+    msg "The local files are updated."
+  else
+    git clone --no-checkout $__gitroot glibc-git
+    cd glibc-git
+    git checkout origin/tschwinge/Roger_Whittaker
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting make..."
+
+  rm -rf "$srcdir/$pkgname" "$srcdir/build"
+  cp -r "$srcdir/glibc-git" "$srcdir/$pkgname"
+  cd "$srcdir/$pkgname"
+
+  #Patching here
   patch -Np1 < ${srcdir}/i686-cpuclock_which.patch
-  patch -Np1 < ${srcdir}/submitted-dl-sysdep.diff
-  patch -Np1 < ${srcdir}/cvs-getcwd.diff
-  patch -Np1 < ${srcdir}/cvs-setsid.diff
-  patch -Np1 < ${srcdir}/local-mlock.diff
-  patch -Np1 < ${srcdir}/submitted-dup2-fix.diff
-  patch -Np1 < ${srcdir}/submitted-sbrk.diff
-  patch -Np1 < ${srcdir}/submitted-critical-sections.diff
   patch -Np1 < ${srcdir}/submitted-posix_opt.h.diff
-  patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff
-  patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff
-  patch -Np1 < ${srcdir}/submitted-ECANCELED.diff
-  patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff
-  patch -Np1 < ${srcdir}/submitted-extern_inline.diff
-  patch -Np1 < ${srcdir}/submitted-itimer-lock.diff
-  patch -Np1 < ${srcdir}/submitted-null-pathname.diff
-  patch -Np1 < ${srcdir}/submitted-SOL_IP.patch
-  patch -Np1 < ${srcdir}/local-bigmem.diff
-  patch -Np1 < ${srcdir}/local-disable-ioctls.diff
   patch -Np1 < ${srcdir}/local-pthread_posix-option.diff
-  patch -Np1 < ${srcdir}/submitted-getnprocs.diff
   patch -Np1 < ${srcdir}/local-pthread.diff
-  patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff
-  patch -Np1 < ${srcdir}/local-thread-cancel.diff
   patch -Np1 < ${srcdir}/local-pthread_types.diff
-  patch -Np1 < ${srcdir}/local-unlockpt-chroot.diff
+  patch -Np1 < ${srcdir}/local-pthread-unsupported-stubs.diff
+  patch -Np1 < ${srcdir}/local-mlock.diff
+  patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff
+  patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff
+  patch -Np1 < ${srcdir}/submitted-sysvshm.diff
+  patch -Np1 < ${srcdir}/submitted-critical-sections.diff
+  patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff
+  patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff
+  patch -Np1 < ${srcdir}/submitted-ECANCELED.diff
+  patch -Np1 < ${srcdir}/submitted-null-pathname.diff
+  patch -Np1 < ${srcdir}/submitted-sbrk.diff
+  patch -Np1 < ${srcdir}/submitted-readlinkat.diff
+  patch -Np1 < ${srcdir}/local-bigmem.diff
+  patch -Np1 < ${srcdir}/submitted-SOL_IP.patch
+  patch -Np1 < ${srcdir}/local-thread-cancel.diff
+  patch -Np1 < ${srcdir}/local-disable-ioctls.diff
+  patch -Np1 < ${srcdir}/local-locarchive.diff
+  patch -Np1 < ${srcdir}/cvs-linkat.diff
+  patch -Np1 < ${srcdir}/submitted-ttyname.diff
+  patch -Np1 < ${srcdir}/local-mkdir_root.diff
 
-  # http://sources.redhat.com/bugzilla/show_bug.cgi?id=411
-  # http://sourceware.org/ml/libc-alpha/2009-07/msg00072.html
-  patch -Np1 < ${srcdir}/glibc-__i686.patch
-  
-  msg "Done Patching."
 
+  mkdir "$srcdir/build"
+  cd "$srcdir/build"
 
-  rm -rf "$srcdir/$pkgname-build" 
-  mkdir "$srcdir/$pkgname-build"
-  cd "$srcdir/$pkgname-build"
-
-  ../$pkgname-$pkgver/configure --host=i686-pc-gnu --prefix= \
-              --without-gd --without-cvs \
-              --disable-profile \
-  
+  ../$pkgname/configure --prefix= --build=i686-pc-gnu --libexecdir=/lib \
+              --without-gd --without-cvs --disable-multi-arch \
+              --disable-profile --enable-add-ons=
 
   make || return 1
 }
 
 package() {
-  cd "$srcdir/$pkgname-build"
+  cd "$srcdir/build"
   make install_root="$pkgdir/" install || return 1
 
   install -dm755 ${pkgdir}/lib/locale
@@ -195,15 +139,15 @@ package() {
 
   # create /etc/locale.gen
   install -m644 ${srcdir}/locale.gen.txt ${pkgdir}/etc/locale.gen
-  sed -i "s|/| |g" ${srcdir}/$pkgname-$pkgver/localedata/SUPPORTED
-  sed -i 's|\\| |g' ${srcdir}/$pkgname-$pkgver/localedata/SUPPORTED
-  sed -i "s|SUPPORTED-LOCALES=||" ${srcdir}/$pkgname-$pkgver/localedata/SUPPORTED
-  cat ${srcdir}/glibc/localedata/SUPPORTED >> ${pkgdir}/etc/locale.gen
+  cp ${srcdir}/${pkgname}/localedata/SUPPORTED ${pkgdir}/
+  sed -i "s|/| |g" ${pkgdir}/SUPPORTED
+  sed -i 's|\\| |g' ${pkgdir}/SUPPORTED
+  sed -i "s|SUPPORTED-LOCALES=||" ${pkgdir}/SUPPORTED
+  cat ${pkgdir}/SUPPORTED >> ${pkgdir}/etc/locale.gen
   sed -i "s|^|#|g" ${pkgdir}/etc/locale.gen
-    
-  cd $pkgdir/lib
-  cp -r ../libexec/* .
-  rm -rf ../libexec
+  rm ${pkgdir}/SUPPORTED
+
+  cd ${pkgdir}/lib
   ln -s ld.so.1 ld.so
 }
 
