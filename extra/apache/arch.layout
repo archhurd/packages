@@ -1,0 +1,22 @@
+<Layout Arch>
+	prefix:          /etc/httpd
+	exec_prefix:     
+	bindir:          /bin
+	sbindir:         /sbin
+	libdir:          /lib/httpd
+	libexecdir:      /lib/httpd/modules
+	mandir:          /share/man
+	sysconfdir:      /etc/httpd/conf
+	datadir:         /share/httpd
+	installbuilddir: /lib/httpd/build
+	errordir:        /share/httpd/error
+	iconsdir:        /share/httpd/icons
+	htdocsdir:       /srv/http
+	manualdir:       /share/httpd/manual
+	cgidir:          /srv/http/cgi-bin
+	includedir:      /include/httpd
+	localstatedir:   /var
+	runtimedir:      /var/run/httpd
+	logfiledir:      /var/log/httpd
+	proxycachedir:   /var/cache/httpd
+</Layout>

@@ -1,0 +1,49 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 72235 2010-03-13 20:22:25Z jgc $
+# Contributor: Jan de Groot <jgc@archlinux.org>
+# Contributor: Andrea Scarpino <andrea@archlinux.org>
+# Contributor: Pierre Schmitz <pierre@archlinux.de>
+
+pkgname=apr
+pkgver=1.4.2
+pkgrel=1
+pkgdesc="The Apache Portable Runtime"
+arch=('i686')
+url="http://apr.apache.org/"
+depends=('util-linux-ng>=2.16')
+options=('!libtool')
+license=('APACHE')
+source=(http://www.apache.org/dist/apr/apr-${pkgver}.tar.bz2
+        01_sendfile_hurd.patch
+        02_hurd_path_max.patch)
+
+build() {
+  cd "${srcdir}/apr-${pkgver}"
+  export apr_cv_epoll_create1=no
+  export apr_cv_dup3=no
+  export apr_cv_accept4=no
+  export apr_cv_sock_cloexec=no
+  export CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+
+  patch -p1 -i ${srcdir}/01_sendfile_hurd.patch
+  patch -p1 -i ${srcdir}/02_hurd_path_max.patch
+
+  ./configure --prefix= --includedir=/include/apr-1 \
+    --with-installbuilddir=/share/apr-1/build \
+    --with-devrandom=/dev/urandom  
+  
+  # multicast not supported on hurd
+  # this has to be after configure
+  sed "/HAVE_STRUCT_IPMREQ/ d" -i include/arch/unix/apr_private.h 
+ 
+  make 
+}
+
+package() {
+  cd "${srcdir}/apr-${pkgver}"
+  make DESTDIR="${pkgdir}" install 
+}
+
+md5sums=('4b00e8f70c067893d075577962656b35'
+         'f05e14fe8e6ce7a7bcf26f5c890c75d3'
+         '925a5769230eee2d3f2fa4689c24e546')

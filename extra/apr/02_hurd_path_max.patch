@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 022_hurd_path_max.dpatch by Stefan Fritsch <sf@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: #349418
+
+@DPATCH@
+diff -urNad apr-1.2.11~/include/apr.h.in apr-1.2.11/include/apr.h.in
+--- apr-1.2.11~/include/apr.h.in	2007-07-25 05:12:02.000000000 +0200
++++ apr-1.2.11/include/apr.h.in	2007-09-12 22:08:30.464437530 +0200
+@@ -389,7 +389,8 @@
+ #elif defined(_POSIX_PATH_MAX)
+ #define APR_PATH_MAX       _POSIX_PATH_MAX
+ #else
+-#error no decision has been made on APR_PATH_MAX for your platform
++#warning no decision has been made on APR_PATH_MAX for your platform
++#define APR_PATH_MAX 4096
+ #endif
+ 
+ /** @} */
