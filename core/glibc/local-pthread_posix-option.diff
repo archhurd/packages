@@ -1,15 +1,17 @@
 Even if glibc doesn't have an integrated pthread library, it depends on the hurd
 packages which have a pthread library.
 
+Avoid letting glibc try to install its own headers for libpthread.
+
 ---
- b/sysdeps/mach/hurd/gai_misc.h     |   43 +++++++++++++++++++++++++++++++++++++
- sysdeps/mach/hurd/Makeconfig       |   10 ++++++++
+ sysdeps/mach/hurd/Makeconfig       |   14 +++++++++++
  sysdeps/mach/hurd/bits/posix_opt.h |   40 +++++++++++++++++++++++-----------
+ sysdeps/mach/hurd/gai_misc.h       |   43 +++++++++++++++++++++++++++++++++++++
  3 files changed, 80 insertions(+), 13 deletions(-)
 
---- a/sysdeps/mach/hurd/bits/posix_opt.h	2010-01-05 23:43:03.000000000 +0100
-+++ b/sysdeps/mach/hurd/bits/posix_opt.h	2010-01-05 23:46:32.000000000 +0100
-@@ -73,24 +73,38 @@
+--- a/sysdeps/mach/hurd/bits/posix_opt.h
++++ b/sysdeps/mach/hurd/bits/posix_opt.h
+@@ -72,24 +72,38 @@
  /* XPG4.2 shared memory is supported.  */
  #define	_XOPEN_SHM	1
  
@@ -54,7 +56,7 @@ packages which have a pthread library.
  
  /* Real-time signals are not yet supported.  */
  #define _POSIX_REALTIME_SIGNALS	-1
-@@ -123,17 +137,17 @@
+@@ -122,17 +136,17 @@
  /* GNU libc provides regular expression handling.  */
  #define _POSIX_REGEXP	1
  
@@ -78,7 +80,7 @@ packages which have a pthread library.
  
  /* The `spawn' function family is supported.  */
  #define _POSIX_SPAWN	200809L
-@@ -142,7 +156,7 @@
+@@ -141,7 +155,7 @@
  #define _POSIX_TIMERS	0
  
  /* The barrier functions are not available.  */
@@ -89,7 +91,7 @@ packages which have a pthread library.
  #define	_POSIX_MESSAGE_PASSING	0
 --- a/sysdeps/mach/hurd/Makeconfig
 +++ b/sysdeps/mach/hurd/Makeconfig
-@@ -2,3 +2,13 @@
+@@ -2,3 +2,17 @@
  # See Makefile in this directory for the rule that builds this.
  # We must define this variable earlier than sysdeps Makefiles are included.
  static-start-installed-name = crt0.o
@@ -103,12 +105,16 @@ packages which have a pthread library.
 +	true
 +$(static-thread-library):
 +	true
-+/usr/include/pthread.h:
++$(inst_includedir)/pthread.h:
 +	true
++
+++force =
 --- /dev/null
 +++ b/sysdeps/mach/hurd/gai_misc.h
 @@ -0,0 +1,43 @@
 +#include <signal.h>
++#include <pthread.h>
++#include <resolv/gai_misc.h>
 +
 +#define gai_start_notify_thread __gai_start_notify_thread
 +#define gai_create_helper_thread __gai_create_helper_thread

@@ -1,0 +1,55 @@
+Fix mkdir / error value (needed for busybox's mkdir -p)
+
+In the / case, directory_name_split can't really split that into an
+absolute ROOT file_t and ".", since name is supposed to be a pointer in
+file_name... Changing the interface is being proposed.
+
+---
+ mkdir.c   |    6 +++++-
+ mkdirat.c |    6 +++++-
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+--- eglibc/sysdeps/mach/hurd/mkdir.c.orig	2010-06-12 00:48:27.000000000 +0000
++++ eglibc/sysdeps/mach/hurd/mkdir.c	2010-06-12 00:55:00.000000000 +0000
+@@ -20,6 +20,7 @@
+ #include <stddef.h>
+ #include <sys/stat.h>
+ #include <hurd.h>
++#include <string.h>
+ 
+ /* Create a directory named FILE_NAME with protections MODE.  */
+ int
+@@ -29,7 +30,10 @@
+ {
+   error_t err;
+   const char *name;
+-  file_t parent = __directory_name_split (file_name, (char **) &name);
++  file_t parent;
++  if (!strcmp(file_name, "/"))
++    return EEXIST;
++  parent = __directory_name_split (file_name, (char **) &name);
+   if (parent == MACH_PORT_NULL)
+     return -1;
+   err = __dir_mkdir (parent, name, mode & ~_hurd_umask);
+--- eglibc/sysdeps/mach/hurd/mkdirat.c.orig	2010-06-12 00:49:02.000000000 +0000
++++ eglibc/sysdeps/mach/hurd/mkdirat.c	2010-06-12 00:54:45.000000000 +0000
+@@ -23,6 +23,7 @@
+ #include <sys/stat.h>
+ #include <hurd.h>
+ #include <hurd/fd.h>
++#include <string.h>
+ 
+ int
+ mkdirat (fd, path, mode)
+@@ -32,7 +33,10 @@
+ {
+   error_t err;
+   const char *name;
+-  file_t parent = __directory_name_split_at (fd, path, (char **) &name);
++  file_t parent;
++  if (!strcmp(path, "/"))
++    return EEXIST;
++  parent = __directory_name_split_at (fd, path, (char **) &name);
+   if (parent == MACH_PORT_NULL)
+     return -1;
+   err = __dir_mkdir (parent, name, mode & ~_hurd_umask);

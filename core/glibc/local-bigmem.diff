@@ -1,12 +1,12 @@
 Allow the kernel to start earlier than VM_MAX_ADDRESS
 
 ---
- dl-sysdep.c |   26 ++++++++++++++++++++------
+ sysdeps/mach/hurd/dl-sysdep.c |   26 ++++++++++++++++++++------
  1 file changed, 20 insertions(+), 6 deletions(-)
 
---- a/sysdeps/mach/hurd/dl-sysdep.c	2008-07-07 20:11:39.000000000 +0200
-+++ b/sysdeps/mach/hurd/dl-sysdep.c	2009-10-21 00:56:09.000000000 +0200
-@@ -102,12 +102,26 @@ static void fmh(void) {
+--- a/sysdeps/mach/hurd/dl-sysdep.c
++++ b/sysdeps/mach/hurd/dl-sysdep.c
+@@ -105,12 +105,26 @@
  	max=a; break;}
        fmha=a+=fmhs;}
      if (err) assert(err==KERN_NO_SPACE);

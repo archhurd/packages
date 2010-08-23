@@ -24,7 +24,7 @@ stubs call forwarding can not work.
  int _dl_verbose;
 --- a/elf/rtld.c
 +++ b/elf/rtld.c
-@@ -146,6 +146,11 @@
+@@ -151,6 +151,11 @@
  #ifdef NEED_DL_SYSINFO
      ._dl_sysinfo = DL_SYSINFO_DEFAULT,
  #endif

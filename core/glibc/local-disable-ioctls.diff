@@ -2,14 +2,12 @@ struct ortentry and struct ifalias req are actually not defined
 struct arpreq is defined, but can not be passed to an ioctl on the Hurd.
 
 ---
- ioctls.h |    6 ++++++
+ sysdeps/mach/hurd/bits/ioctls.h |    6 ++++++
  1 file changed, 6 insertions(+)
 
-diff --git a/sysdeps/mach/hurd/bits/ioctls.h b/sysdeps/mach/hurd/bits/ioctls.h
-index 8718aac..10dd4ff 100644
 --- a/sysdeps/mach/hurd/bits/ioctls.h
 +++ b/sysdeps/mach/hurd/bits/ioctls.h
-@@ -260,8 +271,10 @@ enum __ioctl_datum { IOC_8, IOC_16, IOC_32, IOC_64 };
+@@ -273,8 +273,10 @@
  #define	SIOCSPGRP	_IOW('s',  8, int)		/* set process group */
  #define	SIOCGPGRP	_IOR('s',  9, int)		/* get process group */
  
@@ -20,7 +18,7 @@ index 8718aac..10dd4ff 100644
  
  #define	SIOCSIFADDR	_IOW('i', 12, struct ifreq)	/* set ifnet address */
  #define	OSIOCGIFADDR	_IOWR('i',13, struct ifreq)	/* get ifnet address */
-@@ -283,12 +296,16 @@ enum __ioctl_datum { IOC_8, IOC_16, IOC_32, IOC_64 };
+@@ -296,12 +298,16 @@
  #define	SIOCGIFMETRIC	_IOWR('i',23, struct ifreq_int)	/* get IF metric */
  #define	SIOCSIFMETRIC	_IOW('i',24, struct ifreq_int)	/* set IF metric */
  #define	SIOCDIFADDR	_IOW('i',25, struct ifreq)	/* delete IF addr */
