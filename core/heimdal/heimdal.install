@@ -3,7 +3,7 @@ filelist=(heimdal hx509)
 
 post_install() {
   for file in ${filelist[@]}; do
-    install-info $infodir/$file.info $infodir/dir 2> /dev/null
+    install-info $infodir/$file.info.gz $infodir/dir 2> /dev/null
   done
 }
 
@@ -13,7 +13,7 @@ post_upgrade() {
 
 pre_remove() {
   for file in ${filelist[@]}; do
-    install-info --delete $infodir/$file.info $infodir/dir 2> /dev/null
+    install-info --delete $infodir/$file.info.gz $infodir/dir 2> /dev/null
   done
 }
 
