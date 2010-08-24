@@ -1,0 +1,19 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 0013_fix_hurd_build.dpatch by  <mbanck@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Include config.h so that MAXHOSTNAMELEN is available when
+## DP: building on hurd-i386.
+
+@DPATCH@
+diff -urNad trunk~/saslauthd/auth_sasldb.c trunk/saslauthd/auth_sasldb.c
+--- trunk~/saslauthd/auth_sasldb.c	2006-05-29 22:52:42.000000000 +0300
++++ trunk/saslauthd/auth_sasldb.c	2006-11-09 08:35:17.000000000 +0200
+@@ -41,6 +41,7 @@
+ #include <string.h>
+ #include <stdlib.h>
+ #include <pwd.h>
++#include <config.h>
+ /* END PUBLIC DEPENDENCIES */
+ 
+ #define RETURN(x) return strdup(x)
