@@ -1,67 +1,90 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
-pkgname=('gcc' 'gcc-libs')
-pkgver=4.4.3
-pkgrel=4
+pkgbase=('gcc')
+pkgname=('gcc' 'gcc-libs' 'gcc-fortran' 'gcc-objc')
+pkgver=4.5.1
+pkgrel=2
+_libstdcppmanver=20100719       # Note: check source directory name when updating this
 pkgdesc="The GNU Compiler Collection"
-arch=(i686)
+arch=('i686')
 url="http://gcc.gnu.org"
 license=('GPL' 'LGPL')
-makedepends=('binutils' 'mpfr' 'cloog-ppl')
-source=(ftp://ftp.gnu.org/pub/gnu/gcc/gcc-${pkgver}/gcc-{core,g++}-${pkgver}.tar.bz2
-        gcc-4.4.3_hurd.diff)
-md5sums=('054b66f315b3d04ad06544ce26e72365'
-         'cd179ec4f05ee17ce76464da25a2674c'
-         'b46b41127011fcd13a0df3f70df41565')
+makedepends=('binutils' 'libmpc>=0.8.2' 'libelf' 'cloog-ppl>=0.15.9-2')
+options=('!libtool' '!emptydirs')
+source=(ftp://gcc.gnu.org/pub/gcc/releases/gcc-${pkgver}/gcc-{core,g++,fortran,objc,ada}-${pkgver}.tar.bz2
+        ftp://gcc.gnu.org/pub/gcc/libstdc++/doxygen/libstdc++-api.${_libstdcppmanver}.man.tar.bz2
+        gcc-hash-style-both.patch)
+md5sums=('dc8959e31b01a65ce10d269614815054'
+         'b294953ff0bb2f20c7acb2bf005d832a'
+         '7567c2f8df8a8bf61b48fe414b88de65'
+         '3c11b7037896e967eddf8178af2ddd98'
+         'c92111e2e22fc60d1e0adb1b5c7fa4f9'
+         '226ae0c6364cfe2c1f7ac88d06088d5a'
+         '6fd395bacbd7b6e47c7b74854b478363')
 
-
-#for cross-compiling :(
-_libdir=/lib
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
+  #ppl 0.11 compability
+  sed -i "/ppl_minor_version=/s#10#11#" configure
   # Do not install libiberty
   sed -i 's/install_to_$(INSTALL_DEST) //' libiberty/Makefile.in
   # Do not run fixincludes
   sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
-  
-  #patch for succesfull compile on hurd
-  patch -Np2 < ${srcdir}/gcc-4.4.3_hurd.diff
-  
-  cd libdecnumber && ln -sf dpd no
 
-  cd ../..
-  mkdir build && cd build
-  ../${pkgname}-${pkgver}/configure --target=i686-pc-gnu --host=i686-pc-gnu --prefix= \
-    --with-cloog=$_libdir --with-ppl=$_libdir --with-gmp=$_libdir \
-    --with-mpfr=$_libdir --enable-long-long --enable-c99 \
+  patch -Np0 -i ${srcdir}/gcc-hash-style-both.patch
+
+  #cd libdecnumber && ln -sf dpd no; cd ..
+
+  cd ..
+  mkdir build &&   cd build
+
+  ../${pkgname}-${pkgver}/configure --build=$CHOST --prefix= \
+    --enable-long-long --enable-c99 \
+    --enable-clocale=gnu --enable-gnu-unique-object \
+    --enable-lto --enable-plugin \
     --enable-shared --enable-threads=posix --enable-__cxa_atexit \
-    --enable-languages=c,c++ --disable-libstdcxx-pch --enable-clocale=gnu \
+    --enable-languages=c,c++,fortran,objc,obj-c++ --disable-libstdcxx-pch \
     --disable-multilib --mandir=/share/man --infodir=/share/info \
-    --libexecdir=/lib
+    --libexecdir=/lib --with-system-zlib \
+    --with-gmp \
+    --with-ppl --with-cloog \
+    --with-mpf --with-mpc
 
   make || return 1
-} 
+}
 
-package_gcc() { 
+package_gcc() {
   groups=('base-devel')
-  depends=('binutils' 'mpfr' 'cloog-ppl' 'sh')
+  depends=('binutils' 'libmpc>=0.8.2' 'libelf' 'cloog-ppl>=0.15.9-2' 'sh')
   install=gcc.install
-  
+
   cd ${srcdir}/build
 
   #install and clean up
-  make DESTDIR=${pkgdir} install
-  rm $pkgdir/lib/*.so*
-  rm $pkgdir/share/info/libgomp.info
+  make -j1 DESTDIR=${pkgdir} install
+  rm $pkgdir/bin/*gfortran
+  rm $pkgdir/lib/gcc/$CHOST/${pkgver}/{finclude,include/objc}/*
+  rm $pkgdir/lib/gcc/$CHOST/${pkgver}/{cc1obj{,plus},f951,libgfortranbegin.a}
+
+  rm $pkgdir/lib/{*.so*,lib{gfortran,objc}.a}
+  rm $pkgdir/share/info/{libgomp,gfortran}.info
   rm $pkgdir/share/locale/{de,fr}/LC_MESSAGES/libstdc++.mo
+  rm $pkgdir/share/man/man1/gfortran.1
 
   #sometimes required
   install -dm755 ${pkgdir}/lib
   ln -sf /bin/cpp ${pkgdir}/lib/cpp
   ln -sf gcc ${pkgdir}/bin/cc
   ln -sf g++ ${pkgdir}/bin/c++
+
+  # install the libstdc++ man pages
+  install -dm755 ${pkgdir}/share/man/man3
+  install -m644 ${srcdir}/libstdc++-api-${_libstdcppmanver}.man/man3/* \
+    ${pkgdir}/share/man/man3/
+  # deal with conflicts...
+  rm -f ${pkgdir}/share/man/man3/{ctime,queue,random,regex,string}.3
 
   install -Dm644 ${srcdir}/${pkgname}-${pkgver}/COPYING.RUNTIME \
     ${pkgdir}/share/licenses/gcc/RUNTIME.LIBRARY.EXCEPTION
@@ -74,25 +97,64 @@ package_gcc-libs() {
   depends=('glibc' 'sh')
   install=gcc-libs.install
 
-  
-  cd ${srcdir}/build  
-  make -j1 -C i686-pc-gnu/libgcc DESTDIR=${pkgdir} install-shared
-  for lib in libmudflap libgomp libssp libstdc++-v3/src; do
-    make -j1 -C i686-pc-gnu/$lib DESTDIR=${pkgdir} install-toolexeclibLTLIBRARIES
-  done  
-  
-  make -j1 -C i686-pc-gnu/libstdc++-v3/po DESTDIR=${pkgdir} install
-  make -j1 -C i686-pc-gnu/libgomp DESTDIR=${pkgdir} install-info
 
-  cd ${pkgdir}
-  ln -s libgcc_s.so lib/libgcc.so
-  
+  cd ${srcdir}/build
+  make -j1 -C $CHOST/libgcc DESTDIR=${pkgdir} install-shared
+  for lib in libmudflap libgomp libssp libstdc++-v3/src; do
+    make -j1 -C $CHOST/$lib DESTDIR=${pkgdir} install-toolexeclibLTLIBRARIES
+  done
+
+  make -j1 -C $CHOST/libstdc++-v3/po DESTDIR=${pkgdir} install
+  make -j1 -C $CHOST/libgomp DESTDIR=${pkgdir} install-info
+
+  make -j1 DESTDIR=${pkgdir} install-target-libgfortran
+
+  make -j1 DESTDIR=${pkgdir} install-target-libobjc
+
+  rm -fr ${pkgdir}/lib/gcc
+
   #cleaning up the mess...
   find ${pkgdir} -name *.a -delete
-  
-  
-  install -Dm644 ${srcdir}/${pkgname}-${pkgver}/COPYING.RUNTIME \
+
+  install -Dm644 ${srcdir}/${pkgbase}-${pkgver}/COPYING.RUNTIME \
     ${pkgdir}/share/licenses/gcc-libs/RUNTIME.LIBRARY.EXCEPTION
 }
 
+package_gcc-fortran()
+{
+  pkgdesc="Fortran front-end for GCC"
+  depends=("gcc=$pkgver-$pkgrel")
+  install=gcc-fortran.install
+
+  cd ${srcdir}/build
+  make -j1 DESTDIR=$pkgdir install-target-libgfortran
+  make -j1 -C $CHOST/libgomp DESTDIR=$pkgdir install-nodist_fincludeHEADERS
+  make -j1 -C gcc DESTDIR=$pkgdir fortran.install-{common,man,info}
+  install -Dm755 gcc/f951 $pkgdir/lib/gcc/$CHOST/$pkgver/f951
+
+  # remove libraries included in gcc-libs
+  rm -f ${pkgdir}/lib/libgfortran.so*
+
+  # Install Runtime Library Exception
+  install -Dm644 ${srcdir}/gcc-${pkgver}/COPYING.RUNTIME \
+    ${pkgdir}/share/licenses/gcc-fortran/RUNTIME.LIBRARY.EXCEPTION
+}
+
+package_gcc-objc()
+{
+  pkgdesc="Objective-C front-end for GCC"
+  depends=("gcc=$pkgver-$pkgrel")
+
+  cd ${srcdir}/build
+  make -j1 DESTDIR=$pkgdir install-target-libobjc
+  install -dm755 $pkgdir/lib/gcc/$CHOST/$pkgver/
+  install -m755 gcc/cc1obj{,plus} $pkgdir/lib/gcc/$CHOST/$pkgver/
+
+  # remove libraries included in gcc-libs
+  rm -f ${pkgdir}/lib/libobjc.so*
+
+  # Install Runtime Library Exception
+  install -Dm644 ${srcdir}/gcc-${pkgver}/COPYING.RUNTIME \
+    ${pkgdir}/share/licenses/gcc-objc/RUNTIME.LIBRARY.EXCEPTION
+}
 

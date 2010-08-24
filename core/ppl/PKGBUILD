@@ -1,33 +1,28 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=ppl
-pkgver=0.10.2
+pkgver=0.11
 pkgrel=1
 pkgdesc="A modern library for convex polyhedra and other numerical abstractions."
 arch=(i686)
 url="http://www.cs.unipr.it/ppl"
 license=('GPL3')
 depends=('gmp>=5.0')
-source=(http://www.cs.unipr.it/ppl/Download/ftp/releases/$pkgver/ppl-$pkgver.tar.gz
-        ppl-0.10.2-gmp-5.0.patch)
-md5sums=('e7dd265afdeaea81f7e87a72b182d875'
-         '4da347693c76ccccba4fb5b60ca0f321')
-
+options=('!docs !libtool')
+source=(http://www.cs.unipr.it/ppl/Download/ftp/releases/$pkgver/ppl-$pkgver.tar.gz)
+md5sums=('ba527ec0ffc830ce16fad8a4195a337e')
 
 build() {
-  cd "$srcdir/$pkgname-$pkgver"
-  
-  patch -Np1 < $srcdir/ppl-0.10.2-gmp-5.0.patch
-  autoreconf -vf
-  
-  ./configure --host=i686-pc-gnu --prefix= \
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix= \
               --enable-interfaces="c,cxx"
   make || return 1
-} 
+}
 
-package() { 
-  cd "$srcdir/$pkgname-$pkgver"
-  make DESTDIR="$pkgdir/" install
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}/" install
 }
 
 

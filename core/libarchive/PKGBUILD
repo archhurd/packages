@@ -2,12 +2,12 @@
 
 pkgname=libarchive
 pkgver=2.8.4
-pkgrel=1
+pkgrel=2
 pkgdesc="library that can create and read several streaming archive formats"
 arch=(i686)
 url="http://libarchive.googlecode.com/"
 license=('BSD')
-depends=('zlib' 'bzip2' 'xz-utils' 'openssl>=1.0' 'expat' 'acl' 'libxml2')
+depends=('zlib' 'bzip2' 'xz-utils' 'openssl>=1.0' 'expat' 'acl')
 source=(http://libarchive.googlecode.com/files/$pkgname-$pkgver.tar.gz
         libarchive_hurd.patch)
 md5sums=('83b237a542f27969a8d68ac217dc3796'
@@ -18,7 +18,7 @@ build() {
 
   patch -Np2 < $srcdir/libarchive_hurd.patch
 
-  ./configure --prefix=
+  ./configure --prefix= --without-xml2
   make || return 1
 }
 
@@ -29,5 +29,3 @@ package() {
   mkdir -p $pkgdir/share/licenses/libarchive
   install -m644 COPYING $pkgdir/share/licenses/libarchive
 }
-
-
