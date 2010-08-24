@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+			<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+			<title>RAW OUTPUT PrCP305B</title>
+			<meta name="robots" content="noindex, nofollow" />
+		</head>
+		<body>
+			<pre>diff --git a/config/ltconfig b/config/ltconfig
+index 5b61f70..07d49e5 100755
+--- a/config/ltconfig
++++ b/config/ltconfig
+@@ -1963,6 +1963,7 @@ gnu*)
+   library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so${major} ${libname}.so'
+   soname_spec='${libname}${release}.so$major'
+   shlibpath_var=LD_LIBRARY_PATH
++  deplibs_check_method=pass_all
+   ;;
+ 
+ hpux9* | hpux10* | hpux11*)</pre>
+		</body>
+	</html>
