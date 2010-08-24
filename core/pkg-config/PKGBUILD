@@ -1,4 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 85540 2010-07-15 04:44:14Z allan $
+# Maintainer: Allan McRae <allan@archlinux.org>
+# Committer: Judd Vinet <jvinet@zeroflux.org>
 
 pkgname=pkg-config
 pkgver=0.25
@@ -8,19 +11,23 @@ arch=('i686')
 url="http://pkgconfig.freedesktop.org/wiki/"
 license=('GPL')
 groups=('base-devel')
+depends=('glibc')
+provides=("pkgconfig=${pkgver}")
 conflicts=('pkgconfig')
 replaces=('pkgconfig')
-provides=('pkgconfig')
-depends=('glibc')
-source=(http://pkgconfig.freedesktop.org/releases/${pkgname}-${pkgver}.tar.gz)
+source=(http://pkgconfig.freedesktop.org/releases/${pkgname}-${pkgver}.tar.gz
+        autoconf-2.66.patch)
+md5sums=('a3270bab3f4b69b7dc6dbdacbcae9745'
+         '0fbfc1a5088f792bbeec7b5090e449f1')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
+  patch -Np1 -i $srcdir/autoconf-2.66.patch
   ./configure --prefix=
-  make 
+  make
 }
+
 package() {
   cd ${srcdir}/${pkgname}-${pkgver}
   make DESTDIR=${pkgdir} install
 }
-md5sums=('a3270bab3f4b69b7dc6dbdacbcae9745')
