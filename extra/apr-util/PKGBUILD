@@ -23,7 +23,7 @@ build() {
 	#export LDFLAGS="${LDFLAGS//,--as-needed}"	
 	export LDFLAGS="-lldap -lcrypt"	
 
-  ./configure --prefix=/ --with-apr= \
+  ./configure --prefix= --with-apr= \
 		--without-pgsql --without-mysql --without-sqlite2 --without-sqlite3 \
 		--with-berkeley-db= --with-gdbm= --with-ldap --with-ldap-lib=/lib/libldap-2.4.so.2.5.5
 	make 
