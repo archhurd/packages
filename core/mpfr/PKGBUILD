@@ -1,29 +1,32 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=mpfr
-pkgver=2.4.2
+pkgver=3.0.0
 pkgrel=1
 pkgdesc="Multiple-precision floating-point library"
 arch=(i686)
 url="http://www.mpfr.org/"
 license=('LGPL')
-depends=('gmp>=4.2.3')
+depends=('gmp>=5.0.1')
+options=('!libtool')
 install=mpfr.install
-source=(ftp://ftp.gnu.org/pub/gnu/mpfr/$pkgname-$pkgver.tar.xz)
-md5sums=('f61da10945c3de6962749a5eb70dafd3')
-
+source=(ftp://ftp.gnu.org/pub/gnu/mpfr/$pkgname-$pkgver.tar.xz
+		mpfr-3.0.0-p3.patch)
+md5sums=('8ab3bef2864b8c6e6a291f5603141bbd'
+         '74fc2253afc4900eeacb21df893e6395')
 
 build() {
-  cd "$srcdir/$pkgname-$pkgver"
+  cd "${srcdir}/${pkgname}-${pkgver}"
 
-  ./configure --host=i686-pc-gnu --prefix= \
+  ./configure --prefix= \
               --enable-thread-safe --enable-shared
   make || return 1
-} 
+  make check
+}
 
-package() { 
-  cd "$srcdir/$pkgname-$pkgver"
-  make DESTDIR="$pkgdir/" install
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}/" install
 }
 
 
