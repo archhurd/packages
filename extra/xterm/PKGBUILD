@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=xterm
-pkgver=260
+pkgver=261
 pkgrel=1
 pkgdesc="X Terminal Emulator"
 arch=('i686')
@@ -36,18 +36,18 @@ build() {
       --enable-freetype \
       --enable-luit \
       --enable-mini-luit \
-      --enable-narrowproto || return 1
-  make || return 1
+      --enable-narrowproto 
+  make 
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
-  chmod 0755 "${pkgdir}/bin/xterm" || return 1
+  make DESTDIR="${pkgdir}" install 
+  chmod 0755 "${pkgdir}/bin/xterm" 
 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 "${srcdir}/LICENSE" \
-      "${pkgdir}/share/licenses/${pkgname}/" || return 1
+      "${pkgdir}/share/licenses/${pkgname}/" 
 }
-md5sums=('bcf4f0ba51f5f58fd5bef76b3d05e40e'
+md5sums=('10d211f6986c4b279cfa9530b2361457'
          '10ecc3f8ee91e3189863a172f68282d2')
