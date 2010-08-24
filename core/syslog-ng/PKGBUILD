@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=syslog-ng
-pkgver=3.1.0
+pkgver=3.1.2
 pkgrel=1
 pkgdesc="Next-generation syslogd with advanced networking and filtering capabilities"
 arch=('i686')
@@ -35,12 +35,12 @@ build() {
                 --disable-spoof-source \
                 --disable-linux-caps
 
-    make || return 1
+    make 
 }
 
 package() {
     cd $srcdir/$pkgname-$pkgver
-    make DESTDIR=$pkgdir install || return 1
+    make DESTDIR=$pkgdir install 
     install -dm755 $pkgdir/var/lib/syslog-ng
     install -Dm644 $srcdir/syslog-ng.conf $pkgdir/etc/syslog-ng.conf
     install -Dm644 $srcdir/syslog-ng.logrotate $pkgdir/etc/logrotate.d/syslog-ng
@@ -48,7 +48,7 @@ package() {
     # remove libexec
     rm -rf $pkgdir/libexec
 }
-md5sums=('10f2ad8df738d9551996be4367d1cf4e'
+md5sums=('b9f45d9783a4ebeb84ec5acd158502fb'
          'e02be6637d0c3b5484d4597ce049ae39'
          '735636090be4582885974542d2a75855'
          'ee7783bf72bbde82456e37117fe7426d')
