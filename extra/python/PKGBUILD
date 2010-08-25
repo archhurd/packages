@@ -1,47 +1,48 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=python
-pkgver=2.6.5
-pkgrel=2
+pkgver=2.6.6
+pkgrel=1
 _pybasever=2.6
 pkgdesc="A high-level scripting language"
 arch=('i686')
-license=('PSF')
+license=('custom')
 url="http://www.python.org"
 depends=('db' 'bzip2' 'gdbm' 'openssl' 'zlib' 'expat' 'sqlite3')
-#makedepends=('tk>=8.5.0')
+makedepends=('tk')
 optdepends=('tk: for IDLE, pynche and modulator')
 provides=('python2' 'python-elementtree' 'python-ctypes')
-replaces=('python-elementtree' 'python-ctypes')
 source=(http://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.bz2
-	python-2.6-internal-expat.patch
-	python-2.6-db-4.8.patch
+	python-internal-expat.patch
+  python-db-4.8.patch
 	modulator-launcher
 	pynche-launcher
-  hurd-broken-poll.dpatch
-  hurd-disable-nonworking-constants.dpatch)
+  hurd-broken-poll.diff
+  hurd-disable-nonworking-constants.diff)
 
 build() {
   cd ${srcdir}/Python-${pkgver}
 
-  patch -Np0 -i ${srcdir}/python-2.6-internal-expat.patch
+  patch -Np0 -i ${srcdir}/python-internal-expat.patch
+  patch -Np0 -i ${srcdir}/python-db-4.8.patch  
 
- #Hurd 
-	patch -p0 < ../hurd-broken-poll.dpatch
-	patch -p0 < ../hurd-disable-nonworking-constants.dpatch
+  # Hurd 
+  patch -p1 -i ${srcdir}/hurd-disable-nonworking-constants.diff 
+  patch -p1 -i ${srcdir}/hurd-broken-poll.diff
 
   #http://bugs.python.org/issue6949
-  patch -Np0 -i ${srcdir}/python-2.6-db-4.8.patch
 
   export OPT="${CFLAGS}"
-  ./configure --prefix= --enable-shared --with-threads --enable-unicode
+  ./configure --prefix= --enable-shared --with-threads \
+    --enable-unicode 
 
-  make LN=cp || return 1
+  make  
 }
 
 package() {
   cd ${srcdir}/Python-${pkgver}
-  make LN=cp DESTDIR=${pkgdir} install || return 1
+  
+  make DESTDIR=${pkgdir} install 
   
   rm ${pkgdir}/bin/python
   ln -sf python${_pybasever} ${pkgdir}/bin/python
@@ -73,10 +74,10 @@ package() {
   # license
   install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
-md5sums=('6bef0417e71a1a1737ccf5750420fdb3'
+md5sums=('cf4e6881bb84a7ce6089e4a307f71f14'
          '993800dbcc0c4f199c1ceee998a06e71'
          '10eb5449ead95b9cb13eae9f9a65894e'
          '793f25c6dfc74e75cadb72b2134f7c67'
          '108370afad19062abd2df4edaf060e57'
-         '5dd3f2b420e525fbd5244db1bcb74d24'
-         '922ffa3e9473909f3374ba0e0171c293')
+         'ecf1a0d5eddbcfe757034381152c8f66'
+         '80088c2e94ad8bd419c78a63dc12d55b')

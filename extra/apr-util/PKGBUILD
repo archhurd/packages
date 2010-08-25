@@ -5,7 +5,7 @@
 
 pkgname=apr-util
 pkgver=1.3.9
-pkgrel=2
+pkgrel=3
 pkgdesc="The Apache Portable Runtime"
 arch=('i686')
 url="http://apr.apache.org/"
@@ -18,14 +18,9 @@ md5sums=('29dd557f7bd891fc2bfdffcfa081db59')
 build() {
 	cd "${srcdir}/apr-util-${pkgver}"
   
-  # won't build with --as-needed
-	#export LDFLAGS="${LDFLAGS//-Wl,--as-needed}"
-	#export LDFLAGS="${LDFLAGS//,--as-needed}"	
-	export LDFLAGS="-lldap -lcrypt"	
-
   ./configure --prefix= --with-apr= \
 		--without-pgsql --without-mysql --without-sqlite2 --without-sqlite3 \
-		--with-berkeley-db= --with-gdbm= --with-ldap --with-ldap-lib=/lib/libldap-2.4.so.2.5.5
+		--with-berkeley-db= --with-gdbm= --with-ldap 
 	make 
 }
 
