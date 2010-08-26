@@ -1,0 +1,62 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 40238 2009-05-29 01:53:53Z allan $
+# Contributor: Allan McRae <allan@archlinux.org>
+# Committer: dorphell <dorphell@gmx.net>
+
+#
+# ATTENTION!
+#
+# Build will most likey fail, you have to patch a hurd header yourself
+#
+
+
+pkgname=screen
+pkgver=4.0.3
+pkgrel=1
+_ptygroup=5 #the UID of our PTY/TTY group
+pkgdesc="Full-screen window manager that multiplexes a physical terminal"
+arch=('i686')
+url="http://www.gnu.org/software/screen/"
+license=('GPL')
+depends=('ncurses' 'pam')
+backup=('etc/screenrc' 'etc/pam.d/screen')
+options=('!makeflags')
+install=screen.install
+source=(ftp://ftp.uni-erlangen.de/pub/utilities/screen/screen-${pkgver}.tar.gz \
+        12kfreebsd_ctty
+        05fix_osdef_include
+        hurd.patch
+        screen.pam)
+
+build() {
+  export LDFLAGS="${LDFLAGS} -Wl,--as-needed"
+
+  cd ${srcdir}/${pkgname}-${pkgver}
+  patch -p1 < ../12kfreebsd_ctty
+  patch -p1 < ../05fix_osdef_include
+  patch -p1 < ../hurd.patch
+  
+  ./configure --prefix= --enable-pam \
+        --with-sys-screenrc=/etc/screenrc --enable-colors256 \
+       --enable-rxvt_osc --with-pty-group=$_ptygroup \
+       --mandir=/share/man --infodir=/share/info
+  make
+}
+
+package() { 
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install 
+  install -Dm644 ${srcdir}/screen.pam ${pkgdir}/etc/pam.d/screen
+
+  install -Dm644 etc/completer.zsh ${pkgdir}/share/zsh/site-functions/screen
+  install -Dm644 etc/etcscreenrc ${pkgdir}/etc/screenrc
+  install -Dm644 etc/screenrc ${pkgdir}/etc/skel/.screenrc
+
+  rm ${pkgdir}/share/info/dir
+  gzip -9 ${pkgdir}/share/info/*
+}
+md5sums=('8506fd205028a96c741e4037de6e3c42'
+         '7e5a19d4555e45c128a34844ef3dacb2'
+         '57603a7a2c1ba3db39097be66569a91f'
+         '559b05cb703384ebaf10c92f2a53015d'
+         '74f7919d7b65436cc2ea5341fa8ca374')

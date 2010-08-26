@@ -1,0 +1,18 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 05fix_osdef_include.dpatch by  <hesso@pool.math.tu-berlin.de>
+##
+## DP: Add a missing include to get a few prototypes that caused build
+## DP: issues on kfreebsd-amd64. (See #357232)
+
+@DPATCH@
+diff -Naur screen-4.0.3.orig/osdef.h.in screen-4.0.3/osdef.h.in
+--- screen-4.0.3.orig/osdef.h.in	2008-06-01 23:39:49.000000000 +0200
++++ screen-4.0.3/osdef.h.in	2008-06-01 23:40:11.000000000 +0200
+@@ -106,6 +106,7 @@
+ extern char *tgoto __P((char *, int, int));
+ 
+ #ifdef POSIX
++#include <string.h>
+ extern int   setsid __P((void));
+ extern int   setpgid __P((int, int));
+ extern int   tcsetpgrp __P((int, int));
