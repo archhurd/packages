@@ -1,0 +1,130 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 81011 2010-05-25 17:53:11Z dgriffiths $
+# Maintainer: Douglas Soares de Andrade <douglas@archlinux.org>
+
+pkgbase=('postgresql')
+pkgname=('postgresql-libs' 'postgresql')
+pkgver=8.4.4
+pkgrel=1
+arch=('i686')
+url="http://www.postgresql.org"
+license=('BSD')
+makedepends=('libxml2' 'python')
+options=('!makeflags')
+source=(ftp://ftp.postgresql.org/pub/source/v${pkgver}/postgresql-${pkgver}.tar.bz2 \
+        postgresql postgresql.confd build.patch postgresql.pam)
+
+build() {
+  cd ${srcdir}/${pkgbase}-${pkgver} 
+
+  # patch to remove regress/test make target (won't build with it present)
+  patch -Np1 -i ../build.patch 
+
+  # configure
+  ./configure --prefix= --mandir=/share/man --with-libxml \
+  --with-docdir=/share/doc --with-openssl --with-python --with-pam \
+  --datadir=/share/postgresql --enable-thread-safety 
+
+  sed -i -e '/interfaces/d' src/Makefile 
+
+  # build
+  make 
+
+  # build libs
+  for dir in src/interfaces src/bin/pg_config; do
+    pushd ${dir} 
+    make 
+    popd
+  done
+
+  cd src/include 
+  make 
+
+  # build adminpack
+  cd ../../contrib/adminpack 
+  make 
+}
+
+package_postgresql-libs() {
+  pkgdesc="Libraries for use with PostgreSQL"
+  depends=('openssl>=0.9.8b' 'readline>=6.0')
+
+  cd ${srcdir}/${pkgbase}-${pkgver} 
+
+  # install libs
+  for dir in src/interfaces src/bin/pg_config; do
+    pushd ${dir} 
+    make DESTDIR=${pkgdir} install 
+    popd
+  done
+
+  cd src/include 
+
+  mkdir -p ${pkgdir}/include/{libpq,postgresql/internal/libpq} 
+
+  # these headers are needed by the public headers of the interfaces
+  install -m644 pg_config.h ${pkgdir}/include/ 
+  install -m644 pg_config_os.h ${pkgdir}/include/ 
+  install -m644 postgres_ext.h ${pkgdir}/include/ 
+  install -m644 libpq/libpq-fs.h ${pkgdir}/include/libpq/ 
+  install -m644 pg_config_manual.h ${pkgdir}/include/ 
+
+  # these headers are needed by the not-so-public headers of the interfaces
+  install -m644 c.h ${pkgdir}/include/postgresql/internal/ 
+  install -m644 port.h ${pkgdir}/include/postgresql/internal/ 
+  install -m644 postgres_fe.h ${pkgdir}/include/postgresql/internal/ 
+  install -m644 libpq/pqcomm.h ${pkgdir}/include/postgresql/internal/libpq/ 
+
+  install -Dm644 ../../COPYRIGHT ${pkgdir}/share/licenses/${pkgname}/LICENSE 
+}
+
+
+package_postgresql() {
+  pkgdesc="A sophisticated object-relational DBMS"
+  backup=('etc/conf.d/postgresql' 'etc/pam.d/postgresql')
+  depends=("postgresql-libs>=${pkgver}" 'sudo' 'libxml2' 'python')
+  optdepends=('python: for PL/Python support')
+  provides=('postgresql-client')
+  conflicts=('postgresql-client')
+
+  cd ${srcdir}/${pkgbase}-${pkgver} 
+
+  # install
+  make DESTDIR=${pkgdir} install 
+
+  # install adminpack
+  cd contrib/adminpack 
+  make DESTDIR=${pkgdir} install ;
+
+  # clean up unneeded installed items
+  rm -rf ${pkgdir}/include/postgresql/internal 
+  rm -rf ${pkgdir}/include/libpq 
+  # the below line is expected to produce an error; fix this one day
+  #rm -f ${pkgdir}/include/*
+  find ${pkgdir}/include -maxdepth 1 -type f -execdir rm {} + 
+  rm -f ${pkgdir}/bin/pg_config 
+  
+  # Maintaining the lib below because of qt
+  #rm -f ${pkgdir}/lib/libpgport.a 
+
+  # install launch script
+  install -D -m755 ${srcdir}/postgresql ${pkgdir}/etc/rc.d/postgresql 
+
+  # install license
+  install -D -m644 ../../COPYRIGHT ${pkgdir}/share/licenses/${pkgbase}/LICENSE 
+
+  # install conf file
+  install -D -m644 ${srcdir}/postgresql.confd \
+    ${pkgdir}/etc/conf.d/postgresql 
+
+  install -D -m644 ${srcdir}/postgresql.pam \
+    ${pkgdir}/etc/pam.d/postgresql 
+
+  chown root:root ${pkgdir}/share/doc/postgresql/html/*
+}
+
+md5sums=('4bf2448ad965bca3940df648c02194df'
+         '06d1864456e18ae167a8d2b8c5e588bb'
+         'd63a05943cf0a2726aa2070f3033c569'
+         '4d74f4227dc5e12bf95b3490758d86c9'
+         '96f82c38f3f540b53f3e5144900acf17')
