@@ -1,0 +1,7 @@
+--- rxvtdaemon.C.orig	2010-08-26 02:16:40.000000000 +0000
++++ rxvtdaemon.C	2010-08-26 22:11:28.380000000 +0000
+@@ -35,0 +36,4 @@
++#ifndef PATH_MAX
++#define PATH_MAX 16384
++#endif
++
