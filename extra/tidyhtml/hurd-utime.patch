@@ -1,0 +1,18 @@
+diff -upr tidy.org/include/platform.h tidy/include/platform.h
+--- tidy.org/include/platform.h	2010-08-27 00:55:41.000000000 +0000
++++ tidy/include/platform.h	2010-08-27 00:59:04.000000000 +0000
+@@ -439,8 +439,12 @@ extern "C" {
+ #include <stat.h>
+ #endif
+ 
+-#if HAS_FUTIME
+-#include <sys/utime.h>
++#if HAS_FUTIME 
++  #ifndef __GNU__
++  #include <sys/utime.h>
++  #else
++  #include <utime.h>
++  #endif
+ #else
+ #include <utime.h>
+ #endif /* HASFUTIME */
