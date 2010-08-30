@@ -97,7 +97,7 @@ build() {
 		--with-mysql=shared,mysqlnd \
 		--with-mysqli=shared,mysqlnd \
 		--with-openssl=shared \
-		--with-pcre-regex= \
+		--with-pcre-regex=/ \
 		--with-pdo-mysql=shared,mysqlnd \
 		--with-pdo-odbc=shared,unixODBC,/ \
 		--with-pdo-pgsql=shared \
@@ -125,52 +125,52 @@ build() {
 	cd ${srcdir}/${pkgbase}-${pkgver}
 
 	# apply suhosin patch
-	#patch -p1 -i ${srcdir}/suhosin-patch-${_suhosinver}.patch
+	patch -p1 -i ${srcdir}/suhosin-patch-${_suhosinver}.patch
 
 	# adjust paths
-	#patch -p0 -i ${srcdir}/php.ini.patch
+	patch -p0 -i ${srcdir}/php.ini.patch
 
 	# php
-	#mkdir ${srcdir}/build-php
-	#cd ${srcdir}/build-php
-	#ln -s ../${pkgbase}-${pkgver}/configure
-	#./configure ${phpconfig} \
-	#	--disable-cgi \
-	#	--with-readline \
-	#	--enable-pcntl \
-	#	${phpextensions}
-	#make
+	mkdir ${srcdir}/build-php
+	cd ${srcdir}/build-php
+	ln -s ../${pkgbase}-${pkgver}/configure
+	./configure ${phpconfig} \
+		--disable-cgi \
+		--with-readline \
+		--enable-pcntl \
+		${phpextensions}
+	make
 
 	# cgi and fcgi
 	# reuse the previous run; this will save us a lot of time
-	#cp -a ${srcdir}/build-php ${srcdir}/build-cgi
-	#cd ${srcdir}/build-cgi
-	#./configure ${phpconfig} \
-	#	--disable-cli \
-	#	--enable-cgi \
-	#	${phpextensions}
-	#make
+	cp -a ${srcdir}/build-php ${srcdir}/build-cgi
+	cd ${srcdir}/build-cgi
+	./configure ${phpconfig} \
+		--disable-cli \
+		--enable-cgi \
+		${phpextensions}
+	make
 
 	# apache
-	#cp -a ${srcdir}/build-php ${srcdir}/build-apache
-	#cd ${srcdir}/build-apache
-	#./configure ${phpconfig} \
-	#	--disable-cli \
-	#	--with-apxs2 \
-	#	${phpextensions}
-	#make
+	cp -a ${srcdir}/build-php ${srcdir}/build-apache
+	cd ${srcdir}/build-apache
+	./configure ${phpconfig} \
+		--disable-cli \
+		--with-apxs2 \
+		${phpextensions}
+	make
 
 	# fpm
-#	cp -a ${srcdir}/build-php ${srcdir}/build-fpm
-#	cd ${srcdir}/build-fpm
-#	./configure ${phpconfig} \
-#		--disable-cli \
-#		--enable-fpm \
-#		--with-libevent-dir=/ \
-#		--with-fpm-user=http \
-#		--with-fpm-group=http \
-#		${phpextensions}
-#	make
+	cp -a ${srcdir}/build-php ${srcdir}/build-fpm
+	cd ${srcdir}/build-fpm
+	./configure ${phpconfig} \
+		--disable-cli \
+		--enable-fpm \
+		--with-libevent-dir=/ \
+		--with-fpm-user=http \
+		--with-fpm-group=http \
+		${phpextensions}
+	make
 
 	# embed
 	cp -a ${srcdir}/build-php ${srcdir}/build-embed
