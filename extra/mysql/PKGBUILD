@@ -6,7 +6,7 @@
 
 pkgbase=mysql
 pkgname=('libmysqlclient' 'mysql-clients' 'mysql')
-pkgver=5.1.47
+pkgver=5.1.50
 pkgrel=1
 arch=('i686')
 license=('GPL')
@@ -104,7 +104,7 @@ package_mysql(){
   rm -rf ${pkgdir}/{mysql-test,sql-bench}
   rm -f ${pkgdir}/lib/mysql/plugin/*.a
 }
-md5sums=('02b9964b3966832f3d6bc87524bfd73f'
+md5sums=('23bac4a0aafd683b077dac146ce2701f'
          '9d4a85d7f87bc874eb17df811a5e6708'
          '0337741fa9afbe57939993636081a827'
          'a97e574945e19de3908575b956241026')
