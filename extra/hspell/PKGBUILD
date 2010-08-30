@@ -1,0 +1,28 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 49768 2009-08-15 15:16:56Z jgc $
+# Contributor: Tobias Powalowski <tpowa@archlinux.org>
+
+pkgname=hspell
+pkgver=1.0
+pkgrel=1
+pkgdesc="Hebrew spell-checker"
+arch=(i686)
+license=('GPL')
+url="http://www.ivrix.org.il/projects/spell-checker/"
+depends=('glibc' 'zlib' 'perl')
+options=('!libtool' '!makeflags')
+source=(ftp://ftp.archlinux.org/other/hspell/${pkgname}-${pkgver}.tar.gz)
+md5sums=('3e12fa383c2cfd430918d115f33f9841')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  sed -i -e 's|/bin/awk|/bin/awk|' wzip
+  ./configure --prefix= --mandir=/share/man \
+      --enable-linginfo 
+  make 
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install 
+}

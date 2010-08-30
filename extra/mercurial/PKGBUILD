@@ -4,7 +4,7 @@
 # Contributor: Douglas Soares de Andrade <douglas@archlinux.org>
 
 pkgname=mercurial
-pkgver=1.6.2
+pkgver=1.6.3
 pkgrel=1
 pkgdesc="A scialable distributed SCM tool"
 arch=('i686')
@@ -35,5 +35,5 @@ build() {
   install -m755 -d ${pkgdir}/etc/profile.d
   install -m755 ${srcdir}/mercurial.profile "${pkgdir}/etc/profile.d/mercurial.sh" 
 }
-md5sums=('847359d7488caf8074a69d4b87ca64d2'
+md5sums=('fcd61edc488d1b9aa831dde6f14d9a13'
          'ab16f254b7d23a9f63f8a4b19f3da955')

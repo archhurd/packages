@@ -1,0 +1,33 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 64437 2010-01-20 12:10:30Z ibiru $
+# Contributor: Eric Belanger <eric@archlinux.org>
+
+pkgname=gd
+pkgver=2.0.36RC1
+pkgrel=1
+pkgdesc="Library for the dynamic creation of images by programmers"
+arch=('i686')
+url="http://www.libgd.org/"
+license=('custom')
+depends=('perl' 'libpng>=1.4.0' 'fontconfig' 'libjpeg>=8')
+options=('!libtool')
+source=(http://www.libgd.org/releases/${pkgname}-${pkgver}.tar.bz2 libpng14.patch)
+md5sums=('e876979ca3130623a4e7866d9579171a'
+         '7921556f4960e8d66cf4fb67ea7101b5')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  export LIBS="-lpthread" 
+
+  patch -Np1 -i ${srcdir}/libpng14.patch 
+
+  ./configure --prefix= --without-xpm 
+  make
+}
+
+package() { 
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install 
+  install -D -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/COPYING" 
+}
