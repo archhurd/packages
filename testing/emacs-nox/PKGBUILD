@@ -1,0 +1,55 @@
+# Maintainer: Matt Windsor <hayashi@archhurd.org>
+# Contributor: Jaroslav Lichtblau <dragonlord@aur.archlinux.org>
+# Contributor: Chris Brannon <cmbrannon@cox.net>
+
+# NOTE: emacs as of writing does NOT work due to tty issues.
+# TODO: fix, separate build() and package().
+
+pkgname=emacs-nox
+pkgver=23.2
+pkgrel=1
+pkgdesc="The Emacs Editor, without X11 support"
+arch=('i686')
+url="http://www.gnu.org/software/emacs/emacs.html"
+license=('GPL')
+depends=('dbus-core' 'ncurses' 'perl')
+provides=('emacs')
+conflicts=('emacs' 'emacs-cvs')
+options=('docs')
+install=$pkgname.install
+source=(ftp://ftp.gnu.org/gnu/emacs/emacs-${pkgver}.tar.gz)
+md5sums=('b6691852dae0bc142b3c12749f6b7ade')
+
+build() {
+  cd ${srcdir}/emacs-$pkgver
+
+#gcc 4.5 Workaround: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43904
+  CFLAGS="${CFLAGS} -D_GNU_SOURCE -fno-optimize-sibling-calls"\
+ ./configure --prefix=/ --without-x --without-sound --without-gconf
+
+#we don't want to use /libexec
+  sed -i "s|\"libexec/emacs.*$|\"lib/emacs/$pkgver\"|g" src/epaths.h || return 1
+#  mv newepaths.h src/epaths.h || return 1
+
+  make libexecdir=/lib archlibdir=/lib/emacs/${pkgver} || return 1
+  make prefix=${pkgdir}/ libexecdir=${pkgdir}/lib \
+    archlibdir=${pkgdir}/lib/emacs/${pkgver} install
+
+#remove conflict with ctags package
+  mv ${pkgdir}/bin/{ctags,ctags.emacs} || return 1
+  mv ${pkgdir}/bin/{etags,etags.emacs} || return 1
+  mv ${pkgdir}/share/man/man1/{etags.1,etags.emacs.1} || return 1
+  mv ${pkgdir}/share/man/man1/{ctags.1,ctags.emacs.1} || return 1
+#fix all the 777 perms on directories
+  find ${pkgdir}/share/emacs/$pkgver -type d -exec chmod 755 {} \; || return 1
+#fix user/root permissions on /share files
+  find ${pkgdir}/share/emacs/$pkgver -exec chown root.root {} \; || return 1
+#remove empty files
+  rm -rf ${pkgdir}/var || return 1
+#remove .desktop file and icons
+  rm -rf ${pkgdir}/share/{applications,icons} || return 1
+
+#get rid of the package's info directory, install-info adds entries for us at install-time
+  rm ${pkgdir}/share/info/dir || return 1
+  gzip -9nf ${pkgdir}/share/info/* || return 1
+}
