@@ -9,6 +9,7 @@ pkgdesc="An alternate procfs implementation by Jeremie Koenig"
 arch=('i686')
 url="github.com/jeremie-koenig/hurd"
 license=('GPL')
+install=jkprocfs.install
 
 build() {
   cd ${srcdir}
@@ -33,3 +34,4 @@ package() {
   # /hurd/procfs is owned by the mammoth hurd, so we must avoid conflict
   mv ${pkgdir}/hurd/procfs ${pkgdir}/hurd/jkprocfs  
 }
+

@@ -1,0 +1,13 @@
+post_install() {
+  echo "+--------------------------------------------------+"
+  echo "|                    JKProcFS                      |"
+  echo "|                                                  |"
+  echo "|   If you want to actually use jkprocfs, then you |"
+  echo "| must first start it with a command like          |"
+  echo "|                                                  |"
+  echo "| settrans -fgap /proc /hurd/jkprocfs --compatible |"
+  echo "|                                                  |"
+  echo "|   ( run as root )                                |"
+  echo "+--------------------------------------------------+"
+}
+
