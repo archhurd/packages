@@ -1,0 +1,38 @@
+# Maintainer: Matt Windsor <hayashi@archhurd.com>
+# Contributor: Vesa Kaihlavirta <vegai@iki.fi>
+
+pkgname=openttd
+pkgver=1.0.3
+pkgrel=2
+pkgdesc='An open-source clone of Transport Tycoon Deluxe.'
+arch=('i686')
+url='http://www.openttd.org'
+license=('GPL')
+depends=('lzo2' 'icu' 'libpng' 'sdl' 'fontconfig' 'hicolor-icon-theme' 'desktop-file-utils')
+install=openttd.install
+optdepends=('openttd-opengfx: free graphics' 
+            'openttd-opensfx: free soundset')
+source=("http://binaries.openttd.org/releases/${pkgver}/${pkgname}-${pkgver}-source.tar.bz2")
+
+build() {
+  cd ${pkgname}-${pkgver} 
+
+ ./configure \
+    --prefix-dir= \
+    --binary-name=${pkgname} \
+    --binary-dir=bin \
+    --data-dir=share/${pkgname} \
+    --install-dir=${pkgdir} \
+    --doc-dir=share/doc/${pkgname} \
+    --menu-name="OpenTTD" \
+    --personal-dir=.${pkgname}
+
+  make
+}
+
+package() {
+  cd ${pkgname}-${pkgver} 
+
+  make install
+}
+md5sums=('cff60c624913a491ed3c91474e845722')
