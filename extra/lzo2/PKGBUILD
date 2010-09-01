@@ -1,0 +1,22 @@
+# Maintainer: Matt Windsor <hayashi@archlinux.org>
+# Contributor: dorphell <dorphell@archlinux.org>
+# Contributor: Low Kian Seong <fastmail_low@speedymail.org>
+pkgname=lzo2
+pkgver=2.03
+pkgrel=1
+pkgdesc="Portable lossless data compression library written in ANSI C"
+arch=('i686')
+url="http://www.oberhumer.com/opensource/lzo"
+license=('GPL')
+groups=('base')
+depends=('glibc')
+source=(http://www.oberhumer.com/opensource/lzo/download/lzo-${pkgver}.tar.gz)
+options=(!libtool)
+md5sums=('0c3d078c2e8ea5a88971089a2f02a726')
+
+build() {
+  cd ${srcdir}/lzo-${pkgver}
+  ./configure --prefix= --enable-shared
+  make
+  make DESTDIR=${pkgdir} install
+}
