@@ -1,0 +1,32 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Eric Belanger <eric@archlinux.org>
+
+pkgname=psmisc
+pkgver=22.12
+pkgrel=1
+pkgdesc="Miscellaneous procfs tools"
+arch=('i686')
+url="http://psmisc.sourceforge.net/index.html"
+license=('GPL')
+groups=('base')
+depends=('glibc' 'ncurses')
+changelog=ChangeLog
+source=(http://downloads.sourceforge.net/psmisc/${pkgname}-${pkgver}.tar.gz psmisc.checkregs.fix.patch
+	killall-path-max.diff)
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -p0 < ../psmisc.checkregs.fix.patch
+  patch -p0 src/killall.c < ${srcdir}/killall-path-max.diff
+  autoreconf
+  ./configure --prefix=
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}
+md5sums=('16c83a351c292cfc845b27d6395e05fb'
+         '37a76ddcf8ef7b2b50234707a92be68e'
+         '4ec1ca4c47b42f8e459bf5ce17f93f13')
