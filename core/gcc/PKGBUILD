@@ -3,7 +3,7 @@
 pkgbase=('gcc')
 pkgname=('gcc' 'gcc-libs' 'gcc-fortran' 'gcc-objc')
 pkgver=4.5.1
-pkgrel=2
+pkgrel=3
 _libstdcppmanver=20100719       # Note: check source directory name when updating this
 pkgdesc="The GNU Compiler Collection"
 arch=('i686')
@@ -40,6 +40,9 @@ build() {
   cd ..
   mkdir build &&   cd build
 
+  _build=/home/lnz/build/gcc/libs
+  export LDFLAGS="$LDFLAGS -Wl,-lpwl"
+  export LD_LIBRARY_PATH=$_build/lib
   ../${pkgname}-${pkgver}/configure --build=$CHOST --prefix= \
     --enable-long-long --enable-c99 \
     --enable-clocale=gnu --enable-gnu-unique-object \
@@ -49,8 +52,8 @@ build() {
     --disable-multilib --mandir=/share/man --infodir=/share/info \
     --libexecdir=/lib --with-system-zlib \
     --with-gmp \
-    --with-ppl --with-cloog \
-    --with-mpf --with-mpc
+    --with-ppl=$_build --with-cloog=$_build \
+    --with-mpfr=$_build --with-mpc=$_build
 
   make || return 1
 }
