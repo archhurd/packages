@@ -2,7 +2,7 @@
 
 pkgname=pacman
 pkgver=3.4.0
-pkgrel=4
+pkgrel=5
 pkgdesc="A library-based package manager with dependency support"
 arch=(i686)
 url="http://www.archlinux.org/pacman/"
@@ -18,7 +18,7 @@ source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
         pacman_hurd_fakeroot.patch)
 md5sums=('50ad71be1faaad84842c576e239d1bb5'
          '7e6f21f9990f986edfcb9e573ff4f9f2'
-         '2470ff214479750c4e44bd323b0aa6ab'
+         '6cdd59f2a598861f084748d567d49599'
          '210e7165adf4fa8822c4eb935bc92935'
          'd248452ac7df02e6988f49055aaae4ed')
 
