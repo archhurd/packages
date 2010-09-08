@@ -2,7 +2,7 @@
 # Contributor: Matthias Lanzinger
 
 pkgname=pacman-mirrorlist
-pkgver=20100906
+pkgver=20100907
 pkgrel=1
 pkgdesc="Arch Hurd mirror list for use by pacman"
 arch=('any')
@@ -10,7 +10,7 @@ url="http://www.archhurd.org/mirrors.php"
 license=('GPL')
 backup=(etc/pacman.d/mirrorlist)
 source=(mirrorlist)
-md5sums=('a7664c1b1056c669caf9ad8dd300a96a')
+md5sums=('4ed1f8f61ddf1ca898124fe226b27cdb')
 depends=('pacman>=3.4.0-2')
 
 # NOTE on building this package:

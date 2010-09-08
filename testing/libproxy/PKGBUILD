@@ -1,0 +1,28 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=libproxy
+pkgver=0.3.1
+pkgrel=1
+pkgdesc="A library that provides automatic proxy configuration management"
+arch=(i686)
+license=('LGPL')
+depends=('glibc')
+url="http://libproxy.googlecode.com"
+source=(http://libproxy.googlecode.com/files/${pkgname}-${pkgver}.tar.bz2)
+options=('!libtool')
+md5sums=('1745fe1bdf5beca1bf7269758f3906e8')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  libtoolize --force
+  aclocal
+  autoconf
+  automake --add-missing
+  ./configure --prefix= --without-mozjs
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+}

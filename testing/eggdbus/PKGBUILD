@@ -1,25 +1,24 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=eggdbus
 pkgver=0.6
 pkgrel=1
 pkgdesc="Experimental D-Bus bindings for GObject"
-arch=('i686')
+arch=(i686)
 license=('LGPL')
 url="http://www.freedesktop.org/wiki/Software/Policykit"
-depends=('glib2' 'dbus-glib')
-makedepends=('gtk-doc')
+depends=('glib2>=2.22.2' 'dbus-glib>=0.82-2')
 options=('!libtool')
 source=(http://hal.freedesktop.org/releases/${pkgname}-${pkgver}.tar.gz)
 md5sums=('b43d2a6c523fcb8b9d0b0300c4222386')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= --disable-static --enable-gtk-doc || return 1
-  make || return 1
+  ./configure --prefix= --disable-static
+  make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install
 }
