@@ -6,13 +6,13 @@
 pkgname=sysvinit-tools
 _pkgname=sysvinit
 pkgver=2.88dsf
-pkgrel=1
+pkgrel=2
 pkgdesc="Linux System V Init Tools"
 arch=('i686')
 url="http://freshmeat.net/projects/sysvinit/"
 license=('GPL')
 groups=('base')
-depends=('shadow' 'util-linux-ng' 'coreutils' 'glibc' 'awk' 'jkprocfs')
+depends=('shadow' 'util-linux-ng' 'coreutils' 'glibc' 'awk')
 source=(http://download.savannah.gnu.org/releases/${_pkgname}/${_pkgname}-${pkgver}.tar.bz2
         archhurd.patch
 	30_killall5_hurd.patch)
