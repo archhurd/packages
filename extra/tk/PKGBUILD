@@ -4,7 +4,7 @@
 # Contributor: Judd Vinet <jvinet@zeroflux.org>
 
 pkgname=tk
-pkgver=8.5.8
+pkgver=8.5.9
 pkgrel=1
 
 pkgdesc="A windowing toolkit for use with tcl"
@@ -12,20 +12,18 @@ arch=('i686')
 url="http://tcl.sourceforge.net/"
 license=('custom')
 depends=("tcl=${pkgver}" 'libxss' 'libxft')
-source=(http://downloads.sourceforge.net/sourceforge/tcl/tk${pkgver}-src.tar.gz
-        tkUnixWm.diff)
-md5sums=('13bf90602e16fc530e05196431021dc6'
-         'cd72a2c181052163fa76352476fcca86')
-options=(!zipman)
+source=(http://downloads.sourceforge.net/sourceforge/tcl/tk${pkgver}-src.tar.gz)
 
 build() {
   cd ${srcdir}/tk${pkgver}/unix  
-  # FS#17501, upstream bug 2902814
-  patch -Np0 -i $srcdir/tkUnixWm.diff
   
   ./configure --prefix= --mandir=/share/man --enable-threads --disable-64bit
   
   make
+}
+
+package() {
+  cd ${srcdir}/tk${pkgver}/unix  
   make INSTALL_ROOT=${pkgdir} install install-private-headers
   ln -sf wish8.5 ${pkgdir}/bin/wish
   
@@ -47,3 +45,4 @@ build() {
   -e "s,^TK_BUILD_STUB_LIB_PATH='.*/unix,TK_BUILD_STUB_LIB_PATH='/lib," \
   ${pkgdir}/lib/tkConfig.sh
 }
+md5sums=('7cdeb9feb61593f58a0ae61f2497580e')
