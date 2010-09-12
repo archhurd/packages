@@ -1,0 +1,38 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 37188 2009-05-01 02:26:00Z eric $
+# Contributor: Eric Belanger <eric@archlinux.org>
+# Contributor: judd <jvinet@zeroflux.org>
+
+pkgname=sysvinit-tools
+_pkgname=sysvinit
+pkgver=2.88dsf
+pkgrel=2
+pkgdesc="Linux System V Init Tools"
+arch=('i686')
+url="http://freshmeat.net/projects/sysvinit/"
+license=('GPL')
+groups=('base')
+depends=('shadow' 'util-linux-ng' 'coreutils' 'glibc' 'awk')
+source=(http://download.savannah.gnu.org/releases/${_pkgname}/${_pkgname}-${pkgver}.tar.bz2
+        archhurd.patch
+	30_killall5_hurd.patch)
+
+build() {
+  cd ${srcdir}/${_pkgname}-${pkgver}
+  patch -p1 < ../archhurd.patch
+  patch -p1 < ../30_killall5_hurd.patch
+  make -C src 
+}
+
+package() {
+  cd ${srcdir}/${_pkgname}-${pkgver}
+  install -d ${pkgdir}/{bin,sbin}
+  install -d ${pkgdir}/{bin,include}
+  install -d ${pkgdir}/share/man/man{1,5,8}
+  make -C src ROOT=${pkgdir} install 
+}
+
+
+md5sums=('6eda8a97b86e0a6f59dabbf25202aa6f'
+         'bc214d2ee5a2c7929a94cbb4b3cf2f76'
+         'fee172842bfcac8dca0f6df841375fb4')

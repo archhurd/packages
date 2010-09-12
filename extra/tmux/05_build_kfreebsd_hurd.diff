@@ -1,0 +1,36 @@
+# Enable kFreeBSD and Hurd specific configure script
+--- a/configure
++++ b/configure
+@@ -89,7 +89,7 @@
+ EOF
+ 	;;
+ # ------------------------------------------------------------------------------
+-    Linux)
++    Linux|GNU|GNU/kFreeBSD)
+ 	cat <<EOF >>$CONFIG_H
+ #define HAVE_ASPRINTF
+ #define HAVE_BZERO
+--- a/tmux.h
++++ b/tmux.h
+@@ -389,6 +389,10 @@
+ 	char		argv[COMMAND_LENGTH];
+ };
+ 
++#ifndef MAXPATHLEN
++#define MAXPATHLEN 4096
++#endif
++
+ struct msg_identify_data {
+ 	char		cwd[MAXPATHLEN];
+ 
+@@ -1080,6 +1084,10 @@
+ 	time_t	msg_time;
+ };
+ 
++#ifndef IOV_MAX
++#define IOV_MAX	1024
++#endif
++
+ /* Client connection. */
+ struct client {
+ 	struct imsgbuf	 ibuf;

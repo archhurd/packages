@@ -1,0 +1,14 @@
+diff -upr tmux-1.3.orig//screen.c tmux-1.3/screen.c
+--- tmux-1.3.orig//screen.c	2003-01-01 16:56:13.270000000 +0000
++++ tmux-1.3/screen.c	2003-01-01 16:57:00.580000000 +0000
+@@ -24,6 +24,10 @@
+ 
+ #include "tmux.h"
+ 
++#ifndef MAXHOSTNAMELEN
++#define MAXHOSTNAMELEN 1024
++#endif
++
+ void	screen_resize_x(struct screen *, u_int);
+ void	screen_resize_y(struct screen *, u_int);
+ 

@@ -1,22 +1,21 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=tcl
-pkgver=8.5.8
-pkgrel=2
+pkgver=8.5.9
+pkgrel=1
 pkgdesc="The Tcl scripting language"
 arch=('i686')
 url="http://tcl.sourceforge.net/"
 license=('custom')
 depends=('glibc')
 source=(http://downloads.sourceforge.net/sourceforge/tcl/tcl${pkgver}-src.tar.gz)
-md5sums=('7f123e53b3daaaba2478d3af5a0752e3')
 
 build() {
   cd ${srcdir}/tcl${pkgver}/unix
   
   ./configure --prefix= --mandir=/share/man \
         --enable-threads --disable-64bit
-  make || return 1
+  make 
 }
 
 package() {
@@ -37,3 +36,4 @@ package() {
   -e "s,^TCL_LD_SEARCH_FLAGS='\(.*\)',TCL_LD_SEARCH_FLAGS='\1:/lib'," \
   ${pkgdir}/lib/tclConfig.sh
 }
+md5sums=('8512d8db3233041dd68a81476906012a')

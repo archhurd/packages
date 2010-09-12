@@ -1,0 +1,31 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 54578 2009-10-11 10:56:29Z andyrtr $
+# Contributor: Jan de Groot <jgc@archlinux.org>
+
+pkgname=libdmx
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="X11 Distributed Multihead extension library"
+arch=('i686')
+url="http://xorg.freedesktop.org/"
+license=('custom')
+depends=('dmxproto' 'libxext')
+options=('!libtool')
+source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2
+        COPYING)
+md5sums=('a2fcf0382837888d3781b714489a8999'
+         'ab8509955c3dd4c65fac728e1b367bc4')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix= --mandir=/share/man 
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install 
+
+  install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
+  install -m644 "${srcdir}/COPYING" "${pkgdir}/share/licenses/${pkgname}/" 
+}

@@ -2,7 +2,7 @@
 
 pkgname=binutils
 pkgver=2.20.1
-pkgrel=1
+pkgrel=2
 pkgdesc="A set of programs to assemble and manipulate binary and object files"
 arch=(i686)
 url="http://www.gnu.org/software/binutils/"
@@ -19,18 +19,30 @@ build() {
   mkdir build
   cd build
 
-  ../$pkgname-$pkgver/configure --host=i686-pc-gnu --prefix= \
+  ../$pkgname-$pkgver/configure --prefix= \
               --disable-multilib --enable-shared \
-              --mandir=/share/man --infodir=/share/info 
+              --mandir=/share/man --infodir=/share/info
 
-  make configure-host || return 1
-  make || return 1
+  make configure-host
+  make tooldir=${pkgdir}
 }
 
 package() {
   cd $srcdir/build
-  
-  make DESTDIR="$pkgdir/" install
-  rm -rf $pkgdir/i686-pc-gnu #only when cross-compiling?
+
+  make prefix=${pkgdir} tooldir=${pkgdir} install
+  install -m644 ${srcdir}/${pkgname}-${pkgver}/include/libiberty.h ${pkgdir}/include
+
+  # Rebuild libiberty.a with -fPIC
+  make -C libiberty clean
+  make CFLAGS="$CFLAGS -fPIC" -C libiberty
+  install -m644 libiberty/libiberty.a ${pkgdir}/lib
+
+  # Rebuild libbfd.a with -fPIC
+  make -C bfd clean
+  make CFLAGS="$CFLAGS -fPIC" -C bfd
+  install -m644 bfd/libbfd.a ${pkgdir}/lib
+
+  rm -f ${pkgdir}/share/man/man1/{dlltool,nlmconv,windres,windmc}*
 }
 
