@@ -1,0 +1,28 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=gnustep-gui
+pkgver=0.18.0
+pkgrel=1
+pkgdesc="The GNUstep GUI class library"
+arch=('i686')
+url="http://www.gnustep.org/"
+license=('LGPL')
+depends=(gnustep-base libungif aspell gcc-libs giflib)
+makedepends=(gcc-objc)
+groups=('gnustep-core')
+options=('!makeflags')
+source=(ftp://ftp.gnustep.org/pub/gnustep/core/$pkgname-$pkgver.tar.gz)
+md5sums=('1726eef8bcb7b25d561cf8263242c6e7')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver
+
+  ./configure --prefix=/opt/GNUstep --disable-gsnd --disable-sound --disable-cups
+  make
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
+
+  make DESTDIR=$pkgdir install
+}
