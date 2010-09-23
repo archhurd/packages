@@ -1,8 +1,8 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=pacman
-pkgver=3.4.0
-pkgrel=5
+pkgver=3.4.1
+pkgrel=1
 pkgdesc="A library-based package manager with dependency support"
 arch=(i686)
 url="http://www.archlinux.org/pacman/"
@@ -16,7 +16,7 @@ source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
         makepkg.conf
         pacman_hurd.patch
         pacman_hurd_fakeroot.patch)
-md5sums=('50ad71be1faaad84842c576e239d1bb5'
+md5sums=('4e4e8e4f636d9878fbed9cf840f162cf'
          '7e6f21f9990f986edfcb9e573ff4f9f2'
          '6cdd59f2a598861f084748d567d49599'
          '210e7165adf4fa8822c4eb935bc92935'
@@ -29,8 +29,8 @@ build() {
 
   #as-needed causes a segfault
   export LDFLAGS=""
-  ./configure --prefix=
-  make || return 1
+  ./configure --prefix= --sysconfdir=/etc --localstatedir=/var --enable-doc
+  make
 }
 
 package() {
