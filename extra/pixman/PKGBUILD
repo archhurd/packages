@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=pixman
-pkgver=0.18.4
+pkgver=0.19.4
 pkgrel=1
 pkgdesc="Pixman library"
 arch=('i686')
@@ -22,4 +22,4 @@ package() {
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
-md5sums=('c1d69aaddba8c1e046d26ac125da95bf')
+md5sums=('dfbfbd46221246edd3be702ea65084aa')

@@ -4,8 +4,8 @@
 # Contributor: Judd Vinet <jvinet@zeroflux.org>
 
 pkgname=libldap
-pkgver=2.4.22
-pkgrel=2
+pkgver=2.4.23
+pkgrel=1
 pkgdesc="Lightweight Directory Access Protocol (LDAP) client libraries"
 arch=('i686')
 license=('custom')
@@ -20,7 +20,6 @@ source=("ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-${pkgver}
 
 build() {
   cd ${srcdir}/openldap-${pkgver}
-	export LDFLAGS=""
   patch -Np1 -i ${srcdir}/ntlm.patch
   patch -p1 -i ${srcdir}/hurd_sasl.patch
 
@@ -73,6 +72,6 @@ package() {
   install -Dm644 ${srcdir}/openldap-${pkgver}/LICENSE \
     ${pkgdir}/share/licenses/$pkgname/LICENSE
 }
-md5sums=('ef01b52255ce8e3fbf8aa34f6fe7598b'
+md5sums=('90150b8c0d0192e10b30157e68844ddf'
          'c53d3439f8bfb336f1531ce9442e27aa'
          'dfa9eb6f2fd9d0a3dab0e1860923489e')

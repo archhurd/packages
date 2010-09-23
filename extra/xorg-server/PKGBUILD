@@ -3,16 +3,14 @@
 # Maintainer: Jan de Groot <jgc@archlinux.org>
 
 pkgname=xorg-server
-pkgver=1.8.1
-pkgrel=1
+pkgver=1.9.0
+pkgrel=3
 pkgdesc="X.Org X servers"
 arch=('i686')
 license=('custom')
 url="http://xorg.freedesktop.org"
-depends=('dbus' 'libgl' 'libxfont' 'libgcrypt' 'libpciaccess' 'libxv' 'pixman' 'xcursor-themes' 'xkeyboard-config' 'xorg-server-utils' 'xorg-fonts-misc' 'xbitmaps' 'diffutils' 'inputproto')
-makedepends=('libx11' 'mesa' 'xf86driproto' 'xtrans' 'libxkbfile' 'randrproto' 'renderproto' 'xcmiscproto' 'bigreqsproto' 'resourceproto' 'videoproto' 'compositeproto' 'scrnsaverproto' 'xf86dgaproto' 'libgl' 'glproto' 'xorg-util-macros' 'xineramaproto' 'recordproto')
-conflicts=('catalyst-utils<=9.2' 'xf86-input-calcomp' 'xf86-input-citron' 'xf86-input-digitaledge' 'xf86-input-dmc' 'xf86-input-dynapro' 'xf86-input-elo2300'
-	'xf86-input-jamstudio' 'xf86-input-magellan' 'xf86-input-magictouch' 'xf86-input-microtouch' 'xf86-input-palmax' 'xf86-input-spaceorb' 'xf86-input-summa' 'xf86-input-tek4957' 'xf86-input-ur98' 'xf86-video-vga' 'xf86-video-intel-legacy' 'nvidia-96xx-utils<96.43.14' 'nvidia-173xx-utils<173.14.21')
+depends=('libxext' 'libgl' 'libxfont' 'libgcrypt' 'libpciaccess' 'libxv' 'pixman' 'xcursor-themes' 'xkeyboard-config' 'xorg-server-utils' 'xorg-fonts-misc' 'xbitmaps' 'diffutils' 'inputproto')
+makedepends=('libxres' 'libx11' 'mesa' 'xf86driproto' 'xtrans' 'libxkbfile' 'randrproto' 'renderproto' 'xcmiscproto' 'bigreqsproto' 'resourceproto' 'videoproto' 'compositeproto' 'scrnsaverproto' 'xf86dgaproto' 'libgl' 'glproto' 'xorg-util-macros' 'xineramaproto' 'recordproto')
 options=('!libtool')
 provides=('x-server')
 groups=('xorg')
@@ -20,43 +18,37 @@ install=xorg-server.install
 backup=('etc/X11/xorg.conf.d/10-evdev.conf' 'etc/X11/xorg.conf.d/10-quirks.conf')
 source=(${url}/releases/individual/xserver/${pkgname}-${pkgver}.tar.bz2
         xorg-redhat-die-ugly-pattern-die-die-die.patch
-        1.8-git-fixes.patch
         xvfb-run
         xvfb-run.1
         10-evdev.conf
         10-quirks.conf)
-md5sums=('7c3b873692f4e93938261d774510e78d'
-         '1a336eb22e27cbf443ec5a2ecddfa93c'
-         '1f2b9511fab3564705e410f7f3f96fc8'
-         '52fd3effd80d7bc6c1660d4ecf23d31c'
-         '376c70308715cd2643f7bff936d9934b'
-         'e930e153d69968a795fe4e2ef5d9a5dc'
-         'd4f7dfc6be4ef4e2c6dd7632a9d88abe')
-
+options=(!strip)
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-
-  patch -Np1 -i "${srcdir}/1.8-git-fixes.patch" 
-
-  # Get rid of the ugly pattern
+  
   patch -Np3 -i "${srcdir}/xorg-redhat-die-ugly-pattern-die-die-die.patch" 
 
-  autoreconf || return 1
+  sed -i -e 's:\$(prefix)/etc:/etc:g' config/Makefile.*
+
+#  autoreconf  
   ./configure --prefix= \
-      --enable-ipv6 \
-      --enable-dri \
-      --disable-dmx \
-      --enable-xvfb \
+      --disable-ipv6 \
+      --disable-dri \
+      --disable-dri2 \
+      --disable-xselinux \
       --enable-xnest \
       --enable-composite \
-      --enable-xcsecurity \
+      --disable-xcsecurity \
+      --disable-xcalibrate \
       --enable-xorg \
       --enable-xephyr \
-      --enable-glx-tls \
+      --enable-glx \
+      --disable-glx-tls \
       --enable-kdrive \
       --enable-install-setuid \
       --disable-config-udev \
-      --enable-config-dbus \
+      --disable-config-hal \
+      --disable-config-dbus \
       --enable-record \
       --disable-xfbdev \
       --disable-xfake \
@@ -65,31 +57,37 @@ build() {
       --localstatedir=/var \
       --with-xkb-path=/share/X11/xkb \
       --with-xkb-output=/var/lib/xkb \
-      --with-dri-driver-path=/lib/xorg/modules/dri || return 1
+      --with-dri-driver-path=/lib/xorg/modules/dri
 
-  make || return 1
+  make 
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
 
-  install -m755 "${srcdir}/xvfb-run" "${pkgdir}/bin/" || return 1
-  install -m644 "${srcdir}/xvfb-run.1" "${pkgdir}/share/man/man1/" || return 1
+  install -m755 "${srcdir}/xvfb-run" "${pkgdir}/bin/" 
+  install -m644 "${srcdir}/xvfb-run.1" "${pkgdir}/share/man/man1/" 
 
-  rm -rf "${pkgdir}/var/log" || return 1
+  rm -rf "${pkgdir}/var/log" 
 
-  install -m755 -d "${pkgdir}/var/lib/xkb" || return 1
+  install -m755 -d "${pkgdir}/var/lib/xkb" 
 
   # Install sane config files in /etc. I don't see the need for config files in /share here, users will edit them anyways.
   install -m755 -d "${pkgdir}/etc/X11/xorg.conf.d"
-  install -m644 "${srcdir}/10-evdev.conf" "${srcdir}/10-quirks.conf" "${pkgdir}/etc/X11/xorg.conf.d/" || return 1
+  install -m644 "${srcdir}/10-evdev.conf" "${srcdir}/10-quirks.conf" "${pkgdir}/etc/X11/xorg.conf.d/" 
   rm -rf "${pkgdir}/share/X11"
 
   # Needed for non-mesa drivers, libgl will restore it
   mv "${pkgdir}/lib/xorg/modules/extensions/libglx.so" \
-     "${pkgdir}/lib/xorg/modules/extensions/libglx.xorg" || return 1
-
+      "${pkgdir}/lib/xorg/modules/extensions/libglx.xorg"
+  
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
+md5sums=('ba1173998a5a4216fd7b40eded96697e'
+         '1a336eb22e27cbf443ec5a2ecddfa93c'
+         '52fd3effd80d7bc6c1660d4ecf23d31c'
+         '376c70308715cd2643f7bff936d9934b'
+         'e930e153d69968a795fe4e2ef5d9a5dc'
+         'd4f7dfc6be4ef4e2c6dd7632a9d88abe')
