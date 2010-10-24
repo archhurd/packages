@@ -1,0 +1,30 @@
+# Maintainer: Stpehen Gilles <stephendgilles@gmail.com>
+# Contributor: Thayer Williams <thayer@archlinux.org>
+# Contributor: dale <dale@archlinux.org>
+
+pkgname=prboom
+pkgver=2.5.0
+pkgrel=1
+pkgdesc="A game engine which provides a program to play Doom levels"
+url="http://prboom.sourceforge.net/"
+license=('GPL2')
+arch=('i686')
+#depends=('libpng' 'mesa' 'sdl_mixer' 'sdl_net')
+depends=('libpng' 'mesa' 'sdl_net')
+source=(http://downloads.sourceforge.net/prboom/$pkgname-$pkgver.tar.gz 
+	libpng-1.4.patch
+	doomstat_h_path_max.patch)
+
+build() {
+	cd $srcdir/$pkgname-$pkgver/src
+	patch -p1 doomstat.h < $srcdir/doomstat_h_path_max.patch
+	cd $srcdir/$pkgname-$pkgver
+	patch -p1 < ../libpng-1.4.patch || return 1
+	./configure --prefix= --disable-i386-asm || return 1
+	sed -i "s|/games|/bin|g" $srcdir/$pkgname-$pkgver/src/Makefile || return 1
+	make || return 1
+	make DESTDIR=$pkgdir install || return 1
+}
+md5sums=('a8a15f61fa2626ab98051ab2703378c4'
+         'ba53474db8e747035ca2320a445e4ae0'
+         'dbe10bed57f9589178fab4fe64d54fb8')

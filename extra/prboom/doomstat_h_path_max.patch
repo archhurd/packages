@@ -1,0 +1,13 @@
+--- doomstat.h.orig	2010-10-24 20:09:31.420000000 +0000
++++ doomstat.h	2010-10-24 20:10:38.700000000 +0000
+@@ -46,6 +46,10 @@
+ #pragma interface
+ #endif
+ 
++#ifndef PATH_MAX
++#define PATH_MAX 4096
++#endif
++
+ // ------------------------
+ // Command line parameters.
+ //
