@@ -1,7 +1,7 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=git
-pkgver=1.7.2.3
+pkgver=1.7.3.2
 pkgrel=1
 pkgdesc="The fast distributed version control system"
 arch=(i686)
@@ -18,8 +18,8 @@ source=("http://kernel.org/pub/software/scm/git/${pkgname}-${pkgver}.tar.bz2" \
         "http://kernel.org/pub/software/scm/git/git-manpages-${pkgver}.tar.bz2"
 	git-daemon
 	git-daemon.conf)
-md5sums=('d88c06f6442156686deb4b4fbab0954c'
-         '2ef8d3959c832347c29885627ebc0682'
+md5sums=('902f7f07a789fedc0d2ac03656b85969'
+	 '80bbef2adeaae852f04a9f143aaa5204'
          'd777ff1a239b3d810dcf5d89f9d894af'
          '9d065134210aa0dd3f2b40d12d915040')
 
