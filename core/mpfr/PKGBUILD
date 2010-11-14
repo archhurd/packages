@@ -1,7 +1,11 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+# Contributor: Allan McRae <allan@archlinux.org>
+# Contributor: Jan de Groot <jgc@archlinux.org>
 
 pkgname=mpfr
-pkgver=3.0.0
+_basever=3.0.0
+_patchlevel=p4
+pkgver=${_basever}.${_patchlevel}
 pkgrel=1
 pkgdesc="Multiple-precision floating-point library"
 arch=(i686)
@@ -10,22 +14,25 @@ license=('LGPL')
 depends=('gmp>=5.0.1')
 options=('!libtool')
 install=mpfr.install
-source=(ftp://ftp.gnu.org/pub/gnu/mpfr/$pkgname-$pkgver.tar.xz
-		mpfr-3.0.0-p3.patch)
+source=(ftp://ftp.gnu.org/pub/gnu/mpfr/${pkgname}-${_basever}.tar.xz
+		mpfr-3.0.0-p4.patch)
 md5sums=('8ab3bef2864b8c6e6a291f5603141bbd'
-         '74fc2253afc4900eeacb21df893e6395')
+         '8aef6a737aabc92ea7f524e5afebfce4')
+
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${_basever}"
+	
+  patch -Np1 -i ${srcdir}/${pkgname}-${_basever}-${_patchlevel}.patch
 
   ./configure --prefix= \
               --enable-thread-safe --enable-shared
-  make || return 1
+  make
   make check
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd "${srcdir}/${pkgname}-${_basever}"
   make DESTDIR="${pkgdir}/" install
 }
 
