@@ -1,7 +1,7 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=pango
-pkgver=1.28.1
+pkgver=1.28.3
 pkgrel=1
 pkgdesc="A library for layout and rendering of text"
 arch=('i686')
@@ -12,17 +12,18 @@ options=('!libtool' '!emptydirs')
 install=pango.install
 source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.28/${pkgname}-${pkgver}.tar.bz2)
 url="http://www.pango.org/"
-md5sums=('bab5b4eb3fde6b0a5bfe98d25e668741')
+md5sums=('caa74baea47e7e16bc73c89f9089d522')
 
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix=  --sysconfdir=/etc \
       --localstatedir=/var --with-included-modules=basic-fc || return 1
-  make || return 1
+  make
+  make check
 }
 
 package(){
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install
 }

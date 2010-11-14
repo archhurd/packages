@@ -2,7 +2,7 @@
 
 pkgname=sudo
 pkgver=1.7.5b1
-pkgrel=1
+pkgrel=2
 pkgdesc="Give certain users the ability to run some commands as root"
 arch=('i686')
 url="http://www.sudo.ws/sudo/"
@@ -20,6 +20,9 @@ build() {
 
   ./configure --prefix= --with-pam --libexecdir=/lib \
     --with-env-editor --with-all-insults --with-logfac=auth
+
+  sed -i 's/LOCKF/FLOCK/' config.h
+
   make
 }
 

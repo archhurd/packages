@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=libsm
-pkgver=1.1.1
+pkgver=1.2.0
 pkgrel=1
 pkgdesc="X11 Session Management library"
 arch=('i686')
@@ -11,8 +11,7 @@ depends=('libice' 'util-linux-ng')
 makedepends=('xtrans')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libSM-${pkgver}.tar.bz2)
-md5sums=('6889a455496aaaa65b1fa05fc518d179')
-sha1sums=('dc535af7328dee9a6121b85c3f8041656681a195')
+md5sums=('e78c447bf1790552b644eca81b542742')
 
 build() {
   cd "${srcdir}/libSM-${pkgver}"
