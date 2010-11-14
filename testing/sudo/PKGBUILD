@@ -20,7 +20,7 @@ build() {
 
   ./configure --prefix= --with-pam --libexecdir=/lib \
     --with-env-editor --with-all-insults --with-logfac=auth
-  make || return 1
+  make
 }
 
 package() {
