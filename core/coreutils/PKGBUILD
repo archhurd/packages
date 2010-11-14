@@ -1,50 +1,31 @@
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=coreutils
-pkgver=8.5
-pkgrel=2
+pkgver=8.6
+pkgrel=1
 pkgdesc="The basic file, shell and text manipulation utilities of the GNU operating system"
 arch=(i686)
 url="http://www.gnu.org/software/coreutils"
 license=('GPL3')
 groups=('base')
-depends=('glibc' 'shadow' 'pam' 'acl' 'gmp' 'sh')
+depends=('glibc' 'acl' 'gmp' 'sh')
 options=('!emptydirs')
-backup=('etc/pam.d/su')
 install=coreutils.install
-source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.xz
-        su.pam)
-options=('!emptydirs')
+source=(ftp://ftp.gnu.org/pub/gnu/$pkgname/$pkgname-$pkgver.tar.xz)
+md5sums=('17d693d282ac57c62b241a045e7b511c')
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
 
-  # apply pam patch from archlinux
-  # patch -Np1 -i ${srcdir}/coreutils-pam.patch
- 
-  # autoreconf -v
-  sed -i 's@acl_get_file=cross-compiling@acl_get_file=yes@' configure
-
-  ./configure --build=i686-pc-gnu --prefix= \
-              --enable-install-program=su \
-              --enable-no-install-program=uptime,hostname \
-              --enable-pam 
-  make 
+  ./configure --prefix=
+  make || return 1
 }
 
 package() {
   cd "$srcdir/$pkgname-$pkgver"
   make DESTDIR="$pkgdir/" install
-  
-  cd "$pkgdir/bin"
-  mkdir ../sbin
-  mv chroot ../sbin
-  chmod u+s su
 
-  install -Dm644 "$srcdir/su.pam" "$pkgdir/etc/pam.d/su"
-  
+  #uptime is already provided by hurd
+  rm -f $pkgdir/bin/uptime
 }
 
-md5sums=('55170ed640e300f5b81640c6f4641513'
-         'aad79a2aa6d566c375d7bdd1b0767278'
-         'fa85e5cce5d723275b14365ba71a8aad')

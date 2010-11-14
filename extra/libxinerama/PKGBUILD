@@ -1,7 +1,7 @@
 # Maintainer: Matthias Lanzinger 
 
 pkgname=libxinerama
-pkgver=1.1
+pkgver=1.1.1
 pkgrel=1
 pkgdesc="X11 Xinerama extension library"
 arch=(i686)
@@ -12,18 +12,18 @@ makedepends=('pkgconfig')
 options=(!libtool)
 source=(${url}/releases/individual/lib/libXinerama-${pkgver}.tar.bz2
         LICENSE)
-md5sums=('a2ac01fc0426cdbb713c5d59cf9955ed'
+md5sums=('ecd4839ad01f6f637c6fb5327207f89b'
          '098e0bc089368a988092b3cbda617a57')
 
 build() {
   cd "${srcdir}/libXinerama-${pkgver}"
   ./configure --prefix= || return 1
-  make || return 1
+  make
 }
 
 package(){
   cd "${srcdir}/libXinerama-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install
   install -m755 -d "${pkgdir}/usr/share/licenses/${pkgname}"
-  install -m644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/" || return 1
+  install -m644 "${srcdir}/LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/"
 }
