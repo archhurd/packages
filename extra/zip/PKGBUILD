@@ -2,7 +2,7 @@
 
 pkgname=zip
 pkgver=3.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Creates PKZIP-compatible .zip files"
 arch=(i686)
 url="http://www.info-zip.org/pub/infozip/Zip.html"
@@ -15,7 +15,7 @@ md5sums=('e88492c8abd68fa9cfba72bc08757dba')
 
 build() {
    cd $startdir/src/${pkgname}30
-   make -f unix/Makefile LOCAL_ZIP="$CFLAGS" prefix= generic_gcc || return 1
+   make -f unix/Makefile LOCAL_ZIP="$CFLAGS" prefix= generic_gcc
    make -f unix/Makefile INSTALL=`which install` prefix=$startdir/pkg MANDIR=$startdir/pkg/share/man/man1 install
    install -D -m644 LICENSE $startdir/pkg/share/licenses/$pkgname/LICENSE.txt
 }
