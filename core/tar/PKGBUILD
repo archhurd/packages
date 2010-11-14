@@ -1,46 +1,32 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
+# Contributor: Allan McRae <allan@archlinux.org>
 
-pkgname=pacman
-pkgver=3.3.3
+pkgname=tar
+pkgver=1.25
 pkgrel=1
-pkgdesc="A library-based package manager with dependency support"
-arch=(i686)
-url="http://www.archlinux.org/pacman/"
-license=('GPL')
+pkgdesc="Utility used to store, backup, and transport files"
+arch=('i686')
+url="http://www.gnu.org/software/tar/tar.html"
+license=('GPL3')
 groups=('base')
-depends=('bash' 'libarchive' 'libfetch')
-optdepends=('fakeroot: for makepkg usage as normal user')
-backup=(etc/pacman.conf etc/makepkg.conf)
-source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
-        pacman.conf
-        makepkg.conf
-        pacman_hurd.patch
-        mirrorlist)
-md5sums=('a8cef73d68e2a4c3a46fb46c33210719'
-         'abe70dabacee7036368c7afeb686eb10'
-         '860171534a40d600b8ed038191a21ddc'
-         'ea4e5c8e957d7b7635d291d5aa255527'
-         '90f2e8a6f40279d1dd47c3e05d3908cf')
-
+depends=('glibc' 'sh')
+options=('!emptydirs')
+install=tar.install
+source=(ftp://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.bz2
+        tar.1)
+md5sums=('6e497f861c77bbba2f7da4e10270995b'
+         'e0538778516a284e3558c454b2576c2f')
 
 build() {
-  cd "$srcdir/$pkgname-$pkgver"
+  cd ${srcdir}/$pkgname-$pkgver
 
-  patch -p2 < $srcdir/pacman_hurd.patch
-
-  autoconf
-  ./configure --host=i686-pc-gnu --prefix=
-  make || return 1
-} 
-
-package() { 
-  cd $srcdir/$pkgname-$pkgver
-  make DESTDIR="$pkgdir/" install
-  
-  mkdir -p $pkgdir/etc/pacman.d
-  install -m644 $srcdir/pacman.conf $pkgdir/etc
-  install -m644 $srcdir/makepkg.conf $pkgdir/etc
-  install -m644 $srcdir/mirrorlist $pkgdir/etc/pacman.d
+  ./configure --prefix= --libexecdir=/lib/tar --bindir=/bin
+  make
+  make check
 }
-
-
+  
+package() {
+  cd ${srcdir}/$pkgname-$pkgver
+  make DESTDIR=${pkgdir} install
+  install -Dm644 ${srcdir}/tar.1 ${pkgdir}/share/man/man1/tar.1
+}
