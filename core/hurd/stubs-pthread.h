@@ -1,0 +1,8 @@
+#define __stub_pthread_setschedparam
+#define __stub_pthread_mutex_getprioceiling
+#define __stub_pthread_atfork
+#define __stub_pthread_getschedparam
+#define __stub_pthread_mutex_setprioceiling
+#define __stub_pthread_mutexattr_getprioceiling
+#define __stub_pthread_mutexattr_setprioceiling
+#define __stub_pthread_setschedprio
