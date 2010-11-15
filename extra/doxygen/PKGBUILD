@@ -1,7 +1,7 @@
 # Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=doxygen
-pkgver=1.7.1
+pkgver=1.7.2
 pkgrel=1
 pkgdesc="A documentation system for C++, C, Java, IDL and PHP"
 license=('GPL')
@@ -13,15 +13,14 @@ makedepends=('flex')
 optdepends=('graphviz: for caller/callee graph generation')
 source=(ftp://ftp.stack.nl/pub/users/dimitri/${pkgname}-${pkgver}.src.tar.gz
 	hurd_remove_-pipe.patch)
+md5sums=('d5f3e32474186abc64288db6b8ffd7f0'
+         'fea8037e7f4e433114229231391d01cb')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
   echo "Patching"
   patch -p1 < ${srcdir}/hurd_remove_-pipe.patch
   QTDIR= ./configure --prefix /
-  make || return 1
+  make
   make INSTALL=${pkgdir} MAN1DIR=share/man/man1 install
 }
-
-md5sums=('13e76e10fb55581a16ee04de35c264f0'
-         'fea8037e7f4e433114229231391d01cb')
