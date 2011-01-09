@@ -1,9 +1,10 @@
-# $Id: PKGBUILD 77190 2010-04-11 11:51:03Z allan $
+# Maintainer:  Michael Walker <mike@barrucadu.co.uk>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 # Contributor: Allan McRae <allan@archlinux.org>
 # Contributor: Jan de Groot <jgc@archlinux.org>
 
 pkgname=gdb
-pkgver=7.0
+pkgver=7.2
 pkgrel=1
 pkgdesc="The GNU Debugger"
 arch=('i686')
@@ -16,7 +17,7 @@ options=('!libtool')
 install=gdb.install
 source=( http://ftp.gnu.org/gnu/gdb/${pkgname}-${pkgver}.tar.bz2 )
 
-md5sums=('3386a7b69c010785c920ffc1e9cb890a')
+md5sums=('64260e6c56979ee750a01055f16091a5')
 
 
 build() {
@@ -27,12 +28,12 @@ build() {
     --with-system-gdbinit=/etc/gdb/gdbinit \
     --disable-nls --build=i686-pc-gnu 
 
-  make || return 1
+  make
 }
 
 package() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  make DESTDIR=${pkgdir} install || return 1
+  make DESTDIR=${pkgdir} install
 
   # install "custom" system gdbinit
   install -dm755 $pkgdir/etc/gdb
