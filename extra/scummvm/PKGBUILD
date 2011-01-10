@@ -1,9 +1,9 @@
-# Maintainer: Matt Windsor <hayashi@archhurd.org>
+# Maintainer: Matt Windsor <mattwindsor@btinternet.com>
 # Maintainer: juergen <juergen@hoetzel.info>
 # Contributor: Manolis Tzanidakis, Petter Gundersen
 
 pkgname=scummvm
-pkgver=1.1.1
+pkgver=1.2.1
 pkgrel=1
 pkgdesc="A 'virtual machine' for several classic graphical point-and-click adventure games."
 arch=('i686')
@@ -13,7 +13,7 @@ depends=('gcc-libs' 'zlib' 'sdl')
 source=(http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.bz2
         scummvm-archhurd-hostname.patch)
 
-md5sums=('ed9098a78022d07fa1482f14325e3ab8'
+md5sums=('b1d224d7640bc7fdccaca958164b31df'
          '48461ae0bbe0038147012313b729ad85')
 
 build() {
