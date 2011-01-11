@@ -1,7 +1,10 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 99794 2010-11-17 19:07:22Z andyrtr $
+# Maintainer: Andreas Radke <andyrtr@archlinux.org>
+# Contributor: Sergej Pupykin <sergej@aur.archlinux.org>
 
 pkgname=man-db
-pkgver=2.5.7
+pkgver=2.5.9
 pkgrel=1
 pkgdesc="A utility for reading man pages"
 arch=('i686')
@@ -19,19 +22,20 @@ install=${pkgname}.install
 source=(http://savannah.nongnu.org/download/man-db/$pkgname-$pkgver.tar.gz
 	#http://launchpad.net/man-db/main/${pkgver}/+download/${pkgname}-${pkgver}.tar.gz
         convert-mans man-db.cron.daily)
-                        
+options=('!libtool')
+
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
   
-#  ./configure --prefix= --sysconfdir=/etc --libexecdir=/lib \
-#	--with-db=gdbm --disable-setuid --enable-mandirs=GNU \
-#	--with-sections="1 n l 8 3 0 2 5 4 9 6 7"
-  make || return 1
+  ./configure --prefix= --sysconfdir=/etc --libexecdir=/lib \
+	--with-db=gdbm --disable-setuid --enable-mandirs=GNU \
+	--with-sections="1 n l 8 3 0 2 5 4 9 6 7"
+  make
 }
 
-package() { 
+package() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  make DESTDIR=${pkgdir} install || return 1
+  make DESTDIR=${pkgdir} install 
 
   # part of groff pkg
   rm -f ${pkgdir}/bin/zsoelim
@@ -44,6 +48,6 @@ package() {
   install -D -m744 ${srcdir}/man-db.cron.daily ${pkgdir}/etc/cron.daily/man-db
 }
 
-md5sums=('eef0d8c8e54894e4e050e2176bb1d88d'
+md5sums=('9841394f5c5fe7e2dd2e0c5fb4766d0f'
          '2b7662a7d5b33fe91f9f3e034361a2f6'
-         'cdd8098a4827c70f1dedb54a1ecb0d32')
+         '6950aec56f56569580698745e79d6765')
