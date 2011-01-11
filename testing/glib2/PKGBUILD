@@ -1,13 +1,12 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=glib2
-pkgver=2.26.0
+pkgver=2.26.1
 pkgrel=1
-pkgdesc="Common C routines used by GTK+ 2.6 and other libs"
+pkgdesc="Common C routines used by GTK+ 2.4 and other libs"
 url="http://www.gtk.org/"
 arch=('i686')
 license=('LGPL')
-groups=('base')
 depends=('pcre')
 options=('!libtool' '!docs')
 source=(http://ftp.gnome.org/pub/GNOME/sources/glib/2.26/glib-${pkgver}.tar.bz2
@@ -17,20 +16,22 @@ source=(http://ftp.gnome.org/pub/GNOME/sources/glib/2.26/glib-${pkgver}.tar.bz2
 build() {
   cd "${srcdir}/glib-${pkgver}"
   ./configure --prefix= --sysconfdir=/etc \
-      --with-pcre=system --disable-fam
-
+      --with-pcre=system --disable-fam 
   make
 }
 
 package() {
   cd "${srcdir}/glib-${pkgver}"
-  make DESTDIR="${pkgdir}" install 
+  make DESTDIR="${pkgdir}" install
 
   install -d "${pkgdir}/etc/profile.d"
   install -m755 "${srcdir}/glib2.sh" "${pkgdir}/etc/profile.d/" 
   install -m755 "${srcdir}/glib2.csh" "${pkgdir}/etc/profile.d/" 
-}
 
-md5sums=('9b7dc61f5e389e1cff277a6350c37397'
+  for _i  in "${pkgdir}/etc/bash_completion.d/"*; do
+    chmod +x "${_i}"
+  done
+}
+md5sums=('17535accceef55bcb17a74d73f9c2aef'
          '803017b365bd35dc20b092ce43b8c8c5'
          '90c7b830bef4baf225c2eb8b7ead0cab')
