@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com> 
 
 pkgname=e2fsprogs
-pkgver=1.41.12
+pkgver=1.41.14
 pkgrel=1
 pkgdesc="Ext2/3/4 filesystem utilities"
 arch=('i686')
@@ -11,6 +11,7 @@ groups=('base')
 depends=('sh' 'util-linux-ng')
 makedepends=('bc')
 source=("http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+	'e2fsprogs-O_DIRECT.patch'
         'MIT-LICENSE')
 backup=('etc/mke2fs.conf')
 install=${pkgname}.install
@@ -20,24 +21,29 @@ build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
 
   # Remove unnecessary init.d directory
-  sed -i '/init\.d/s|^|#|' misc/Makefile.in || return 1
+  sed -i '/init\.d/s|^|#|' misc/Makefile.in 
+
+  patch -p1 -i "${srcdir}/e2fsprogs-O_DIRECT.patch"
 
   ./configure --prefix= --with-root-prefix="" --enable-elf-shlibs \
       --disable-fsck --disable-uuidd \
-      --disable-libuuid --disable-libblkid || return 1
+      --disable-libuuid --disable-libblkid 
 
-  make || return 1
+  make 
 }
 
 package() { 
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install install-libs || return 1
+  make DESTDIR="${pkgdir}" install install-libs 
   
-  sed -i -e 's/^AWK=.*/AWK=awk/' "${pkgdir}/bin/compile_et" || return 1
+  sed -i -e 's/^AWK=.*/AWK=awk/' "${pkgdir}/bin/compile_et" 
 
   # install MIT license
   install -Dm644 "${srcdir}/MIT-LICENSE" \
-    "${pkgdir}/share/licenses/${pkgname}/MIT-LICENSE" || return 1
+    "${pkgdir}/share/licenses/${pkgname}/MIT-LICENSE"
 }
-md5sums=('1b24a21fc0c2381ef420961cbfec733f'
+md5sums=('05f70470aea2ef7efbb0845b2b116720'
+         '035b7c69b7a2cecf996a4708c262245e')
+md5sums=('05f70470aea2ef7efbb0845b2b116720'
+         '692792e9c541fc826029aeea7e50657c'
          '035b7c69b7a2cecf996a4708c262245e')
