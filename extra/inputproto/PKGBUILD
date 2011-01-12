@@ -1,25 +1,26 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=inputproto
-pkgver=2.0
+pkgver=2.0.1
 pkgrel=1
 pkgdesc="X11 Input extension wire protocol"
 arch=(any)
 license=('custom')
+makedepends=('xorg-util-macros')
 url="http://xorg.freedesktop.org/"
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('0f7acbc14a082f9ae03744396527d23d')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix= 
+  make 
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
+md5sums=('da9bf9e5d174163f597d2d72757d9038')
