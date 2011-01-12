@@ -1,0 +1,13 @@
+--- e2fsprogs-1.41.14/lib/ext2fs/unix_io.c	2010-12-22 15:49:20.000000000 +0000
++++ e2fsprogs-1.41.14.new/lib/ext2fs/unix_io.c	2011-01-11 22:32:05.000000000 +0000
+@@ -463,8 +463,10 @@ static errcode_t unix_open(const char *n
+ 	open_flags = (flags & IO_FLAG_RW) ? O_RDWR : O_RDONLY;
+ 	if (flags & IO_FLAG_EXCLUSIVE)
+ 		open_flags |= O_EXCL;
++#ifdef O_DIRECT
+ 	if (flags & IO_FLAG_DIRECT_IO)
+ 		open_flags |= O_DIRECT;
++#endif
+ 	data->flags = flags;
+ 
+ #ifdef HAVE_OPEN64

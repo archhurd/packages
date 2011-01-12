@@ -1,0 +1,33 @@
+# Maintainer: Matt Windsor <hayashi@archhurd.org>
+# Contributor: Juergen Hoetzel <juergen@archlinux.org>
+# Contributor: John Proctor <jproctor@prium.net>
+
+pkgname=socat
+pkgver=1.7.1.3
+pkgrel=1
+pkgdesc='Relay for bidirectional data transfer via socket, pty, pipe, file and more'
+arch=('i686')
+license=('GPL2')
+url='http://www.dest-unreach.org/socat/'
+depends=('readline' 'openssl' 'tcp_wrappers')
+makedepends=('imake')
+source=("http://www.dest-unreach.org/socat/download/$pkgname-$pkgver.tar.gz"
+        "socat-archhurd-pathmax.patch")
+sha1sums=('5a42275da0d8a5182452b36535a74c3cdf21793b'
+          'a64788329769c692e7699b77c4ef719378438794')
+
+build() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+	patch -Np1 <../socat-archhurd-pathmax.patch
+
+  ./configure --prefix= \
+    --mandir=/share/man
+  make depend
+  make
+}
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+  make DESTDIR="$pkgdir" install
+}

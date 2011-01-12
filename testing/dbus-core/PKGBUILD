@@ -1,0 +1,60 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 90541 2010-09-13 10:46:30Z jgc $
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+# Contributor: Link Dupont <link@subpop.net>
+#
+pkgname=dbus-core
+pkgver=1.4.1
+pkgrel=1
+pkgdesc="Freedesktop.org message bus system"
+url="http://www.freedesktop.org/Software/dbus"
+arch=(i686)
+license=('GPL' 'custom')
+depends=('expat>=2.0.1' 'coreutils' 'filesystem')
+conflicts=('dbus<1.2.3-2')
+options=(!libtool)
+install=dbus.install
+source=(http://dbus.freedesktop.org/releases/dbus/dbus-${pkgver}.tar.gz
+        dbus)
+
+build() {
+  cd "${srcdir}/dbus-${pkgver}"
+  export LIBS="-lpthread"
+  ./configure --prefix= --sysconfdir=/etc --localstatedir=/var \
+      --libexecdir=/lib/dbus-1.0 --with-dbus-user=81 \
+      --with-system-pid-file=/var/run/dbus.pid \
+      --enable-inotify --disable-dnotify \
+      --disable-verbose-mode --disable-static \
+      --disable-tests --disable-asserts --without-x \
+      --with-systemdsystemunitdir=/lib/systemd/system
+  make
+}
+
+package() {
+  cd "${srcdir}/dbus-${pkgver}"
+  make DESTDIR="${pkgdir}" install
+
+  rm -f "${pkgdir}/bin/dbus-launch"
+  rm -f "${pkgdir}/share/man/man1/dbus-launch.1"
+
+  chown 81:81 "${pkgdir}/var/run/dbus"
+
+  install -m755 -d "${pkgdir}/etc/rc.d"
+  install -m755 "${srcdir}/dbus" "${pkgdir}/etc/rc.d/"
+
+  #Fix configuration file
+  sed -i -e 's|<user>81</user>|<user>dbus</user>|' "${pkgdir}/etc/dbus-1/system.conf"
+
+  #install .keep files so pacman doesn't delete empty dirs
+  touch "${pkgdir}/share/dbus-1/services/.keep"
+  touch "${pkgdir}/share/dbus-1/system-services/.keep"
+  touch "${pkgdir}/etc/dbus-1/session.d/.keep"
+  touch "${pkgdir}/etc/dbus-1/system.d/.keep"
+
+  rmdir "${pkgdir}/lib/dbus-1.0/dbus-1"
+
+  install -d -m755 "${pkgdir}/share/licenses/dbus-core"
+  install -m644 COPYING "${pkgdir}/share/licenses/dbus-core/"
+}
+md5sums=('99cb057700c0455fb68f8d57902f77ac'
+         '08f93dd19cffd1b45ab05c1fd4efb560')

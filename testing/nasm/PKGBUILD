@@ -1,0 +1,24 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=nasm
+pkgver=2.09.04
+pkgrel=1
+pkgdesc="80x86 assembler designed for portability and modularity"
+url="http://www.nasm.us"
+license=('BSD')
+arch=('i686')
+depends=('glibc')
+source=(http://www.nasm.us/pub/nasm/releasebuilds/${pkgver}/${pkgname}-${pkgver}.tar.bz2)
+md5sums=('c11f083a501adae843d0bc3e7c106c73')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix=
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make INSTALLROOT="${pkgdir}" install
+}

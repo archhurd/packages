@@ -1,0 +1,28 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 73837 2010-03-28 22:10:37Z ibiru $
+# Contributor: Jan de Groot <jgc@archlinux.org>
+
+pkgname=zenity
+pkgver=2.30.0
+pkgrel=1
+pkgdesc="Display graphical dialog boxes from shell scripts"
+arch=(i686)
+license=('LGPL')
+depends=('libnotify')
+makedepends=('intltool' 'gnome-doc-utils>=0.19.5')
+groups=('gnome-extra')
+url="http://www.gnome.org"
+source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/2.30/${pkgname}-${pkgver}.tar.bz2)
+sha256sums=('d42a9be6f77eb018fb8c5967094db86604271f342dd15b6e6101338d82f923ff')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix= --sysconfdir=/etc \
+      --localstatedir=/var --disable-scrollkeeper 
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install 
+}

@@ -1,0 +1,30 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 37519 2009-05-02 16:42:38Z jgc $
+# Contributor: Jan de Groot <jgc@archlinux.org>
+
+pkgname=libnotify
+pkgver=0.4.5
+pkgrel=1
+pkgdesc="Desktop notification library"
+arch=(i686)
+license=('LGPL')
+depends=('dbus-glib' 'gtk2')
+options=('!libtool')
+source=(http://www.galago-project.org/files/releases/source/${pkgname}/${pkgname}-${pkgver}.tar.gz
+hurd_PATH_MAX.patch
+)
+url="http://www.galago-project.org/"
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  patch -p1 -i ${srcdir}/hurd_PATH_MAX.patch
+  ./configure --prefix= --disable-static 
+  make 
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install 
+}
+md5sums=('472e2c1f808848365572a9b024d9e8f5'
+         '8d6080f92a8ffb26b712181016b75390')

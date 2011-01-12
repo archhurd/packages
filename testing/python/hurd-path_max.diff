@@ -1,0 +1,130 @@
+# DP: Replace PATH_MAX with MAXPATHLEN.
+
+--- a/Modules/getpath.c
++++ b/Modules/getpath.c
+@@ -139,7 +139,7 @@
+ static int
+ _wstat(const wchar_t* path, struct stat *buf)
+ {
+-    char fname[PATH_MAX];
++    char fname[MAXPATHLEN];
+     size_t res = wcstombs(fname, path, sizeof(fname));
+     if (res == (size_t)-1) {
+         errno = EINVAL;
+@@ -153,8 +153,8 @@
+ static wchar_t*
+ _wgetcwd(wchar_t *buf, size_t size)
+ {
+-    char fname[PATH_MAX];
+-    if (getcwd(fname, PATH_MAX) == NULL)
++    char fname[MAXPATHLEN];
++    if (getcwd(fname, MAXPATHLEN) == NULL)
+         return NULL;
+     if (mbstowcs(buf, fname, size) >= size) {
+         errno = ERANGE;
+@@ -168,18 +168,18 @@
+ int
+ _Py_wreadlink(const wchar_t *path, wchar_t *buf, size_t bufsiz)
+ {
+-    char cbuf[PATH_MAX];
+-    char cpath[PATH_MAX];
++    char cbuf[MAXPATHLEN];
++    char cpath[MAXPATHLEN];
+     int res;
+-    size_t r1 = wcstombs(cpath, path, PATH_MAX);
+-    if (r1 == (size_t)-1 || r1 >= PATH_MAX) {
++    size_t r1 = wcstombs(cpath, path, MAXPATHLEN);
++    if (r1 == (size_t)-1 || r1 >= MAXPATHLEN) {
+         errno = EINVAL;
+         return -1;
+     }
+-    res = (int)readlink(cpath, cbuf, PATH_MAX);
++    res = (int)readlink(cpath, cbuf, MAXPATHLEN);
+     if (res == -1)
+         return -1;
+-    if (res == PATH_MAX) {
++    if (res == MAXPATHLEN) {
+         errno = EINVAL;
+         return -1;
+     }
+--- a/Modules/main.c
++++ b/Modules/main.c
+@@ -104,11 +104,11 @@
+ static FILE*
+ _wfopen(const wchar_t *path, const wchar_t *mode)
+ {
+-    char cpath[PATH_MAX];
++	char cpath[MAXPATHLEN];
+     char cmode[10];
+     size_t r;
+-    r = wcstombs(cpath, path, PATH_MAX);
+-    if (r == (size_t)-1 || r >= PATH_MAX) {
++	r = wcstombs(cpath, path, MAXPATHLEN);
++	if (r == (size_t)-1 || r >= MAXPATHLEN) {
+         errno = EINVAL;
+         return NULL;
+     }
+@@ -551,9 +551,9 @@
+ 
+         if (sts==-1 && filename!=NULL) {
+             if ((fp = _wfopen(filename, L"r")) == NULL) {
+-                char cfilename[PATH_MAX];
+-                size_t r = wcstombs(cfilename, filename, PATH_MAX);
+-                if (r == PATH_MAX)
++				char cfilename[MAXPATHLEN];
++				size_t r = wcstombs(cfilename, filename, MAXPATHLEN);
++				if (r == MAXPATHLEN)
+                     /* cfilename is not null-terminated;
+                      * forcefully null-terminating it
+                      * might break the shift state */
+--- a/Python/pythonrun.c
++++ b/Python/pythonrun.c
+@@ -666,7 +666,7 @@
+ }
+ 
+ static wchar_t *default_home = NULL;
+-static wchar_t env_home[PATH_MAX+1];
++static wchar_t env_home[MAXPATHLEN+1];
+ 
+ void
+ Py_SetPythonHome(wchar_t *home)
+@@ -681,8 +681,8 @@
+     if (home == NULL && !Py_IgnoreEnvironmentFlag) {
+         char* chome = Py_GETENV("PYTHONHOME");
+         if (chome) {
+-            size_t r = mbstowcs(env_home, chome, PATH_MAX+1);
+-            if (r != (size_t)-1 && r <= PATH_MAX)
++			size_t r = mbstowcs(env_home, chome, MAXPATHLEN+1);
++			if (r != (size_t)-1 && r <= MAXPATHLEN)
+                 home = env_home;
+         }
+ 
+--- a/Python/sysmodule.c
++++ b/Python/sysmodule.c
+@@ -1539,20 +1539,20 @@
+ static wchar_t*
+ _wrealpath(const wchar_t *path, wchar_t *resolved_path)
+ {
+-    char cpath[PATH_MAX];
+-    char cresolved_path[PATH_MAX];
++	char cpath[MAXPATHLEN];
++	char cresolved_path[MAXPATHLEN];
+     char *res;
+     size_t r;
+-    r = wcstombs(cpath, path, PATH_MAX);
+-    if (r == (size_t)-1 || r >= PATH_MAX) {
++	r = wcstombs(cpath, path, MAXPATHLEN);
++	if (r == (size_t)-1 || r >= MAXPATHLEN) {
+         errno = EINVAL;
+         return NULL;
+     }
+     res = realpath(cpath, cresolved_path);
+     if (res == NULL)
+         return NULL;
+-    r = mbstowcs(resolved_path, cresolved_path, PATH_MAX);
+-    if (r == (size_t)-1 || r >= PATH_MAX) {
++	r = mbstowcs(resolved_path, cresolved_path, MAXPATHLEN);
++	if (r == (size_t)-1 || r >= MAXPATHLEN) {
+         errno = EINVAL;
+         return NULL;
+     }

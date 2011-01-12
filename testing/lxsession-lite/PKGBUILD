@@ -1,0 +1,23 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+pkgname=lxsession-lite
+pkgver=0.4.4
+pkgrel=1
+pkgdesc="Session manager of the LXDE Desktop (light version)"
+arch=('i686')
+license=('GPL2')
+url="http://lxde.org/"
+groups=('lxde')
+depends=('gtk2' 'dbus')
+
+source=(http://downloads.sourceforge.net/sourceforge/lxde/lxsession-${pkgver}.tar.gz)
+md5sums=('9d433e1219eac07862c0d725ab58444f')
+
+build() {
+	cd "$srcdir/lxsession-$pkgver"
+	./configure --sysconfdir=/etc --prefix= || return 1
+	make || return 1
+}
+package() {
+	cd "$srcdir/lxsession-$pkgver"
+	make DESTDIR="$pkgdir" install || return 1
+}

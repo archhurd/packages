@@ -1,0 +1,26 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=lxpanel
+pkgver=0.5.5
+pkgrel=2
+pkgdesc="Panel of the LXDE Desktop"
+arch=('i686')
+license=('GPL2')
+url="http://lxde.org/"
+groups=('lxde')
+depends=('gtk2' 'menu-cache' 'lxmenu-data')
+source=(http://downloads.sourceforge.net/sourceforge/lxde/${pkgname}-${pkgver}.tar.gz Fix-failure-to-react-to-keyboard-map-changes-initiat.patch)
+md5sums=('6162b7e8d912a41f9c075fe982370bfb' 'aade0bd1c58be45930e881f987ade17a')
+optdepends=(pcmanfm)
+
+build() {
+	cd "$srcdir/$pkgname-$pkgver"
+	patch -p1 -i $srcdir/Fix-failure-to-react-to-keyboard-map-changes-initiat.patch
+	./configure --disable-alsa --sysconfdir=/etc --prefix=  
+	make 
+}
+
+package() {
+	cd "$srcdir/$pkgname-$pkgver"
+	make DESTDIR="$pkgdir" install 
+}
