@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=syslog-ng
-pkgver=3.1.2
+pkgver=3.2.1
 pkgrel=1
 pkgdesc="Next-generation syslogd with advanced networking and filtering capabilities"
 arch=('i686')
@@ -21,12 +21,8 @@ install=syslog-ng.install
 build() {
     cd $srcdir/$pkgname-$pkgver
 
-    # NOTE - re-assess this with later releases
-    # FS#15787: syslog-ng does not write to files not owned by root
-    # Upstream: https://bugzilla.balabit.com/show_bug.cgi?id=52
-    # Solution: --disable-linux-caps
 
-    LDFLAGS="$LDFLAGS -Wl,--no-undefined" ./configure \
+    ./configure \
                 --prefix= \
                 --sysconfdir=/etc \
                 --localstatedir=/var/lib/syslog-ng \
@@ -48,7 +44,7 @@ package() {
     # remove libexec
     rm -rf $pkgdir/libexec
 }
-md5sums=('b9f45d9783a4ebeb84ec5acd158502fb'
+md5sums=('c0160053e24a0408d08bbfd454b110df'
          'e02be6637d0c3b5484d4597ce049ae39'
          '735636090be4582885974542d2a75855'
          'ee7783bf72bbde82456e37117fe7426d')
