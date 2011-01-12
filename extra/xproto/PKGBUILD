@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.org>
 
 pkgname=xproto
-pkgver=7.0.18
+pkgver=7.0.20
 pkgrel=1
 pkgdesc="X11 core wire protocol and auxiliary headers"
 arch=('any')
@@ -21,4 +21,4 @@ package() {
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
-md5sums=('74abb8fb91af66f35873b1f444731220')
+md5sums=('65633168e5315c19defb4652cd3d83c1')
