@@ -1,26 +1,27 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=damageproto
-pkgver=1.2.0
+pkgver=1.2.1
 pkgrel=1
 pkgdesc="X11 Damage extension wire protocol"
 arch=(any)
 url="http://xorg.freedesktop.org/"
 license=('custom')
 depends=('xproto' 'fixesproto')
+makedepends=('xorg-util-macros')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('ffe177a6ae2cf023d41e015aa6ece2b191cb8a8a')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix= 
+  make 
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
+md5sums=('998e5904764b82642cc63d97b4ba9e95')
