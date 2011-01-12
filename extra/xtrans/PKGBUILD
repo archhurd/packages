@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=xtrans
-pkgver=1.2.5
+pkgver=1.2.6
 pkgrel=1
 pkgdesc="X transport library"
 arch=(any)
@@ -8,20 +8,19 @@ license=('custom')
 url="http://xorg.freedesktop.org/"
 options=(!emptydirs)
 source=(${url}/releases/individual/lib/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('2d1e57e82acc5f21797e92341415af2f')
-sha1sums=('e8c4ce58b42d05e613fe535319a7d7f45f30f3e9')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix= 
+  make 
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
   install -m755 -d "${pkgdir}/lib"
-  mv "${pkgdir}/share/pkgconfig" "${pkgdir}/lib/pkgconfig" || return 1
+  mv "${pkgdir}/share/pkgconfig" "${pkgdir}/lib/pkgconfig" 
 }
+md5sums=('c66f9ffd2da4fb012220c6c40ebc7609')
