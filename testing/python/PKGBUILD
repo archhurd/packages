@@ -1,0 +1,88 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 101741 2010-12-01 12:46:53Z stephane $
+# Maintainer: Allan McRae <allan@archlinux.org>
+# Contributer: Jason Chu <jason@archlinux.org>
+
+pkgname=python
+pkgver=3.1.3
+pkgrel=1
+_pybasever=3.1
+pkgdesc="Next generation of the python high-level scripting language"
+arch=('i686')
+license=('custom')
+url="http://www.python.org"
+depends=('expat' 'bzip2' 'gdbm' 'openssl' 'libffi' 'zlib')
+makedepends=('tk' 'sqlite3')
+optdepends=('tk: for tkinter')
+provides=('python3')
+replaces=('python3')
+options=('!makeflags')
+source=(http://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.bz2
+	hurd-broken-poll.diff
+	hurd-disable-nonworking-constants.diff
+	hurd-path_max.diff
+        python-internal-expat.patch)
+
+build() {
+  cd "${srcdir}/Python-${pkgver}"
+
+  # Ensure that we are using the system copy of various libraries (expat, zlib and libffi),
+  # rather than copies shipped in the tarball
+  patch -Np0 -i ../python-internal-expat.patch
+  patch -Np1 -i ../hurd-broken-poll.diff
+  patch -Np1 -i ../hurd-disable-nonworking-constants.diff
+  patch -Np1 -i ../hurd-path_max.diff
+  rm -r Modules/expat
+  rm -r Modules/zlib
+  rm -r Modules/_ctypes/{darwin,libffi}*
+
+  export OPT="${CFLAGS}"
+  export CPPFLAGS+="`pkg-config --cflags-only-I libffi`"
+  ./configure --prefix= \
+              --enable-shared \
+              --with-threads \
+              --with-computed-gotos \
+              --enable-ipv6 \
+              --with-wide-unicode \
+              --with-system-ffi
+
+  make
+
+  # Run the upstream test suite
+  LD_LIBRARY_PATH=${srcdir}/Python-${pkgver}:${LD_LIBRARY_PATH} PYTHON=./python \
+     ./runtests.sh -x test_distutils
+  for testname in $(cat BAD); do
+     echo "== ${testname} =="
+     cat OUT/${testname}.out
+  done
+}
+
+package() {
+  cd "${srcdir}/Python-${pkgver}"
+  make DESTDIR=${pkgdir} install
+
+  # why are these not done by default...
+  ln -sf python3 ${pkgdir}/bin/python
+  ln -sf python3-config ${pkgdir}/bin/python-config
+  ln -sf idle3 ${pkgdir}/bin/idle
+  ln -sf pydoc3 ${pkgdir}/bin/pydoc
+
+  # clean-up reference to build directory
+  sed -i "s#$srcdir/Python-${pkgver}:##" $pkgdir/lib/python3.1/config/Makefile
+
+  # Fix conflicts with python2 - python2 version is newer...
+  rm ${pkgdir}/bin/2to3
+
+  # license
+  install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
+}
+md5sums=('ad5e5f1c07e829321e0a015f8cafe245'
+         '201148e71ca6b722a089d855773bc23c'
+         '9e7381a9e12a71f4c43c88f0edda9837'
+         '34ee397c459526a658ec626878f542f9'
+         '005743e69b0d67e4e3567774e2905067')
+md5sums=('ad5e5f1c07e829321e0a015f8cafe245'
+         '201148e71ca6b722a089d855773bc23c'
+         '9e7381a9e12a71f4c43c88f0edda9837'
+         '34ee397c459526a658ec626878f542f9'
+         '005743e69b0d67e4e3567774e2905067')
