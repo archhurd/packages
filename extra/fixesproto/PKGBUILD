@@ -1,7 +1,7 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=fixesproto
-pkgver=4.1.1
+pkgver=4.1.2
 pkgrel=1
 pkgdesc="X11 Fixes extension wire protocol"
 arch=(any)
@@ -9,17 +9,17 @@ url="http://xorg.freedesktop.org/"
 license=('custom')
 depends=('xproto' 'xextproto')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('4c1cb4f2ed9f34de59f2f04783ca9483')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix= 
+  make 
 }
 
 package () {
   cd ${srcdir}/${pkgname}-${pkgver}
-  make DESTDIR=${pkgdir} install || return 1
+  make DESTDIR=${pkgdir} install 
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
 
+md5sums=('bdb58ecc313b509247036d5c11fa99df')
