@@ -1,0 +1,46 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## Makefile.dpatch by  <apollock@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Install into FHS-compliant directories
+
+@DPATCH@
+diff -urNad dhcp3-3.0.4~/Makefile.conf dhcp3-3.0.4/Makefile.conf
+--- dhcp3-3.0.4~/Makefile.conf	2005-06-16 12:39:35.000000000 -0700
++++ dhcp3-3.0.4/Makefile.conf	2006-07-02 13:59:16.491088939 -0700
+@@ -42,8 +42,8 @@
+ ETC = /etc
+ VARRUN = /var/run
+ VARDB = /var/db
+-LIBDIR=/usr/local/lib
+-INCDIR=/usr/local/include
++LIBDIR=/lib
++INCDIR=/include
+ LIBS =
+ COPTS = $(BINDDEF) $(CC_OPTIONS)
+ DEBUG = -g
+@@ -314,18 +314,19 @@
+ ##--linux-2.2--
+ #COPTS = -DLINUX_MAJOR=$(MAJORVERSION) -DLINUX_MINOR=$(MINORVERSION) \
+ #        $(BINDDEF) $(CC_OPTIONS)
++#ETC = /etc/dhcp3
+ #CF = cf/linux.h
+-#ADMMANDIR = /usr/man/man8
++#ADMMANDIR = /usr/share/man/man8
+ #ADMMANEXT = .8
+-#FFMANDIR = /usr/man/man5
++#FFMANDIR = /usr/share/man/man5
+ #FFMANEXT = .5
+-#LIBMANDIR = /usr/man/man3
++#LIBMANDIR = /usr/share/man/man3
+ #LIBMANEXT = .3
+-#USRMANDIR = /usr/man/man1
++#USRMANDIR = /usr/share/man/man1
+ #USRMANEXT = .1
+ #MANCAT = man
+ #VARRUN = /var/run
+-#VARDB = /var/state/dhcp
++#VARDB = /var/lib/dhcp3
+ #SCRIPT=linux
+ ##--linux-2.2--
+ 

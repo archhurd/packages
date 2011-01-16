@@ -1,0 +1,20 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## dhclient-chdir.dpatch by  <apollock@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Don't tie up the current working directory (fixes #387723)
+
+@DPATCH@
+diff -urNad dhcp3-3.1.0~/client/dhclient.c dhcp3-3.1.0/client/dhclient.c
+--- dhcp3-3.1.0~/client/dhclient.c	2007-10-27 16:58:05.366089512 -0700
++++ dhcp3-3.1.0/client/dhclient.c	2007-10-27 16:59:05.401470566 -0700
+@@ -102,6 +102,9 @@
+ 	int no_dhclient_script = 0;
+ 	char *s;
+ 
++	/* chdir to / to avoid leaving the cwd busy */
++	chdir("/");
++
+         /* Make sure that file descriptors 0 (stdin), 1, (stdout), and
+            2 (stderr) are open. To do this, we assume that when we
+            open a file the lowest available file decriptor is used. */

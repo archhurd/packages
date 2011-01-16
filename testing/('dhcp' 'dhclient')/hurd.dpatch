@@ -1,0 +1,412 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## hurd.dpatch by  <sthibault@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: No description.
+
+@DPATCH@
+diff -ur dhcp3-3.1.3.backup/Makefile.conf dhcp3-3.1.3.new/Makefile.conf
+--- dhcp3-3.1.3.backup/Makefile.conf	2009-11-08 22:56:19.000000000 +0000
++++ dhcp3-3.1.3.new/Makefile.conf	2009-11-08 23:48:09.000000000 +0000
+@@ -485,3 +485,20 @@
+ #FFMANEXT = .5
+ #MANINSTALL = install -i -m 444
+ ##--hpux-gcc--
++
++## GNU
++##--gnu--
++#COPTS = $(BINDDEF) $(CC_OPTIONS) -Dgnu
++#CF = cf/gnu.h
++#ADMMANDIR = /share/man/man8
++#ADMMANEXT = .8
++#FFMANDIR = /share/man/man5
++#FFMANEXT = .5
++#LIBMANDIR = /share/man/man3
++#LIBMANEXT = .3
++#USRMANDIR = /share/man/man1
++#USRMANEXT = .1
++#MANCAT = man
++#VARRUN = /var/run
++#VARDB = /var/lib/dhcp
++#SCRIPT = gnu
++##--gnu--
+diff -ur dhcp3-3.1.3.backup/configure dhcp3-3.1.3.new/configure
+--- dhcp3-3.1.3.backup/configure	2009-11-08 22:56:19.000000000 +0000
++++ dhcp3-3.1.3.new/configure	2009-11-08 22:56:20.000000000 +0000
+@@ -184,6 +184,8 @@
+       sysname=nextstep;;
+     UnixWare)
+       sysname=uw7;;
++    GNU)
++      sysname=gnu;;
+   esac
+ fi
+ 
+@@ -213,6 +215,7 @@
+     echo "   qnx		QNX 4.2 or higher"
+     echo "   NEXTSTEP     NeXTSTEP"
+     echo "   sco	SCO Open Server"
++    echo "   GNU	GNU"
+     exit 1;
+   fi
+ fi
+diff -ur dhcp3-3.1.3.backup/includes/osdep.h dhcp3-3.1.3.new/includes/osdep.h
+--- dhcp3-3.1.3.backup/includes/osdep.h	2009-11-08 22:56:20.000000000 +0000
++++ dhcp3-3.1.3.new/includes/osdep.h	2009-11-08 22:54:20.000000000 +0000
+@@ -133,6 +133,10 @@
+ # endif
+ #endif
+ 
++#ifdef gnu
++# include "cf/gnu.h"
++#endif
++
+ /* snprintf/vsnprintf hacks.  for systems with no libc versions only. */
+ #ifdef NO_SNPRINTF
+   extern int isc_print_snprintf(char *, size_t, const char *, ...);
+--- /dev/null	2007-12-29 19:47:02.000000000 +0000
++++ dhcp3-3.1.3.new/includes/cf/gnu.h	2009-11-08 23:05:05.000000000 +0000
+@@ -0,0 +1,138 @@
++/* gnu.h */
++/*
++ * Copyright (c) 1996 The Internet Software Consortium.  All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of The Internet Software Consortium nor the names of its
++ *    contributors may be used to endorse or promote products derived
++ *    from this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE INTERNET SOFTWARE CONSORTIUM AND
++ * CONTRIBUTORS ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
++ * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL
++ * INTERNET SOFTWARE CONSORTIUM OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
++ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
++ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
++ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
++ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
++ * OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ */
++
++#define int8_t		char
++#define int16_t		short
++#define int32_t		int
++
++#define u_int8_t	unsigned char
++#define u_int16_t	unsigned short
++#define u_int32_t	unsigned int
++
++#include <sys/types.h>
++
++#include <syslog.h>
++
++#include <string.h>
++#include <errno.h>
++#include <unistd.h>
++#include <sys/select.h>
++#include <sys/wait.h>
++#include <signal.h>
++#include <setjmp.h>
++#include <limits.h>
++
++#include <net/if.h>
++#include <net/if_arp.h>
++
++#ifndef _PATH_DHCPD_PID
++#define _PATH_DHCPD_PID	"/var/run/dhcpd.pid"
++#endif
++#ifndef _PATH_DHCLIENT_PID
++#define _PATH_DHCLIENT_PID "/var/run/dhclient.pid"
++#endif
++#ifndef _PATH_DHCRELAY_PID
++#define _PATH_DHCRELAY_PID "/var/run/dhcrelay.pid"
++#endif
++
++#ifndef _PATH_DHCPD_DB
++#define _PATH_DHCPD_DB "/var/state/dhcp/dhcpd.leases"
++#endif
++#ifndef _PATH_DHCLIENT_DB
++#define _PATH_DHCLIENT_DB "/var/state/dhcp/dhclient.leases"
++#endif
++
++#include <stdarg.h>
++#define VA_DOTDOTDOT ...
++#define VA_start(list, last) va_start (list, last)
++#define va_dcl
++
++#define EOL '\n'
++#define VOIDPTR void *
++
++#include <time.h>
++
++#define TIME time_t
++#define GET_TIME(x)	time ((x))
++
++#define HAVE_SIOCGIFHWADDR
++
++#define USE_SOCKETS	1
++#define HAVE_SA_LEN	1
++#undef FDDI
++#undef AF_LINK
++
++#ifdef NEED_PRAND_CONF
++#ifndef HAVE_DEV_RANDOM
++ # define HAVE_DEV_RANDOM 1
++ #endif /* HAVE_DEV_RANDOM */
++
++const char *cmds[] = {
++	"/bin/ps -axlw 2>&1",
++	"/sbin/arp -an 2>&1",
++	"/bin/netstat -an 2>&1",
++	"/bin/df  2>&1",
++	"/bin/df / 2>&1",
++	"/usr/bin/dig com. soa +ti=1 +retry=0 2>&1",
++	"/usr/bin/uptime  2>&1",
++	"/bin/netstat -s 2>&1",
++	"/usr/bin/dig . soa +ti=1 +retry=0 2>&1",
++	"/usr/bin/vmstat  2>&1",
++	"/usr/bin/w  2>&1",
++	NULL
++};
++
++const char *dirs[] = {
++	"/tmp",
++	"/usr/tmp",
++	".",
++	"/",
++	"/var/spool",
++	"/dev",
++	"/var/spool/mail",
++	"/home",
++	"/usr/home",
++	NULL
++};
++
++const char *files[] = {
++	"/proc/stat",
++	"/proc/rtc",
++	"/proc/meminfo",
++	"/proc/interrupts",
++	"/proc/self/status",
++	"/var/log/messages",
++	"/var/log/wtmp",
++	"/var/log/lastlog",
++	NULL
++};
++#endif /* NEED_PRAND_CONF */
+--- /dev/null	2007-12-29 19:47:02.000000000 +0000
++++ dhcp3-3.1.3.new/client/scripts/gnu	2009-11-08 23:37:40.000000000 +0000
+@@ -0,0 +1,202 @@
++#!/bin/sh
++# dhclient-script for GNU, based on the script for Linux. 
++# Dan Halbert, March, 1997.
++# Updated for Linux 2.[12] by Brian J. Murrell, January 1999.
++# No guarantees about this. I'm a novice at the details of Linux
++# networking.
++
++# Notes:
++
++# 0. This script is based on the netbsd script supplied with dhcp-970306.
++
++# 1. ifconfig down apparently deletes all relevant routes and flushes
++# the arp cache, so this doesn't need to be done explicitly.
++
++# 2. The alias address handling here has not been tested AT ALL.
++# I'm just going by the doc of modern Linux ip aliasing, which uses
++# notations like eth0:0, eth0:1, for each alias.
++
++# 3. I have to calculate the network address, and calculate the broadcast
++# address if it is not supplied. This might be much more easily done
++# by the dhclient C code, and passed on.
++
++# 4. TIMEOUT not tested. ping has a flag I don't know, and I'm suspicious
++# of the $1 in its args.
++
++make_resolv_conf() {
++  if [ x"$new_domain_name_servers" != x ]; then
++    cat /dev/null > /etc/resolv.conf.dhclient
++    chmod 644 /etc/resolv.conf.dhclient
++    if [ x"$new_domain_search" != x ]; then
++      echo search $new_domain_search >> /etc/resolv.conf.dhclient
++    elif [ x"$new_domain_name" != x ]; then
++      # Note that the DHCP 'Domain Name Option' is really just a domain
++      # name, and that this practice of using the domain name option as
++      # a search path is both nonstandard and deprecated.
++      echo search $new_domain_name >> /etc/resolv.conf.dhclient
++    fi
++    for nameserver in $new_domain_name_servers; do
++      echo nameserver $nameserver >>/etc/resolv.conf.dhclient
++    done
++
++    mv /etc/resolv.conf.dhclient /etc/resolv.conf
++  fi
++}
++
++# Must be used on exit.   Invokes the local dhcp client exit hooks, if any.
++exit_with_hooks() {
++  exit_status=$1
++  if [ -x /etc/dhclient-exit-hooks ]; then
++    . /etc/dhclient-exit-hooks
++  fi
++# probably should do something with exit status of the local script
++  exit $exit_status
++}
++
++# Invoke the local dhcp client enter hooks, if they exist.
++if [ -x /etc/dhclient-enter-hooks ]; then
++  exit_status=0
++  . /etc/dhclient-enter-hooks
++  # allow the local script to abort processing of this state
++  # local script must set exit_status variable to nonzero.
++  if [ $exit_status -ne 0 ]; then
++    exit $exit_status
++  fi
++fi
++
++release=`uname -r`
++release=`expr $release : '\(.*\)\..*'`
++relminor=`echo $release |sed -e 's/^.*\.\([^\.]*\)$/\1/'`
++relmajor=`echo $release |sed -e 's/^\([^\.]*\)\..*$/\1/'`
++
++if [ x$new_broadcast_address != x ]; then
++  new_broadcast_arg="--broadcast $new_broadcast_address"
++fi
++if [ x$old_broadcast_address != x ]; then
++  old_broadcast_arg="--broadcast $old_broadcast_address"
++fi
++if [ x$new_subnet_mask != x ]; then
++  new_subnet_arg="--netmask $new_subnet_mask"
++fi
++if [ x$old_subnet_mask != x ]; then
++  old_subnet_arg="--netmask $old_subnet_mask"
++fi
++if [ x$alias_subnet_mask != x ]; then
++  alias_subnet_arg="--netmask $alias_subnet_mask"
++fi
++if [ x$new_interface_mtu != x ]; then
++  mtu_arg="--mtu $new_interface_mtu"
++fi
++if [ x$IF_METRIC != x ]; then
++  metric_arg="metric $IF_METRIC"
++fi
++
++if [ x$reason = xMEDIUM ]; then
++  # Linux doesn't do mediums (ok, ok, media).
++  exit_with_hooks 0
++fi
++
++if [ x$reason = xPREINIT ]; then
++  settrans -afg /servers/socket/2 /hurd/pfinet -i $interface
++  exit_with_hooks 0
++fi
++
++if [ x$reason = xARPCHECK ] || [ x$reason = xARPSEND ]; then
++  exit_with_hooks 0
++fi
++  
++if [ x$reason = xBOUND ] || [ x$reason = xRENEW ] || \
++   [ x$reason = xREBIND ] || [ x$reason = xREBOOT ]; then
++  current_hostname=`hostname`
++  if [ x$current_hostname = x ] || \
++     [ x$current_hostname = "x(none)" ] || \
++     [ x$current_hostname = xlocalhost ] || \
++     [ x$current_hostname = x$old_host_name ]; then
++    if [ x$new_host_name != x$old_host_name ]; then
++      hostname "$new_host_name"
++    fi
++  fi
++    
++  if [ x$old_ip_address != x ] && [ x$alias_ip_address != x ] && \
++		[ x$alias_ip_address != x$old_ip_address ]; then
++    # Possible new alias. Remove old alias.
++    inetutils-ifconfig -i $interface:0- inet 0
++  fi
++  if [ x$old_ip_address != x ] && [ x$old_ip_address != x$new_ip_address ]; then
++    # IP address changed. Bringing down the interface will delete all routes,
++    # and clear the ARP cache.
++    inetutils-ifconfig -i $interface inet 0 down
++
++  fi
++  if [ x$old_ip_address = x ] || [ x$old_ip_address != x$new_ip_address ] || \
++     [ x$reason = xBOUND ] || [ x$reason = xREBOOT ]; then
++
++    inetutils-ifconfig -i $interface -a $new_ip_address $new_subnet_arg \
++    							$new_broadcast_arg $mtu_arg
++    # Add a network route to the computed network address.
++    if [ $relmajor -lt 2 ] || \
++		( [ $relmajor -eq 2 ] && [ $relminor -eq 0 ] ); then
++      #route add -net $new_network_number $new_subnet_arg dev $interface
++      /bin/true
++    fi
++    for router in $new_routers; do
++      fsysopts /servers/socket/2 -i $interface -a $new_ip_address -m $new_subnet_mask -g $router
++    done
++  fi
++  if [ x$new_ip_address != x$alias_ip_address ] && [ x$alias_ip_address != x ];
++   then
++    inetutils-ifconfig -i $interface:0- inet 0
++    inetutils-ifconfig -i $interface:0 inet -a $alias_ip_address $alias_subnet_arg
++    #route add -host $alias_ip_address $interface:0
++  fi
++  make_resolv_conf
++  exit_with_hooks 0
++fi
++
++if [ x$reason = xEXPIRE ] || [ x$reason = xFAIL ] || [ x$reason = xRELEASE ] \
++   || [ x$reason = xSTOP ]; then
++  if [ x$alias_ip_address != x ]; then
++    # Turn off alias interface.
++    inetutils-ifconfig -i $interface:0- inet 0
++  fi
++  if [ x$old_ip_address != x ]; then
++    # Shut down interface, which will delete routes and clear arp cache.
++    inetutils-ifconfig -i $interface inet 0 down
++  fi
++  if [ x$alias_ip_address != x ]; then
++    inetutils-ifconfig -i $interface:0 inet -a $alias_ip_address $alias_subnet_arg
++    #route add -host $alias_ip_address $interface:0
++  fi
++  exit_with_hooks 0
++fi
++
++if [ x$reason = xTIMEOUT ]; then
++  if [ x$alias_ip_address != x ]; then
++    inetutils-ifconfig -i $interface:0- inet 0
++  fi
++  inetutils-ifconfig -i $interface inet -a $new_ip_address $new_subnet_arg \
++					$new_broadcast_arg $mtu_arg
++  set $new_routers
++  if ping -q -c 1 $1; then
++    if [ x$new_ip_address != x$alias_ip_address ] && \
++			[ x$alias_ip_address != x ]; then
++      inetutils-ifconfig -i $interface:0 inet -a $alias_ip_address $alias_subnet_arg
++      #route add -host $alias_ip_address dev $interface:0
++    fi
++    if [ $relmajor -lt 2 ] || \
++		( [ $relmajor -eq 2 ] && [ $relminor -eq 0 ] ); then
++        #route add -net $new_network_number
++        /bin/true
++    fi
++    for router in $new_routers; do
++      #route add default gw $router $metric_arg dev $interface
++      fsysopts /servers/socket/2 -i $interface -a $new_ip_address -m $new_subnet_mask -g $router
++    done
++    make_resolv_conf
++    exit_with_hooks 0
++  fi
++  inetutils-ifconfig -i $interface inet 0 down
++  exit_with_hooks 1
++fi
++
++exit_with_hooks 0

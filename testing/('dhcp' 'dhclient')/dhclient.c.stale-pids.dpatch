@@ -1,0 +1,42 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## dhclient.c.stale-pids.dpatch by  <apollock@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch from Ubuntu via Martin Pitt to prevent multiple dhclients starting
+## DP: up. (See #178885)
+
+@DPATCH@
+diff -urNad dhcp3-3.1.1~/client/dhclient.c dhcp3-3.1.1/client/dhclient.c
+--- dhcp3-3.1.1~/client/dhclient.c	2008-05-14 22:21:38.292160952 -0700
++++ dhcp3-3.1.1/client/dhclient.c	2008-05-14 22:33:50.327182983 -0700
+@@ -248,7 +248,7 @@
+ 	}
+ 
+ 	/* first kill of any currently running client */
+-	if (release_mode || exit_mode) {
++	if (1) {
+ 		FILE *pidfd;
+ 		pid_t oldpid;
+ 		long temp;
+@@ -258,10 +258,19 @@
+ 		if ((pidfd = fopen(path_dhclient_pid, "r")) != NULL) {
+ 			e = fscanf(pidfd, "%ld\n", &temp);
+ 			oldpid = (pid_t)temp;
++			log_info ("There is already a pid file %s with pid %i", path_dhclient_pid, oldpid);
+ 
+ 			if (e != 0 && e != EOF) {
+-				if (oldpid)
+-					kill(oldpid, SIGTERM);
++				if (oldpid) {
++					if (kill(oldpid, SIGTERM) == 0) {
++						log_info ("killed old client process, removed PID file");
++						/* Upstream removed the unlink in 3.1.1, is it because the SIGTERM handler does it anyway? */
++						unlink(path_dhclient_pid);
++					} else if (errno == ESRCH) {
++						log_info ("removed stale PID file");
++						unlink(path_dhclient_pid);
++					}
++				}
+ 			}
+ 			fclose(pidfd);
+ 		}

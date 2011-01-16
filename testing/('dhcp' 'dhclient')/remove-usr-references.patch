@@ -1,0 +1,18 @@
+--- dhcp-3.1.3/Makefile.conf	2011-01-15 22:42:47.980000000 +0000
++++ dhcp-3.1.3/Makefile.conf_new	2011-01-15 23:39:21.270000000 +0000
+@@ -492,6 +492,8 @@
+ ##--gnu--
+ #COPTS = $(BINDDEF) $(CC_OPTIONS) -Dgnu
+ #CF = cf/gnu.h
++#USERBINDIR = /bin
++#BINDIR = /bin
+ #ADMMANDIR = /share/man/man8
+ #ADMMANEXT = .8
+ #FFMANDIR = /share/man/man5
+@@ -502,5 +504,5 @@
+ #USRMANEXT = .1
+ #MANCAT = man
+ #VARRUN = /var/run
+-#VARDB = /var/lib/dhcp
++#VARDB = /var/state/dhcp
+ #SCRIPT = gnu

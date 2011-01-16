@@ -1,0 +1,11 @@
+--- dhcp-3.1.3/includes/site.h	2011-01-15 23:59:38.690000000 +0000
++++ dhcp-3.1.3/includes/site.h_new	2011-01-16 01:14:41.420000000 +0000
+@@ -205,8 +205,3 @@
+    to add -lcrypto -lssl to the LIBS= line of server/Makefile */
+ 
+ #define USE_SSL
+-
+-#define _PATH_DHCPD_DB    "/var/lib/dhcp3/dhcpd.leases"
+-#define _PATH_DHCLIENT_DB "/var/lib/dhcp3/dhclient.leases"
+-#define _PATH_DHCPD_DB    "/var/lib/dhcp3/dhcpd.leases"
+-#define _PATH_DHCLIENT_DB "/var/lib/dhcp3/dhclient.leases"

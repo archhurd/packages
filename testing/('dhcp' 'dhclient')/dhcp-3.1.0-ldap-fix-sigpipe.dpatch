@@ -1,0 +1,214 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## dhcp-3.1.0-ldap-nosigpipe by Petter Reinholdtsen
+
+# Fix LDAP code to avoid SIGPIPE when submitting requests to the LDAP
+# server if the server disconnected the connection because of
+# inactivity.  Fixes BTS request #559160.
+
+@DPATCH@
+
+--- dhcp3-3.1.0.orig/server/ldap.c  2009-12-20 22:12:47.000000000 +0100
++++ dhcp3-3.1.0/server/ldap.c       2009-12-20 22:20:24.000000000 +0100
+@@ -431,26 +431,11 @@
+ static void
+ ldap_stop()
+ {
+-  struct sigaction old, new;
+-
+   if (ld == NULL)
+     return;
+ 
+-  /*
+-   ** ldap_unbind after a LDAP_SERVER_DOWN result
+-   ** causes a SIGPIPE and dhcpd gets terminated,
+-   ** since it doesn't handle it...
+-   */
+-
+-  new.sa_flags   = 0;
+-  new.sa_handler = SIG_IGN;
+-  sigemptyset (&new.sa_mask);
+-  sigaction (SIGPIPE, &new, &old);
+-
+   ldap_unbind_ext_s (ld, NULL, NULL);
+   ld = NULL;
+-
+-  sigaction (SIGPIPE, &old, &new);
+ }
+ 
+ 
+@@ -544,7 +529,7 @@
+   return (ret);
+ }
+ 
+-int
++static int
+ ldap_rebind_cb (LDAP *ld, LDAP_CONST char *url, ber_tag_t request, ber_int_t msgid, void *parms)
+ {
+   int ret;
+@@ -1703,14 +1688,28 @@
+   isc_result_t status;
+   ldap_dn_node *curr;
+   int ret;
++  struct sigaction old, new;
+ 
+   if (ldap_method == LDAP_METHOD_STATIC)
+     return (0);
+ 
++  /*
++   ** ldap_* calls can result in a SIGPIPE and dhcpd gets terminated,
++   ** since it doesn't handle it...
++   */
++
++  new.sa_flags   = 0;
++  new.sa_handler = SIG_IGN;
++  sigemptyset (&new.sa_mask);
++  sigaction (SIGPIPE, &new, &old);
++
+   if (ld == NULL)
+     ldap_start ();
+   if (ld == NULL)
+-    return (0);
++    {
++      sigaction (SIGPIPE, &old, &new);
++      return (0);
++    }
+ 
+   switch (htype)
+     {
+@@ -1725,6 +1724,7 @@
+         break;
+       default:
+         log_info ("Ignoring unknown type %d", htype);
++        sigaction (SIGPIPE, &old, &new);
+         return (0);
+     }
+ 
+@@ -1756,6 +1756,7 @@
+           if(ld == NULL)
+             {
+               log_info ("LDAP reconnect failed - try again later...");
++              sigaction (SIGPIPE, &old, &new);
+               return (0);
+             }
+ 
+@@ -1791,6 +1792,7 @@
+               log_error ("Cannot search for %s in LDAP tree %s: %s", buf, 
+                          curr->dn, ldap_err2string (ret));
+               ldap_stop();
++              sigaction (SIGPIPE, &old, &new);
+               return (0);
+             }
+ #if defined (DEBUG_LDAP)
+@@ -1821,6 +1823,7 @@
+           log_fatal ("can't allocate host decl struct: %s", 
+                      isc_result_totext (status)); 
+           ldap_msgfree (res);
++          sigaction (SIGPIPE, &old, &new);
+           return (0);
+         }
+ 
+@@ -1829,6 +1832,7 @@
+         {
+           host_dereference (&host, MDL);
+           ldap_msgfree (res);
++          sigaction (SIGPIPE, &old, &new);
+           return (0);
+         }
+ 
+@@ -1837,6 +1841,7 @@
+           log_fatal ("can't clone group for host %s", host->name);
+           host_dereference (&host, MDL);
+           ldap_msgfree (res);
++          sigaction (SIGPIPE, &old, &new);
+           return (0);
+         }
+ 
+@@ -1844,11 +1849,13 @@
+ 
+       *hp = host;
+       ldap_msgfree (res);
++      sigaction (SIGPIPE, &old, &new);
+       return (1);
+     }
+ 
+ 
+   if(res) ldap_msgfree (res);
++  sigaction (SIGPIPE, &old, &new);
+   return (0);
+ }
+ 
+@@ -1862,14 +1869,28 @@
+   isc_result_t status;
+   ldap_dn_node *curr;
+   char buf[1024];
++  struct sigaction old, new;
+ 
+   if (ldap_method == LDAP_METHOD_STATIC)
+     return (0);
+ 
++  /*
++   ** ldap_* calls can result in a SIGPIPE and dhcpd gets terminated,
++   ** since it doesn't handle it...
++   */
++
++  new.sa_flags   = 0;
++  new.sa_handler = SIG_IGN;
++  sigemptyset (&new.sa_mask);
++  sigaction (SIGPIPE, &new, &old);
++
+   if (ld == NULL)
+     ldap_start ();
+   if (ld == NULL)
+-    return (0);
++    {
++      sigaction (SIGPIPE, &old, &new);
++      return (0);
++    }
+ 
+   snprintf (buf, sizeof (buf),
+             "(&(objectClass=dhcpSubClass)(cn=%s)(dhcpClassData=%s))",
+@@ -1900,6 +1921,7 @@
+           if(ld == NULL)
+             {
+               log_info ("LDAP reconnect failed - try again later...");
++              sigaction (SIGPIPE, &old, &new);
+               return (0);
+             }
+ 
+@@ -1935,6 +1957,7 @@
+               log_error ("Cannot search for %s in LDAP tree %s: %s", buf, 
+                          curr->dn, ldap_err2string (ret));
+               ldap_stop();
++              sigaction (SIGPIPE, &old, &new);
+               return (0);
+             }
+ #if defined (DEBUG_LDAP)
+@@ -1963,6 +1986,7 @@
+         {
+           log_error ("Cannot allocate memory for a new class");
+           ldap_msgfree (res);
++          sigaction (SIGPIPE, &old, &new);
+           return (0);
+         }
+ 
+@@ -1984,6 +2008,7 @@
+               log_error ("no memory for billing");
+               class_dereference (newclass, MDL);
+               ldap_msgfree (res);
++              sigaction (SIGPIPE, &old, &new);
+               return (0);
+             }
+           memset ((*newclass)->billed_leases, 0, 
+@@ -1993,10 +2018,12 @@
+       data_string_copy (&(*newclass)->hash_string, data, MDL);
+ 
+       ldap_msgfree (res);
++      sigaction (SIGPIPE, &old, &new);
+       return (1);
+     }
+ 
+   if(res) ldap_msgfree (res);
++  sigaction (SIGPIPE, &old, &new);
+   return (0);
+ }
+ 

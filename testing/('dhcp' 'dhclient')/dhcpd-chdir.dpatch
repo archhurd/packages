@@ -1,0 +1,21 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## dhcpd-chdir.dpatch by  <apollock@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Changes to the root directory, avoids leaving busy whatever the current
+## DP: working directory was when started up
+
+@DPATCH@
+diff -urNad dhcp3-3.1.0~/server/dhcpd.c dhcp3-3.1.0/server/dhcpd.c
+--- dhcp3-3.1.0~/server/dhcpd.c	2007-10-27 16:56:02.666826967 -0700
++++ dhcp3-3.1.0/server/dhcpd.c	2007-10-27 16:57:26.406703518 -0700
+@@ -572,6 +572,9 @@
+ 		log_perror = 0;
+ 
+ 	if (daemon) {
++		/* chdir to / to not leave cwd busy */
++		chdir("/");
++
+ 		/* Become session leader and get pid... */
+ 		pid = setsid();
+ 

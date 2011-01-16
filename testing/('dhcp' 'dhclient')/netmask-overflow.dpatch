@@ -1,0 +1,22 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## netmask-overflow.dpatch by Sebastian Kramer <krahmer@suse.de>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Client overflow in netmask handling
+
+@DPATCH@
+diff -urNad git~/client/dhclient.c git/client/dhclient.c
+--- git~/client/dhclient.c	2009-07-08 20:49:22.000000000 +0200
++++ git/client/dhclient.c	2009-07-08 20:53:58.000000000 +0200
+@@ -2544,8 +2544,9 @@
+ 					 (struct option_state *)0,
+ 					 lease -> options,
+ 					 &global_scope, oc, MDL)) {
+-		if (data.len > 3) {
+-			struct iaddr netmask, subnet, broadcast;
++		struct iaddr netmask;
++		if (data.len > 3 && data.len <= sizeof(netmask.iabuf)) {
++			struct iaddr subnet, broadcast;
+ 
+ 			memcpy (netmask.iabuf, data.data, data.len);
+ 			netmask.len = data.len;

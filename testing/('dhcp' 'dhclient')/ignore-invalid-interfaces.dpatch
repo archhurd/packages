@@ -1,0 +1,36 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## ignore-invalid-interfaces.dpatch by  <apollock@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: Patch to ignore ARPHRD_VOID interfaces (for #463499)
+
+@DPATCH@
+diff -urNad dhcp3-3.1.0~/common/discover.c dhcp3-3.1.0/common/discover.c
+--- dhcp3-3.1.0~/common/discover.c	2006-11-07 15:41:39.000000000 -0800
++++ dhcp3-3.1.0/common/discover.c	2008-02-03 14:53:58.216602003 -0800
+@@ -480,6 +480,11 @@
+ 			/* ignore loopback interface */
+ 			break;
+ #endif
++#ifdef HAVE_ARPHRD_VOID
++		      case ARPHRD_VOID:
++		        /* ignore void interfaces */
++			break;
++#endif
+ 
+ 		      case ARPHRD_ETHER:
+ 			tmp -> hw_address.hlen = 7;
+diff -urNad dhcp3-3.1.0~/includes/osdep.h dhcp3-3.1.0/includes/osdep.h
+--- dhcp3-3.1.0~/includes/osdep.h	2006-02-24 15:16:29.000000000 -0800
++++ dhcp3-3.1.0/includes/osdep.h	2008-02-03 14:52:53.792501634 -0800
+@@ -307,6 +307,10 @@
+ # define HAVE_ARPHRD_METRICOM
+ #endif
+ 
++#if defined (ARPHRD_VOID) && !defined (HAVE_ARPHRD_VOID)
++# define HAVE_ARPHRD_VOID
++#endif
++
+ #if defined (SO_BINDTODEVICE) && !defined (HAVE_SO_BINDTODEVICE)
+ # define HAVE_SO_BINDTODEVICE
+ #endif
