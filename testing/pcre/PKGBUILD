@@ -1,0 +1,29 @@
+# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=pcre
+pkgver=8.12
+pkgrel=1
+pkgdesc="A library that implements Perl 5-style regular expressions"
+arch=('i686') 
+url="http://www.pcre.org/"
+license=('BSD')
+depends=('gcc-libs')
+options=('!libtool' '!makeflags')
+source=(ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/${pkgname}-${pkgver}.tar.bz2)
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --build=${CHOST} --prefix= \
+	--enable-utf8 --enable-unicode-properties 
+  make 
+}
+
+package(){
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  make DESTDIR="${pkgdir}" install
+  
+  # grep uses pcre, so we need the libs in /lib 
+  install -Dm644 LICENCE "${pkgdir}/share/licenses/${pkgname}/LICENSE" 
+}
+md5sums=('f14a9fef3c92f3fc6c5ac92d7a2c7eb3')
