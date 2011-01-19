@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=libxmu
-pkgver=1.0.5
+pkgver=1.1.0
 pkgrel=1
 pkgdesc="X11 miscellaneous micro-utility library"
 arch=('i686')
@@ -10,21 +10,21 @@ depends=('libxext' 'libxt')
 license=('custom')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXmu-${pkgver}.tar.bz2)
-md5sums=('fc4d66be7a1a1eb474954728415e46d6')
 
 build() {
   cd ${startdir}/src/libXmu-${pkgver}
 
   ./configure --prefix= --sysconfdir=/etc --disable-static \
               --host=${CHOST} --build=${CHOST}
-  make || return 1
+  make 
 }
 
 package() {
   cd ${startdir}/src/libXmu-${pkgver}
-  make DESTDIR=${startdir}/pkg install || return 1
+  make DESTDIR=${startdir}/pkg install 
 
-# install custom license
-install -Dm644 $srcdir/libXmu-$pkgver/COPYING \
-	$pkgdir/share/licenses/$pkgname/COPYING
+  # install custom license
+  install -Dm644 $srcdir/libXmu-$pkgver/COPYING \
+  $pkgdir/share/licenses/$pkgname/COPYING
 }
+md5sums=('6836883a0120e8346cf7f58dc42e465a')
