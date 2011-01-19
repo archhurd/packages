@@ -1,24 +1,24 @@
 #Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=xf86vidmodeproto
-pkgver=2.3
+pkgver=2.3.1
 pkgrel=1
 pkgdesc="X11 Video Mode extension wire protocol"
 arch=(any)
 url="http://xorg.freedesktop.org/"
 license=('custom')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('4434894fc7d4eeb4a22e6b876d56fdaa')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix= 
+  make 
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
+md5sums=('e793ecefeaecfeabd1aed6a01095174e')
