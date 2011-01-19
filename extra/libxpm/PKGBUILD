@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=libxpm
-pkgver=3.5.8
+pkgver=3.5.9
 pkgrel=1
 pkgdesc="X11 pixmap library"
 arch=('i686')
@@ -10,19 +10,19 @@ url="http://xorg.freedesktop.org/"
 depends=('libxt' 'libxext')
 options=('!libtool')
 source=(${url}/releases/individual/lib/libXpm-${pkgver}.tar.bz2)
-md5sums=('38e58e72d476a74298a59052fde185a3')
 
 build() {
   cd "${srcdir}/libXpm-${pkgver}"
   ./configure --prefix= --sysconfdir=/etc --mandir=/share/man \
-		--disable-static || return 1
-  make || return 1
+		--disable-static 
+  make 
 }
 
 package() {
   cd "${srcdir}/libXpm-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install 
 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
+md5sums=('2de3a1b9541f4b3a6f9d84b69d25530e')
