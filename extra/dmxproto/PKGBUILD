@@ -3,21 +3,25 @@
 # Contributor: Jan de Groot <jgc@archlinux.org>
 
 pkgname=dmxproto
-pkgver=2.3
+pkgver=2.3.1
 pkgrel=1
 pkgdesc="X11 Distributed Multihead X extension wire protocol"
 arch=(any)
 url="http://xorg.freedesktop.org/"
 license=('custom')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('880a41720b2937e2660dcdc0d34a8791')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
-  make || return 1
-  make DESTDIR="${pkgdir}" install || return 1
+  ./configure --prefix= 
+  make 
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" install 
 
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
-  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
+  install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
+md5sums=('4ee175bbd44d05c34d43bb129be5098a')
