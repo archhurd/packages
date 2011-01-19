@@ -1,6 +1,6 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 pkgname=libxcomposite
-pkgver=0.4.2
+pkgver=0.4.3
 pkgrel=1
 pkgdesc="X11 Composite extension library"
 arch=('i686')
@@ -21,4 +21,4 @@ package() {
   make DESTDIR=${pkgdir} install 
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
-md5sums=('e38dc98509149083f6c31b49b484e63c')
+md5sums=('a60e0b5c276d0aa9e2d3b982c98f61c8')
