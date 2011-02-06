@@ -1,0 +1,27 @@
+diff -rupN a/clydelib/utilcore.c b/clydelib/utilcore.c
+--- a/clydelib/utilcore.c	2011-02-06 16:40:11.540000000 +0000
++++ b/clydelib/utilcore.c	2011-02-06 16:43:21.700000000 +0000
+@@ -12,7 +12,8 @@
+ #include <sys/ioctl.h>
+ #include <sys/time.h>
+ #include <sys/utsname.h>
+-#include <sys/prctl.h> /* for setprocname */
++//#include <sys/prctl.h> /* for setprocname */
++// sys/prctl.h is absent on hurd
+ 
+ 
+ #include <stdio.h>
+@@ -216,11 +217,12 @@ static void throw_errno ( lua_State *L,
+ /* Sets the effective procedure name, to change the terminal's title. */
+ static int clyde_setprocname ( lua_State *L )
+ {
++/*  setprocname is not implemented - sys/prctl.h is absent on hurd
+     const char *procname;
+     
+     procname = luaL_checkstring( L, 1 );
+     CHECK_ERR( "prctl", prctl( PR_SET_NAME, procname, 0, 0, 0 ));
+-    
++*/    
+     return 0;
+ }
+ 
