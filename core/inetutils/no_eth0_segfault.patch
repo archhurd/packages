@@ -1,0 +1,13 @@
+--- options.c.orig	2010-09-19 16:42:46.990000000 +0000
++++ options.c	2010-09-19 16:43:35.150000000 +0000
+@@ -594,8 +594,9 @@
+     {
+       /* No interfaces specified.  Get a list of all interfaces.  */
+       struct if_nameindex *ifnx, *ifnxp;
+-
+       ifnx = ifnxp = if_nameindex ();
++      if (!ifnx)
++       error (EXIT_FAILURE, 0, "could not get list of interfaces");
+       while (ifnxp->if_index != 0 || ifnxp->if_name != NULL)
+ 	{
+ 	  struct ifconfig *ifp;

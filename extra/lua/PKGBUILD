@@ -1,31 +1,35 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Contributor: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=lua 
 pkgver=5.1.4
-pkgrel=1
+pkgrel=2
 pkgdesc="A powerful light-weight programming language designed for extending applications." 
 arch=('i686')
 url="http://www.lua.org/" 
 depends=('readline' 'ncurses') 
 license=(MIT)
 options=('!makeflags')
-source=($url/ftp/$pkgname-$pkgver.tar.gz $pkgname-arch-hurd.patch)
+source=($url/ftp/$pkgname-$pkgver.tar.gz 
+	$pkgname-arch-hurd.patch)
+md5sums=('d0870f2de55d59c1c8419f36e8fac150'
+         '2b61470400e3f48b38f950f235f08be4')
 
 build() { 
   cd $startdir/src/$pkgname-$pkgver 
-  patch -p1 -i $startdir/src/$pkgname-arch-hurd.patch || return 1
-  
-  make INSTALL_DATA="cp -d" TO_LIB="liblua.a liblua.so liblua.so.5.1" LUA_SO=liblua.so  INSTALL_TOP=$pkgdir INSTALL_MAN=$startdir/pkg/share/man/man1 \
-    posix install  || return 1
+ 
+  #if rebuilding, liblua.so existing kills build.
+  rm ./src/liblua.so
+
+  patch -p1 < ${srcdir}/$pkgname-arch-hurd.patch
+
+  make INSTALL_DATA="cp -d" TO_LIB="liblua.a liblua.so liblua.so.5.1" LUA_SO=liblua.so  INSTALL_TOP=$pkgdir INSTALL_MAN=$startdir/pkg/share/man/man1 posix
+  make install
   install -D -m 644 etc/lua.pc $startdir/pkg/lib/pkgconfig/lua.pc
   install -D -m644 COPYRIGHT $startdir/pkg/share/licenses/$pkgname/COPYRIGHT
 
   # Install the documentation
   mkdir -p $pkgdir/share/doc/lua
   cp -R doc/* $pkgdir/share/doc/lua
-  rm -fr $startdir/pkg
-  mv $startdir/_pkg $startdir/pkg
 }
 # vim: ts=2 sw=2 et ft=sh
-md5sums=('d0870f2de55d59c1c8419f36e8fac150'
-         '2a02d21e28ae8cdfab16d183b2ae6f28')
