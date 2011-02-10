@@ -2,8 +2,8 @@
 # Packaged by Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=lua-yajl-git
-pkgver=20100716
-pkgrel=1
+pkgver=20110206
+pkgrel=2
 pkgdesc="Lua interface to yajl."
 arch=('i686')
 url="http://github.com/brimworks/lua-yajl"
@@ -43,8 +43,8 @@ package(){
 	cd ${srcdir}/${_gitname}-build
 	make DESTDIR=${pkgdir} install
 	mkdir -p ${pkgdir}/lib/lua/5.1  
-	mv ${pkgdir}/local/share/lua/cmod/* ${pkgdir}/lib/lua/5.1/
-	rm -R ${pkgdir}/local
+	mv ${pkgdir}/usr/local/share/lua/cmod/* ${pkgdir}/lib/lua/5.1/
+	rm -R ${pkgdir}/usr
 	install -Dm644 ${srcdir}/LICENSE \
 		${pkgdir}/share/licenses/${pkgname}/LICENSE
 } 
