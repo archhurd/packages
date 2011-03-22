@@ -9,7 +9,8 @@ url="http://www.gnu.org/software/hurd/user/zhengda.html"
 license=('GPL')
 groups=('dde')
 makedepends=('git' 'mig' 'glibc')
-depends=('gnumach-userleveldrivers' 'libpciaccess')
+#depends=('gnumach-userleveldrivers' 'libpciaccess')
+depends=('libpciaccess')
 
 __gitroot="git://git.sv.gnu.org/hurd/incubator.git"
 __gitname="incubator"
@@ -18,14 +19,9 @@ build() {
   cd "$srcdir"
   msg "Connecting to GIT server...."
 
-  if [ -d $__gitname ] ; then
-    cd $__gitname && git pull
-    msg "The local files are updated."
-  else
-    git clone $__gitroot
-    cd incubator
-    git checkout origin/dde
-  fi
+  git clone -b $__gitname $__gitroot $__gitname
+  cd $__gitname
+  git checkout origin/dde
 
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
