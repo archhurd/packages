@@ -26,7 +26,8 @@ build() {
   cd "${srcdir}/Python-${pkgver}"
 
   if [ -e ${srcdir}/.patched ]
-    msg "Already patched
+  then
+    msg "Already patched"
   else
     msg "Patching"
     # Ensure that we are using the system copy of various libraries (expat, zlib and libffi),
@@ -41,6 +42,7 @@ build() {
   fi
 
   if [ -e ${srcdir}/.configured ]
+  then
     msg "Already configured"
   else
     msg "Configuring"
