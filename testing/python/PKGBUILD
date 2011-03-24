@@ -6,7 +6,7 @@
 
 pkgname=python
 pkgver=3.2
-pkgrel=1
+pkgrel=2
 _pybasever=3.2
 pkgdesc="Next generation of the python high-level scripting language"
 arch=('i686')
@@ -36,8 +36,8 @@ build() {
     patch -Np1 -i ../hurd-disable-nonworking-constants.diff
     
     # can't be too careful...
-    sed 's/PATH_MAX/4096' -i *ython/*.c
-    sed 's/MAX_PATH/4096' -i *ython/*.c
+    sed 's/PATH_MAX/4096/' -i Python/*.c
+    sed 's/MAX_PATH/4096/' -i Python/*.c
     touch ${srcdir}/.patched
   fi
 
@@ -90,6 +90,6 @@ package() {
   install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
 
-md5sums=('ad5e5f1c07e829321e0a015f8cafe245'
+md5sums=('92e94b5b6652b96349d6362b8337811d'
          '201148e71ca6b722a089d855773bc23c'
          '9e7381a9e12a71f4c43c88f0edda9837')
