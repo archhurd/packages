@@ -79,7 +79,7 @@ package() {
   ln -sf pydoc3 ${pkgdir}/bin/pydoc
 
   # clean-up reference to build directory
-  sed -i "s#$srcdir/Python-${pkgver}:##" $pkgdir/lib/python3.1/config/Makefile
+  sed -i "s#${srcdir}/Python-${pkgver}:##" $pkgdir/lib/python3.2/config-3.2mu/Makefile
 
   # Fix conflicts with python2 - python2 version is newer...
   rm ${pkgdir}/bin/2to3
@@ -87,6 +87,7 @@ package() {
   # license
   install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
+
 md5sums=('ad5e5f1c07e829321e0a015f8cafe245'
          '201148e71ca6b722a089d855773bc23c'
          '9e7381a9e12a71f4c43c88f0edda9837')
