@@ -2,7 +2,7 @@
 
 pkgname=python2
 pkgver=2.7.1
-pkgrel=1
+pkgrel=3
 _pybasever=2.7
 pkgdesc="A high-level scripting language"
 arch=('i686')
@@ -14,25 +14,24 @@ optdepends=('tk: for IDLE, pynche and modulator')
 conflicts=('python<3')
 provides=('python2' 'python-elementtree' 'python-ctypes')
 source=(http://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.bz2
-   	python-db-4.8.patch
   	hurd-broken-poll.diff
   	hurd-disable-nonworking-constants.diff)
-
+md5sums=('aa27bc25725137ba155910bd8e5ddc4f'
+         '45b7a5b9ee08f7f428677bc489dfa751'
+         '97bfc79cafffb1f26a122780e2cf516c')
 build() {
   cd ${srcdir}/Python-${pkgver}
 
 
   if [ -e ${srcdir}/.patched ]
   then
+    msg "Already patched"
+  else
     msg "Patching"
-    patch -Np0 -i ${srcdir}/python-db-4.8.patch  
-
     # Hurd 
     patch -p1 -i ${srcdir}/hurd-disable-nonworking-constants.diff 
     patch -p1 -i ${srcdir}/hurd-broken-poll.diff
     touch ${srcdir}/.patched
-  else
-    msg "Already patched"
   fi
 
   #http://bugs.python.org/issue6949
@@ -110,9 +109,5 @@ package() {
   sed -i "s#${srcdir}/Python-${pkgver}:##" "${pkgdir}/lib/python${_pybasever}/config/Makefile" 
 
   # license
-  install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
+  install -Dm644 LICENSE ${pkgdir}/share/licenses/python2/LICENSE
 }
-md5sums=('aa27bc25725137ba155910bd8e5ddc4f'
-         '10eb5449ead95b9cb13eae9f9a65894e'
-         'ecf1a0d5eddbcfe757034381152c8f66'
-         '80088c2e94ad8bd419c78a63dc12d55b')
