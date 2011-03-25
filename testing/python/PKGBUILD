@@ -6,7 +6,7 @@
 
 pkgname=python
 pkgver=3.2
-pkgrel=2
+pkgrel=3
 _pybasever=3.2
 pkgdesc="Next generation of the python high-level scripting language"
 arch=('i686')
@@ -21,6 +21,9 @@ options=('!makeflags')
 source=(http://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.bz2
 	hurd-broken-poll.diff
 	hurd-disable-nonworking-constants.diff)
+md5sums=('92e94b5b6652b96349d6362b8337811d'
+         '49b10b02f78becfe7abae8b0ab7b7612'
+         'f255ad891e46f3acaa8b19078acdab6e')
 
 build() {
   cd "${srcdir}/Python-${pkgver}"
@@ -90,6 +93,3 @@ package() {
   install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
 
-md5sums=('92e94b5b6652b96349d6362b8337811d'
-         '201148e71ca6b722a089d855773bc23c'
-         '9e7381a9e12a71f4c43c88f0edda9837')

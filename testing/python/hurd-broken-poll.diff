@@ -3,7 +3,7 @@
 
 --- a/Modules/selectmodule.c
 +++ b/Modules/selectmodule.c
-@@ -1720,7 +1720,7 @@
+@@ -1748,7 +1748,7 @@
  
  static PyMethodDef select_methods[] = {
      {"select",          select_select,  METH_VARARGS,   select_doc},
@@ -12,9 +12,9 @@
      {"poll",            select_poll,    METH_NOARGS,    poll_doc},
  #endif /* HAVE_POLL */
      {0,         0},     /* sentinel */
-@@ -1757,7 +1757,7 @@
-     Py_INCREF(SelectError);
-     PyModule_AddObject(m, "error", SelectError);
+@@ -1793,7 +1793,7 @@
+     PyModule_AddIntConstant(m, "PIPE_BUF", PIPE_BUF);
+ #endif
  
 -#if defined(HAVE_POLL)
 +#if defined(HAVE_POLL) && !defined(HAVE_BROKEN_POLL)
