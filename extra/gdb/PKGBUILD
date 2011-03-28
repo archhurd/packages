@@ -1,11 +1,12 @@
 # Maintainer:  Michael Walker <mike@barrucadu.co.uk>
+# Contributor: Stephen Gilles <stephendgilles@gmail.com>
 # Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 # Contributor: Allan McRae <allan@archlinux.org>
 # Contributor: Jan de Groot <jgc@archlinux.org>
 
 pkgname=gdb
 pkgver=7.2
-pkgrel=1
+pkgrel=3
 pkgdesc="The GNU Debugger"
 arch=('i686')
 url="http://www.gnu.org/software/gdb/"
@@ -15,18 +16,34 @@ makedepends=('texinfo')
 backup=('etc/gdb/gdbinit')
 options=('!libtool')
 install=gdb.install
-source=( http://ftp.gnu.org/gnu/gdb/${pkgname}-${pkgver}.tar.bz2 )
-
-md5sums=('64260e6c56979ee750a01055f16091a5')
-
+source=(http://ftp.gnu.org/gnu/gdb/${pkgname}-${pkgver}.tar.bz2 
+	01-threads.diff)
+md5sums=('64260e6c56979ee750a01055f16091a5'
+         '9bed48585a21d052135d61672a2bb8ad')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  
   # doesn't work with system readline >= 6
-  ./configure --prefix= \
-    --with-system-gdbinit=/etc/gdb/gdbinit \
-    --disable-nls --build=i686-pc-gnu 
+
+  if [ -e ${srcdir}/.patched ]
+  then
+    msg "Already patched"
+  else
+    msg "Patching"
+    patch -p1 -i ${srcdir}/01-threads.diff
+    touch ${srcdir}/.patched    
+  fi
+
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    ./configure --prefix= \
+      --with-system-gdbinit=/etc/gdb/gdbinit \
+      --disable-nls --build=i686-pc-gnu 
+    touch ${srcdir}/.configured
+  fi
 
   make
 }
