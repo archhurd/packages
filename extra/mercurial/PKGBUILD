@@ -5,7 +5,7 @@
 # Contributor: Douglas Soares de Andrade <douglas@archlinux.org>
 
 pkgname=mercurial
-pkgver=1.8.1
+pkgver=1.8.2
 pkgrel=1
 pkgdesc="A scialable distributed SCM tool"
 arch=('i686')
@@ -15,12 +15,10 @@ depends=('python2')
 optdepends=('tk: for the hgk GUI')
 source=(http://www.selenic.com/mercurial/release/${pkgname}-${pkgver}.tar.gz
         mercurial.profile)
-md5sums=('e0a8cfca69aa4003ea3187aed609d5e0'
-         'ab16f254b7d23a9f63f8a4b19f3da955')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  
+
   # run by hand, because python within PKGBUILDS is messed up
   python2 setup.py install --prefix="${pkgdir}/" --optimize=1  || true
   install -d ${pkgdir}/share/man/{man1,man5}
@@ -39,3 +37,5 @@ build() {
   install -m755 -d ${pkgdir}/etc/profile.d
   install -m755 ${srcdir}/mercurial.profile "${pkgdir}/etc/profile.d/mercurial.sh" 
 }
+md5sums=('a1634b9b709ecc70662f3257abece2c7'
+         'ab16f254b7d23a9f63f8a4b19f3da955')
