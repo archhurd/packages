@@ -1,8 +1,9 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=ncurses
-pkgver=5.7
-pkgrel=4
+pkgver=5.9
+pkgrel=1
 pkgdesc="System V Release 4.0 curses emulation library"
 arch=('i686')
 url="http://www.gnu.org/software/ncurses/"
@@ -10,7 +11,6 @@ license=('MIT')
 groups=('base')
 depends=('glibc')
 source=(ftp://ftp.gnu.org/pub/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('cce05daf61a64501ef6cd8da1f727ec6')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
@@ -57,3 +57,4 @@ package() {
 #  install -dm755 ${pkgdir}/share/licenses/$pkgname
 #  grep -B 100 '$Id' README > ${pkgdir}/share/licenses/${pkgname}/license.txt
 }
+md5sums=('8cb9c412e5f2d96bc6f459aa8c6282a1')
