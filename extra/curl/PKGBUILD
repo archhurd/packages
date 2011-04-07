@@ -1,7 +1,8 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=curl
-pkgver=7.20.1
+pkgver=7.21.4
 pkgrel=1
 pkgdesc="An URL retrival utility and library"
 arch=('i686')
@@ -36,5 +37,5 @@ package() {
   install -D -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/COPYING" || return 1
   install -D -m644 docs/libcurl/libcurl.m4 "${pkgdir}/share/aclocal/libcurl.m4" || return 1
 }
-md5sums=('244b16b2a38c70e47130c8494b7371b9'
+md5sums=('e2dd20c88a7d01c745af9d788545ab2a'
          '4e2737ddc209d2d1990890d3a9dc7dcf')
