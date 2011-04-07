@@ -1,7 +1,8 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=zsh
-pkgver=4.3.10
+pkgver=4.3.11
 pkgrel=1
 pkgdesc="A very advanced and programmable command interpreter (shell) for UNIX"
 arch=('i686')
@@ -10,16 +11,21 @@ license=('custom')
 depends=('ncurses' 'pcre')
 install=zsh.install
 source=(ftp://ftp.zsh.org/pub/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('74c5b275544400082a1cde806c98682a')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  # FS#16360
-  sed -i "s:init.d:rc.d:g" Doc/Zsh/compsys.yo \
+
+  if [ -e ${srcdir}/.configured ]; then
+    msg "Already configured"
+  else
+    msg "Configuring"
+
+    # FS#16360
+    sed -i "s:init.d:rc.d:g" Doc/Zsh/compsys.yo \
                            Doc/zsh.texi \
                            Completion/Unix/Type/_services \
                            Completion/Unix/Command/_init_d
-  ./configure --prefix= \
+    ./configure --prefix= \
               --bindir=/bin \
               --enable-etcdir=/etc/zsh \
 	      --enable-zshenv=/etc/zsh/zshenv \
@@ -36,7 +42,9 @@ build() {
               --enable-pcre \
               --enable-zsh-secure-free \
 	      --disable-gdbm
-  make || return 1
+    touch ${srcdir}/.configured
+  fi
+  make
 }
 
 package(){
@@ -45,3 +53,4 @@ package(){
 
   install -D -m644 LICENCE "${pkgdir}/share/licenses/${pkgname}/LICENSE"
 }
+md5sums=('3225c7f53b69f395e95723585d6785ed')
