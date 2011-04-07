@@ -1,8 +1,9 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=nano
 pkgver=2.2.6
-pkgrel=1
+pkgrel=2
 pkgdesc="Pico editor clone with enhancements"
 arch=('i686')
 license=('GPL')
