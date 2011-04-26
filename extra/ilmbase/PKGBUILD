@@ -2,21 +2,47 @@
 # Contributor: Tobias Powalowski <tpowa@archlinux.org>
 
 pkgname=ilmbase
-pkgver=1.0.1
+pkgver=1.0.2
 pkgrel=1
 depends=('gcc-libs')
 pkgdesc="IlmThread is a thread abstraction library for use with OpenEXR"
 arch=('i686')
 license=('custom')
 options=('!libtool')
-source=(http://savannah.nongnu.org/download/openexr/$pkgname-$pkgver.tar.gz)
+source=(http://savannah.nongnu.org/download/openexr/$pkgname-$pkgver.tar.gz
+	tests-compile-fixes.patch)
 url="http://www.openexr.org"
-md5sums=('f76f094e69a6079b0beb93d97e2a217e')
 
 build() {
-  cd $startdir/src/$pkgname-$pkgver
-  ./configure --prefix=
-  make || return 1
+  cd ${srcdir}/${pkgname}-${pkgver}
+  if [ -e ${srcdir}/.patched ]; then
+    msg "Already patched"
+  else
+    msg "Patching"
+    patch -Np1 ${srcdir}/tests-compile-fixes.patch
+    touch ${srcdir}/.patched
+  fi
+
+  if [ -e ${srcdir}/.configured ]; then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    ./configure --prefix=
+    touch ${srcdir}/.configured
+  fi
+  make
+}
+
+check() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  # upstream reports a false negative test
+  make check || true
+}
+
+package () {
+  cd ${srcdir}/${pkgname}-${pkgver}
   make DESTDIR=$startdir/pkg install
   install -D -m644 COPYING $pkgdir/share/licenses/$pkgname/COPYING
 }
+md5sums=('26c133ee8ca48e1196fbfb3ffe292ab4'
+         '2687ab9ac01b417ee5cf8c0174b72e43')
