@@ -1,7 +1,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=bin86
-pkgver=0.16.17
+pkgver=0.16.18
 pkgrel=1
 pkgdesc="A complete 8086 assembler and loader"
 arch=('i686')
@@ -9,13 +9,16 @@ license=('GPL')
 url="http://www.debath.co.uk/"
 groups=('base-devel')
 depends=('glibc')
-source=(http://homepage.ntlworld.com/robert.debath/dev86/$pkgname-$pkgver.tar.gz)
-
-md5sums=('c9e8d72dd2e7457b52d0e3164fc199a1')
+source=(http://www.debath.co.uk/dev86/${pkgname}-${pkgver}.tar.gz)
 
 build() {
   cd $srcdir/$pkgname-$pkgver
-  make PREFIX= || return 1
+  make PREFIX=
+}
+
+package() {
+  cd $srcdir/$pkgname-$pkgver
   mkdir -p $pkgdir/bin $pkgdir/share/man/man1
   make PREFIX=$pkgdir MANDIR=$pkgdir/share/man/man1 install
 }
+md5sums=('914068fb649b93642d1cf21857b75699')
