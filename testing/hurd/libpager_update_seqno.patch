@@ -1,0 +1,137 @@
+2005-08-10  Sergio Lopez  <koro@sinrega.org>
+
+	* seqnos.c (_pager_stubs_update_seqno): New function.
+	* priv.h (_pager_stubs_update_seqno): New function.
+	
+	* notify-stubs.c (_pager_do_seqnos_mach_notify_port_deleted):
+	Call _pager_stubs_update_seqno to properly update seqno.
+	(_pager_do_seqnos_mach_notify_msg_accepted): Likewise.
+	(_pager_do_seqnos_mach_notify_port_destroyed): Likewise.
+	(_pager_do_seqnos_mach_notify_send_once): Likewise.
+	(_pager_do_seqnos_mach_notify_dead_name): Likewise.
+	* stubs.c (_pager_seqnos_memory_object_data_write): Likewise.
+	(_pager_seqnos_memory_object_supply_completed): Likewise.
+
+diff -dur libpager.orig/notify-stubs.c libpager/notify-stubs.c
+--- libpager.orig/notify-stubs.c	1995-06-22 18:01:46.000000000 +0200
++++ libpager/notify-stubs.c	2005-08-10 15:56:52.000000000 +0200
+@@ -18,6 +18,7 @@
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA. */
+ 
++#include "priv.h"
+ #include "notify_S.h"
+ #include <errno.h>
+ 
+@@ -29,6 +30,7 @@
+ 					   mach_port_t name
+ 					   __attribute__ ((unused)))
+ {
++  _pager_stubs_update_seqno (notify, seqno);
+   return 0;
+ }
+ 
+@@ -40,6 +42,7 @@
+ 					   mach_port_t name
+ 					     __attribute__ ((unused)))
+ {
++  _pager_stubs_update_seqno (notify, seqno);
+   return 0;
+ }
+ 
+@@ -51,6 +54,7 @@
+ 					     mach_port_t name
+ 					       __attribute__ ((unused)))
+ {
++  _pager_stubs_update_seqno (notify, seqno);
+   return 0;
+ }
+ 
+@@ -60,6 +64,7 @@
+ 					mach_port_seqno_t seqno
+ 					  __attribute__ ((unused)))
+ {
++  _pager_stubs_update_seqno (notify, seqno);
+   return 0;
+ }
+ 
+@@ -71,5 +76,6 @@
+ 					mach_port_t name
+ 					  __attribute__ ((unused)))
+ {
++  _pager_stubs_update_seqno (notify, seqno);
+   return 0;
+ }
+diff -dur libpager.orig/priv.h libpager/priv.h
+--- libpager.orig/priv.h	2000-07-25 21:40:27.000000000 +0200
++++ libpager/priv.h	2005-08-10 15:56:52.000000000 +0200
+@@ -133,6 +133,7 @@
+ 
+ void _pager_wait_for_seqno (struct pager *, int);
+ void _pager_release_seqno (struct pager *, int);
++void _pager_stubs_update_seqno (mach_port_t, int);
+ void _pager_block_termination (struct pager *);
+ void _pager_allow_termination (struct pager *);
+ error_t _pager_pagemap_resize (struct pager *, vm_address_t);
+diff -dur libpager.orig/seqnos.c libpager/seqnos.c
+--- libpager.orig/seqnos.c	1994-06-01 18:57:29.000000000 +0200
++++ libpager/seqnos.c	2005-08-10 16:37:11.000000000 +0200
+@@ -47,3 +47,25 @@
+       condition_broadcast (&p->wakeup);
+     }
+ }
++
++
++/* This function is called by stub functions to properly update
++   seqno. */
++void
++_pager_stubs_update_seqno (mach_port_t object,
++                           int seqno)
++{
++  struct pager *p;
++  
++  p = ports_lookup_port (0, object, _pager_class);
++  if (p)
++    {  
++      mutex_lock (&p->interlock);
++      _pager_wait_for_seqno (p, seqno);
++      _pager_release_seqno (p, seqno);
++      mutex_unlock (&p->interlock);
++      
++      ports_port_deref (p);
++    }
++}
++
+diff -dur libpager.orig/stubs.c libpager/stubs.c
+--- libpager.orig/stubs.c	1994-07-22 17:55:06.000000000 +0200
++++ libpager/stubs.c	2005-08-10 15:56:52.000000000 +0200
+@@ -29,6 +29,9 @@
+ 			   mach_port_t new)
+ {
+   printf ("m_o_copy called\n");
++  
++  _pager_stubs_update_seqno (old, seq);
++  
+   return EOPNOTSUPP;
+ }
+ 
+@@ -41,6 +44,9 @@
+ 				 vm_size_t data_cnt)
+ {
+   printf ("m_o_data_write called\n");
++  
++  _pager_stubs_update_seqno (old, seq);
++  
+   return EOPNOTSUPP;
+ }
+ 
+@@ -54,6 +60,9 @@
+ 				       vm_offset_t err_off)
+ {
+   printf ("m_o_supply_completed called\n");
++  
++  _pager_stubs_update_seqno (obj, seq);
++  
+   return EOPNOTSUPP;
+ }
+ 
