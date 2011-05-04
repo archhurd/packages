@@ -2,22 +2,47 @@
 # Contributor: Tobias Powalowski <tpowa@archlinux.org>
 
 pkgname=openexr
-pkgver=1.6.1
+pkgver=1.7.0
 pkgrel=1
 depends=('zlib' 'ilmbase')
 pkgdesc="openexr library for EXR images"
 arch=('i686')
 options=('!libtool')
 license=('custom')
-source=("http://savannah.nongnu.org/download/$pkgname/$pkgname-$pkgver.tar.gz" 'gcc43.patch')
+source=("http://savannah.nongnu.org/download/$pkgname/$pkgname-$pkgver.tar.gz"
+	'gcc43.patch'
+	'01-missing-include.patch')
 url="http://www.openexr.org"
-md5sums=('11951f164f9c872b183df75e66de145a' '7c83ee3d69ad688142e7de63cb68e70a')
 
 build() {
-  cd $startdir/src/$pkgname-$pkgver
-  patch -p1 -i $srcdir/gcc43.patch || return 1
-  ./configure --prefix=
+  cd ${srcdir}/$pkgname-$pkgver
+
+  if [ -e ${srcdir}/.patched ]; then
+    msg "Already patched"
+  else
+    msg "Patching"
+    patch -p1 -i ${srcdir}/gcc43.patch
+    patch -Np1 -i ${srcdir}/01-missing-include.patch
+    touch ${srcdir}/.patched
+  fi
+
+  if [ -e ${srcdir}/.configured ]; then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    ./configure --prefix=
+    touch ${srcdir}/.configured
+  fi
+
   make 
+}
+
+package() {
+  cd ${srcdir}/$pkgname-$pkgver
   make DESTDIR=$startdir/pkg install
   install -D -m644 COPYING $pkgdir/share/licenses/$pkgname/COPYING
 }
+
+md5sums=('27113284f7d26a58f853c346e0851d7a'
+         '7c83ee3d69ad688142e7de63cb68e70a'
+         'bea689554d04fbd0f2ca80b8cee490bb')
