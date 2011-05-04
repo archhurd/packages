@@ -1,0 +1,48 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributorr: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=dcron
+pkgver=4.5
+pkgrel=1
+pkgdesc="dillon's lightweight cron daemon"
+arch=('i686')
+license=('GPL')
+url="http://www.jimpryor.net/linux/dcron"
+backup=('var/spool/cron/root' 'etc/conf.d/crond')
+depends=('glibc')
+provides=('cron')
+source=("http://www.jimpryor.net/linux/releases/${pkgname}-${pkgver}.tar.gz"
+	'dcron.rc.d'
+	'dcron.conf.d')
+optdepends=('smtp-server: sending cron job output via email')
+
+install=$pkgname.install
+
+build() {
+	cd "$srcdir/${pkgname}-${pkgver}"
+
+	# by default, any member of group "users" can edit their own crontab
+	make \
+		PREFIX= \
+		CRONTAB_GROUP=users \
+		CRONTABS=/var/spool/cron \
+		CRONSTAMPS=/var/spool/cronstamps 
+
+}
+
+package() {
+	cd "$srcdir/${pkgname}-${pkgver}"
+	make DESTDIR="$pkgdir" install
+
+	# install standard configuration and scripts
+	install -d -m755 "$pkgdir/etc/cron."{hourly,daily,weekly,monthly}
+	install -D -m755 extra/run-cron "$pkgdir/sbin/run-cron"
+	install -D -m0600 extra/root.crontab "$pkgdir/var/spool/cron/root" 
+
+	# install Arch configuration and launch scripts
+	install -D -m755 "$srcdir/dcron.rc.d" "$pkgdir/etc/rc.d/crond"
+	install -D -m0644 "$srcdir/dcron.conf.d" "$pkgdir/etc/conf.d/crond"
+}
+md5sums=('078833f3281f96944fc30392b1888326'
+         '8b4556c6bb5d38f2a48b7309fd95af60'
+         '5bfa07beb54d0beaf3f38225e4d5a9fa')
