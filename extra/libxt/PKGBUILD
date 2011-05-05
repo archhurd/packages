@@ -1,7 +1,8 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=libxt
-pkgver=1.0.9
+pkgver=1.1.1
 pkgrel=1
 pkgdesc="X11 toolkit intrinsics library"
 arch=('i686')
@@ -25,4 +26,4 @@ package() {
   install -Dm644 "${srcdir}/libXt-${pkgver}/COPYING" \
       "${pkgdir}/share/licenses/${pkgname}/COPYING" 
 }
-md5sums=('8a414f8f2327aaa616ca2dcac1f5d8c3')
+md5sums=('eb22c0a1f172b06b97a3f5ae89768412')
