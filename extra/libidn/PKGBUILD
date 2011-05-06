@@ -1,7 +1,7 @@
 # Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=libidn
-pkgver=1.21
+pkgver=1.22
 pkgrel=1
 pkgdesc="Implementation of the Stringprep, Punycode and IDNA specifications"
 url="http://www.gnu.org/software/libidn/"
@@ -31,4 +31,4 @@ package() {
   cd ${srcdir}/${pkgname}-${pkgver}
   make DESTDIR=${pkgdir} install
 }
-md5sums=('80aba4e9503cd3ba6725cdbf265550f8')
+md5sums=('893a1df0cf3b28b72d248382eaeaca71')
