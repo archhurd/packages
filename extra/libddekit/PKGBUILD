@@ -1,7 +1,7 @@
 # Maintainer Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=libddekit
-pkgver=20100815
+pkgver=20110507
 pkgrel=1
 pkgdesc="Part of the requirements for building DDE drivers"
 arch=(i686)
@@ -19,7 +19,7 @@ build() {
   msg "Connecting to GIT server...."
 
   if [ -d $__gitname ] ; then
-    cd $__gitname && git pull
+#   cd $__gitname && git pull origin/dde
     msg "The local files are updated."
   else
     git clone $__gitroot $__gitname
@@ -31,23 +31,23 @@ build() {
 
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
-
+  
   #
   # BUILD HERE
   #
   export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
-  autoreconf -vif
-  rm -rf $srcdir/$_gitname-build
-  git clone $srcdir/$_gitname $srcdir/$_gitname-build
-  cd $srcdir/$_gitname-build
 
+  rm -rf $srcdir/$__gitname-build
+  git clone $srcdir/$__gitname $srcdir/$__gitname-build
+  cd $srcdir/$__gitname-build
+  autoreconf -vif
   #todo: fix this so that configure does not need to be so awkward
   ./configure --host=i686-pc-gnu --prefix=${pkgdir} 
   make libddekit
 }
 
 package() {
-  cd $srcdir/$_gitname-build/libddekit
+  cd $srcdir/$__gitname-build/libddekit
   make install
 } 
 
