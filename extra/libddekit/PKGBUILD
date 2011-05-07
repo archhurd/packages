@@ -22,9 +22,11 @@ build() {
     cd $__gitname && git pull
     msg "The local files are updated."
   else
-    git clone $__gitroot
-    cd incubator
+    git clone $__gitroot $__gitname
+    cd $__gitname
+    git fetch --all
     git checkout origin/dde
+    cd $srcdir
   fi
 
   msg "GIT checkout done or server timeout"
@@ -35,13 +37,17 @@ build() {
   #
   export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
   autoreconf -vif
+  rm -rf $srcdir/$_gitname-build
+  git clone $srcdir/$_gitname $srcdir/$_gitname-build
+  cd $srcdir/$_gitname-build
+
   #todo: fix this so that configure does not need to be so awkward
   ./configure --host=i686-pc-gnu --prefix=${pkgdir} 
-  make libddekit || return 1
+  make libddekit
 }
 
 package() {
-  cd $srcdir/incubator/libddekit
+  cd $srcdir/$_gitname-build/libddekit
   make install
 } 
 
