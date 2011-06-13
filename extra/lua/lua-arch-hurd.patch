@@ -1,8 +1,25 @@
-diff -ur lua-5.1.orig/etc/lua.pc lua-5.1/etc/lua.pc
---- lua-5.1.orig/etc/lua.pc	2006-03-21 11:51:53.000000000 +0100
-+++ lua-5.1/etc/lua.pc	2006-03-21 11:52:05.000000000 +0100
-@@ -6,7 +6,7 @@
- V= 5.1
+diff -rupN a//Makefile b//Makefile
+--- a//Makefile	2008-08-12 00:40:48.000000000 +0000
++++ b//Makefile	2011-02-06 15:48:06.000000000 +0000
+@@ -5,11 +5,11 @@
+ # == CHANGE THE SETTINGS BELOW TO SUIT YOUR ENVIRONMENT =======================
+ 
+ # Your platform. See PLATS for possible values.
+-PLAT= none
++PLAT= posix
+ 
+ # Where to install. The installation starts in the src and doc directories,
+ # so take care if INSTALL_TOP is not an absolute path.
+-INSTALL_TOP= /usr/local
++INSTALL_TOP= /local
+ INSTALL_BIN= $(INSTALL_TOP)/bin
+ INSTALL_INC= $(INSTALL_TOP)/include
+ INSTALL_LIB= $(INSTALL_TOP)/lib
+diff -rupN a//etc/lua.pc b//etc/lua.pc
+--- a//etc/lua.pc	2008-08-08 12:46:11.000000000 +0000
++++ b//etc/lua.pc	2011-02-06 15:45:13.000000000 +0000
+@@ -8,7 +8,7 @@ V= 5.1
+ R= 5.1.4
  
  # grep '^INSTALL_.*=' ../Makefile | sed 's/INSTALL_TOP/prefix/'
 -prefix= /usr/local
@@ -10,18 +27,18 @@ diff -ur lua-5.1.orig/etc/lua.pc lua-5.1/etc/lua.pc
  INSTALL_BIN= ${prefix}/bin
  INSTALL_INC= ${prefix}/include
  INSTALL_LIB= ${prefix}/lib
-diff -ur lua-5.1.orig/src/Makefile lua-5.1/src/Makefile
---- lua-5.1.orig/src/Makefile	2006-03-21 11:51:53.000000000 +0100
-+++ lua-5.1/src/Makefile	2006-03-21 11:52:09.000000000 +0100
-@@ -23,6 +23,7 @@
- PLATS= aix ansi bsd generic linux macosx mingw posix solaris
+diff -rupN a//src/Makefile b//src/Makefile
+--- a//src/Makefile	2008-01-19 19:37:58.000000000 +0000
++++ b//src/Makefile	2011-02-06 15:47:42.350000000 +0000
+@@ -23,6 +23,7 @@ MYLIBS=
+ PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
  
  LUA_A=	liblua.a
 +LUA_SO=	liblua.so
  CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
  	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
  	lundump.o lvm.o lzio.o
-@@ -36,7 +37,7 @@
+@@ -36,7 +37,7 @@ LUAC_T=	luac
  LUAC_O=	luac.o print.o
  
  ALL_O= $(CORE_O) $(LIB_O) $(LUA_O) $(LUAC_O)
@@ -30,7 +47,7 @@ diff -ur lua-5.1.orig/src/Makefile lua-5.1/src/Makefile
  ALL_A= $(LUA_A)
  
  default: $(PLAT)
-@@ -51,6 +52,10 @@
+@@ -51,6 +52,10 @@ $(LUA_A): $(CORE_O) $(LIB_O)
  	$(AR) $@ $?
  	$(RANLIB) $@
  
@@ -41,10 +58,19 @@ diff -ur lua-5.1.orig/src/Makefile lua-5.1/src/Makefile
  $(LUA_T): $(LUA_O) $(LUA_A)
  	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
  
-diff -ur lua-5.1.orig/src/luaconf.h lua-5.1/src/luaconf.h
---- lua-5.1.orig/src/luaconf.h	2006-03-21 11:51:53.000000000 +0100
-+++ lua-5.1/src/luaconf.h	2006-03-21 11:52:05.000000000 +0100
-@@ -82,7 +82,7 @@
+@@ -110,7 +115,7 @@ mingw:
+ 	$(MAKE) "LUAC_T=luac.exe" luac.exe
+ 
+ posix:
+-	$(MAKE) all MYCFLAGS=-DLUA_USE_POSIX
++	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-ldl"
+ 
+ solaris:
+ 	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-ldl"
+diff -rupN a//src/luaconf.h b//src/luaconf.h
+--- a//src/luaconf.h	2008-02-11 16:25:08.000000000 +0000
++++ b//src/luaconf.h	2011-02-06 15:45:14.000000000 +0000
+@@ -94,7 +94,7 @@
  	".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
  
  #else

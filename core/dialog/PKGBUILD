@@ -1,25 +1,27 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Contributor: Allan McRae <allan@archlinux.org>
+# Contributor: Andreas Radke <andyrtr@archlinux.org>
 
 pkgname=dialog
-  pkgver=1.1_20100428
-_pkgver=1.1-20100428
-pkgrel=1
+pkgver=1.1_20110302
+pkgrel=2
 pkgdesc="A tool to display dialog boxes from shell scripts"
 arch=('i686')
 url="http://invisible-island.net/dialog/"
 license=('GPL')
 depends=('ncurses')
-source=(ftp://invisible-island.net/${pkgname}/${pkgname}-$_pkgver.tgz)
+source=(ftp://invisible-island.net/${pkgname}/${pkgname}-${pkgver/_/-}.tgz)
+md5sums=('2eaa82055b86006e205d2c3f74d9b800')
 
 build() {
-  cd ${srcdir}/$pkgname-$_pkgver
+  cd ${srcdir}/${pkgname}-${pkgver/_/-}
   ./configure --prefix= --mandir=/share/man \
               --with-ncursesw --enable-nls
   make 
 }
 
 package() {
-  cd ${srcdir}/$pkgname-$_pkgver
+  cd ${srcdir}/${pkgname}-${pkgver/_/-}
   make DESTDIR=${pkgdir} install
 }
-md5sums=('519c0a0cbac28ddb992111ec2c3f82aa')

@@ -1,0 +1,31 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Kyle Keen <keenerd@gmail.com>
+
+pkgname=rogue
+pkgver=5.4.4
+pkgrel=1
+pkgdesc="Exploring the Dungeons of Doom"
+arch=(i686)
+url="http://rogue.rogueforge.net/rogue-5-4/"
+license=('rogue')
+depends=(ncurses)
+makedepends=()
+#source=(http://rogue.rogueforge.net/files/rogue5.4/${pkgname}${pkgver}-src.tar.gz)
+source=(http://www.sourcefiles.org/Games/Role_Play/$pkgname$pkgver-src.tar.gz
+	01-PATH_MAX.patch)
+
+build() {
+ cd "$srcdir/${pkgname}${pkgver}"
+ ./configure --prefix= --with-ncurses
+ 
+ patch mdport.c -i $srcdir/01-PATH_MAX.patch
+
+ make "LDFLAGS= -lncursesw"
+}
+
+package() {
+ cd "$srcdir/${pkgname}${pkgver}"
+ make DESTDIR="$pkgdir/" install
+}
+md5sums=('033288f46444b06814c81ea69d96e075'
+         'f9c1ffb405cb117af9b97a40cd58a033')

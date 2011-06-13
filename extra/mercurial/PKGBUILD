@@ -1,24 +1,26 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 # $Id: PKGBUILD 86661 2010-08-02 22:11:04Z giovanni $
-# Contirbutor: Giovanni Scafora <giovanni@archlinux.org>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Contributor: Giovanni Scafora <giovanni@archlinux.org>
 # Contributor: Douglas Soares de Andrade <douglas@archlinux.org>
 
 pkgname=mercurial
-pkgver=1.6.3
+pkgver=1.8.3
 pkgrel=1
 pkgdesc="A scialable distributed SCM tool"
 arch=('i686')
 url="http://www.selenic.com/mercurial"
 license=('GPL')
-depends=('python')
+depends=('python2')
 optdepends=('tk: for the hgk GUI')
 source=(http://www.selenic.com/mercurial/release/${pkgname}-${pkgver}.tar.gz
         mercurial.profile)
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  python setup.py install --prefix="${pkgdir}/" --optimize=1 
 
+  # run by hand, because python within PKGBUILDS is messed up
+  python2 setup.py install --prefix="${pkgdir}/" --optimize=1  || true
   install -d ${pkgdir}/share/man/{man1,man5}
   install -m644 doc/hg.1 "${pkgdir}/share/man/man1" 
   install -m644 doc/{hgrc.5,hgignore.5} "${pkgdir}/share/man/man5" 
@@ -35,5 +37,5 @@ build() {
   install -m755 -d ${pkgdir}/etc/profile.d
   install -m755 ${srcdir}/mercurial.profile "${pkgdir}/etc/profile.d/mercurial.sh" 
 }
-md5sums=('fcd61edc488d1b9aa831dde6f14d9a13'
+md5sums=('7afea936dfdb21220064cac6402f8743'
          'ab16f254b7d23a9f63f8a4b19f3da955')

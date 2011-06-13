@@ -1,0 +1,31 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Allan McRae <allan@archlinux.org>
+# Contributor: judd <jvinet@zeroflux.org>
+
+pkgname=less
+pkgver=443
+pkgrel=1
+pkgdesc="A terminal based program for viewing text files"
+license=('GPL3')
+arch=('i686')
+url="http://www.greenwoodsoftware.com/less"
+groups=('base')
+depends=('ncurses' 'pcre')
+source=(http://www.greenwoodsoftware.com/$pkgname/$pkgname-$pkgver.tar.gz)
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  ./configure --prefix= --with-regex=pcre
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  install -dm755 ${pkgdir}/bin
+  make prefix=${pkgdir} install
+
+}
+
+md5sums=('47db098fb3cdaf847b3c4be05ee954fc')

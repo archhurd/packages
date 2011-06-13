@@ -1,0 +1,2219 @@
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/console/pager.c hurd/console/pager.c
+--- ../cvs/hurd/console/pager.c	2002-09-22 04:28:35.000000000 +0300
++++ hurd/console/pager.c	2004-11-11 18:16:15.000000000 +0200
+@@ -94,6 +94,14 @@ pager_unlock_page (struct user_pager_inf
+ }
+ 
+ 
++void
++pager_notify_evict (struct user_pager_info *pager,
++		    vm_offset_t page)
++{
++  assert (!"unrequested notification on eviction");
++}
++
++
+ /* Tell how big the file is. */
+ error_t
+ pager_report_extent (struct user_pager_info *upi,
+@@ -159,7 +167,7 @@ user_pager_create (struct user_pager *us
+ 
+   /* XXX Are the values 1 and MEMORY_OBJECT_COPY_DELAY correct? */
+   user_pager->pager = pager_create (upi, pager_bucket,
+-				    1, MEMORY_OBJECT_COPY_DELAY);
++				    1, MEMORY_OBJECT_COPY_DELAY, 0);
+   if (!user_pager->pager)
+     {
+       free (upi);
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/balloc.c hurd/ext2fs/balloc.c
+--- ../cvs/hurd/ext2fs/balloc.c	2000-03-10 06:54:55.000000000 +0200
++++ hurd/ext2fs/balloc.c	2004-11-11 18:29:43.000000000 +0200
+@@ -92,7 +92,7 @@ ext2_free_blocks (block_t block, unsigne
+ 		      block, count);
+ 	}
+       gdp = group_desc (block_group);
+-      bh = bptr (gdp->bg_block_bitmap);
++      bh = disk_cache_block_ref (gdp->bg_block_bitmap);
+ 
+       if (in_range (gdp->bg_block_bitmap, block, gcount) ||
+ 	  in_range (gdp->bg_inode_bitmap, block, gcount) ||
+@@ -114,6 +114,7 @@ ext2_free_blocks (block_t block, unsigne
+ 	}
+ 
+       record_global_poke (bh);
++      disk_cache_block_ref_ptr (gdp);
+       record_global_poke (gdp);
+ 
+       block += gcount;
+@@ -139,7 +140,7 @@ ext2_new_block (block_t goal,
+ 		block_t prealloc_goal,
+ 		block_t *prealloc_count, block_t *prealloc_block)
+ {
+-  char *bh;
++  char *bh = 0;
+   char *p, *r;
+   int i, j, k, tmp;
+   unsigned long lmap;
+@@ -164,9 +165,10 @@ ext2_new_block (block_t goal,
+ 
+   ext2_debug ("goal=%u", goal);
+ 
+-repeat:
++ repeat:
++  assert (! bh);
+   /*
+-     * First, test whether the goal block is free.
++   * First, test whether the goal block is free.
+    */
+   if (goal < sblock->s_first_data_block || goal >= sblock->s_blocks_count)
+     goal = sblock->s_first_data_block;
+@@ -179,7 +181,7 @@ repeat:
+       if (j)
+ 	goal_attempts++;
+ #endif
+-      bh = bptr (gdp->bg_block_bitmap);
++      bh = disk_cache_block_ref (gdp->bg_block_bitmap);
+ 
+       ext2_debug ("goal is at %d:%d", i, j);
+ 
+@@ -194,8 +196,8 @@ repeat:
+       if (j)
+ 	{
+ 	  /*
+-	     * The goal was occupied; search forward for a free
+-	     * block within the next 32 blocks
++	   * The goal was occupied; search forward for a free
++	   * block within the next 32 blocks
+ 	   */
+ 	  lmap = ((((unsigned long *) bh)[j >> 5]) >>
+ 		  ((j & 31) + 1));
+@@ -242,13 +244,16 @@ repeat:
+ 	  j = k;
+ 	  goto got_block;
+ 	}
++
++      disk_cache_block_deref (bh);
++      bh = 0;
+     }
+ 
+   ext2_debug ("bit not found in block group %d", i);
+ 
+   /*
+-     * Now search the rest of the groups.  We assume that
+-     * i and gdp correctly point to the last group visited.
++   * Now search the rest of the groups.  We assume that
++   * i and gdp correctly point to the last group visited.
+    */
+   for (k = 0; k < groups_count; k++)
+     {
+@@ -264,7 +269,8 @@ repeat:
+       spin_unlock (&global_lock);
+       return 0;
+     }
+-  bh = bptr (gdp->bg_block_bitmap);
++  assert (! bh);
++  bh = disk_cache_block_ref (gdp->bg_block_bitmap);
+   r = memscan (bh, 0, sblock->s_blocks_per_group >> 3);
+   j = (r - bh) << 3;
+   if (j < sblock->s_blocks_per_group)
+@@ -274,21 +280,25 @@ repeat:
+ 			     sblock->s_blocks_per_group);
+   if (j >= sblock->s_blocks_per_group)
+     {
++      disk_cache_block_deref (bh);
++      bh = 0;
+       ext2_error ("free blocks count corrupted for block group %d", i);
+       spin_unlock (&global_lock);
+       return 0;
+     }
+ 
+-search_back:
++ search_back:
++  assert (bh);
+   /*
+-     * We have succeeded in finding a free byte in the block
+-     * bitmap.  Now search backwards up to 7 bits to find the
+-     * start of this group of free blocks.
++   * We have succeeded in finding a free byte in the block
++   * bitmap.  Now search backwards up to 7 bits to find the
++   * start of this group of free blocks.
+    */
+   for (k = 0; k < 7 && j > 0 && !test_bit (j - 1, bh); k++, j--);
+ 
+-got_block:
+-
++ got_block:
++  assert (bh);
++  
+   ext2_debug ("using block group %d (%d)", i, gdp->bg_free_blocks_count);
+ 
+   tmp = j + i * sblock->s_blocks_per_group + sblock->s_first_data_block;
+@@ -301,6 +311,8 @@ got_block:
+   if (set_bit (j, bh))
+     {
+       ext2_warning ("bit already set for block %d", j);
++      disk_cache_block_deref (bh);
++      bh = 0;
+       goto repeat;
+     }
+ 
+@@ -317,7 +329,7 @@ got_block:
+   ext2_debug ("found bit %d", j);
+ 
+   /*
+-     * Do block preallocation now if required.
++   * Do block preallocation now if required.
+    */
+ #ifdef EXT2_PREALLOCATE
+   if (prealloc_goal)
+@@ -348,6 +360,7 @@ got_block:
+   j = tmp;
+ 
+   record_global_poke (bh);
++  bh = 0;
+ 
+   if (j >= sblock->s_blocks_count)
+     {
+@@ -360,12 +373,14 @@ got_block:
+ 	      j, goal_hits, goal_attempts);
+ 
+   gdp->bg_free_blocks_count--;
++  disk_cache_block_ref_ptr (gdp);
+   record_global_poke (gdp);
+ 
+   sblock->s_free_blocks_count--;
+   sblock_dirty = 1;
+ 
+  sync_out:
++  assert (! bh);
+   spin_unlock (&global_lock);
+   alloc_sync (0);
+ 
+@@ -387,9 +402,12 @@ ext2_count_free_blocks ()
+   gdp = NULL;
+   for (i = 0; i < groups_count; i++)
+     {
++      void *bh;
+       gdp = group_desc (i);
+       desc_count += gdp->bg_free_blocks_count;
+-      x = count_free (bptr (gdp->bg_block_bitmap), block_size);
++      bh = disk_cache_block_ref (gdp->bg_block_bitmap);
++      x = count_free (bh, block_size);
++      disk_cache_block_deref (bh);
+       printf ("group %d: stored = %d, counted = %lu",
+ 	      i, gdp->bg_free_blocks_count, x);
+       bitmap_count += x;
+@@ -450,7 +468,7 @@ ext2_check_blocks_bitmap ()
+ 
+       gdp = group_desc (i);
+       desc_count += gdp->bg_free_blocks_count;
+-      bh = bptr (gdp->bg_block_bitmap);
++      bh = disk_cache_block_ref (gdp->bg_block_bitmap);
+ 
+       if (!EXT2_HAS_RO_COMPAT_FEATURE (sblock,
+ 				       EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER)
+@@ -476,6 +494,7 @@ ext2_check_blocks_bitmap ()
+ 	  ext2_error ("block #%d of the inode table in group %d is marked free", j, i);
+ 
+       x = count_free (bh, block_size);
++      disk_cache_block_deref (bh);
+       if (gdp->bg_free_blocks_count != x)
+ 	ext2_error ("wrong free blocks count for group %d,"
+ 		    " stored = %d, counted = %lu",
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/ext2_fs.h hurd/ext2fs/ext2_fs.h
+--- ../cvs/hurd/ext2fs/ext2_fs.h	2000-02-05 13:59:54.000000000 +0200
++++ hurd/ext2fs/ext2_fs.h	2004-11-11 18:16:38.000000000 +0200
+@@ -25,7 +25,8 @@
+ /*
+  * Define EXT2FS_DEBUG to produce debug messages
+  */
+-#undef EXT2FS_DEBUG
++/* #undef EXT2FS_DEBUG */
++#define EXT2FS_DEBUG
+ 
+ /*
+  * Define EXT2_PREALLOCATE to preallocate data blocks for expanding files
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/ext2fs.c hurd/ext2fs/ext2fs.c
+--- ../cvs/hurd/ext2fs/ext2fs.c	2002-06-03 00:40:56.000000000 +0300
++++ hurd/ext2fs/ext2fs.c	2004-11-11 18:16:15.000000000 +0200
+@@ -106,7 +106,7 @@ parse_opt (int key, char *arg, struct ar
+       if (values == 0)
+ 	return ENOMEM;
+       state->hook = values;
+-      bzero (values, sizeof *values);
++      memset (values, 0, sizeof *values);
+       values->sb_block = SBLOCK_BLOCK;
+       break;
+ 
+@@ -181,9 +181,9 @@ main (int argc, char **argv)
+   /* Map the entire disk. */
+   create_disk_pager ();
+ 
+-  pokel_init (&global_pokel, diskfs_disk_pager, disk_image);
++  pokel_init (&global_pokel, diskfs_disk_pager, disk_cache);
+ 
+-  get_hypermetadata();
++  map_hypermetadata ();
+ 
+   inode_init ();
+ 
+@@ -211,6 +211,8 @@ diskfs_reload_global_state ()
+ {
+   pokel_flush (&global_pokel);
+   pager_flush (diskfs_disk_pager, 1);
++  sblock = 0;
+   get_hypermetadata ();
++  map_hypermetadata ();
+   return 0;
+ }
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/ext2fs.h hurd/ext2fs/ext2fs.h
+--- ../cvs/hurd/ext2fs/ext2fs.h	2004-01-11 00:08:58.000000000 +0200
++++ hurd/ext2fs/ext2fs.h	2004-11-11 18:16:15.000000000 +0200
+@@ -23,7 +23,9 @@
+ #include <hurd/pager.h>
+ #include <hurd/fshelp.h>
+ #include <hurd/iohelp.h>
++#include <hurd/store.h>
+ #include <hurd/diskfs.h>
++#include <hurd/ihash.h>
+ #include <assert.h>
+ #include <rwlock.h>
+ #include <sys/mman.h>
+@@ -186,6 +188,8 @@ struct user_pager_info
+ /* ---------------------------------------------------------------- */
+ /* pager.c */
+ 
++#define DISK_CACHE_BLOCKS	65536
++
+ #include <hurd/diskfs-pager.h>
+ 
+ /* Set up the disk pager.  */
+@@ -209,10 +213,54 @@ extern struct store *store;
+ /* What the user specified.  */
+ extern struct store_parsed *store_parsed;
+ 
+-/* Mapped image of the disk.  */
+-extern void *disk_image;
++/* Mapped image of cached blocks of the disk.  */
++extern void *disk_cache;
++extern store_offset_t disk_cache_size;
++extern int disk_cache_blocks;
++
++#define DC_INCORE	0x01	/* Not in core.  */
++#define DC_UNTOUCHED	0x02	/* Not touched by disk_pager_read_paged
++				   or disk_cache_block_ref.  */
++#define DC_FIXED	0x04	/* Must not be re-associated.  */
++
++/* Flags that forbid re-association of page.  DC_UNTOUCHED is included
++   because this flag is used only when page is already to be
++   re-associated, so it's not good candidate for another
++   remapping.  */
++#define DC_DONT_REUSE	(DC_INCORE | DC_UNTOUCHED | DC_FIXED)
++
++#define DC_NO_BLOCK	((block_t) -1L)
++
++#ifndef NDEBUG
++#define DISK_CACHE_LAST_READ_XOR	0xDEADBEEF
++#endif
+ 
+-/* Our in-core copy of the super-block (pointer into the disk_image).  */
++/* Disk cache blocks' meta info.  */
++struct disk_cache_info
++{
++  block_t block;
++  uint16_t flags;
++  uint16_t ref_count;
++#ifndef NDEBUG
++  block_t last_read, last_read_xor;
++#endif
++};
++
++/* block num --> pointer to in-memory block */
++extern hurd_ihash_t disk_cache_bptr;
++/* Metadata about cached block. */
++extern struct disk_cache_info *disk_cache_info;
++/* Lock for these mappings */
++extern struct mutex disk_cache_lock;
++/* Fired when a re-association is done.  */
++extern struct condition disk_cache_reassociation;
++
++void *disk_cache_block_ref (block_t block);
++void disk_cache_block_ref_ptr (void *ptr);
++void disk_cache_block_deref (void *ptr);
++int disk_cache_block_is_ref (block_t block);
++
++/* Our in-core copy of the super-block (pointer into the disk_cache).  */
+ struct ext2_super_block *sblock;
+ /* True if sblock has been modified.  */
+ int sblock_dirty;
+@@ -242,6 +290,9 @@ vm_address_t zeroblock;
+ 
+ /* Get the superblock from the disk, & setup various global info from it.  */
+ void get_hypermetadata ();
++
++/* Map `sblock' and `group_desc_image' pointers to disk cache.  */
++void map_hypermetadata ();
+ 
+ /* ---------------------------------------------------------------- */
+ /* Random stuff calculated from the super block.  */
+@@ -265,21 +316,51 @@ spin_lock_t generation_lock;
+ unsigned long next_generation;
+ 
+ /* ---------------------------------------------------------------- */
+-/* Functions for looking inside disk_image */
++/* Functions for looking inside disk_cache */
+ 
+-#define trunc_block(offs) (((offs) >> log2_block_size) << log2_block_size)
++#define trunc_block(offs) \
++  ((off_t) ((offs) >> log2_block_size) << log2_block_size)
+ #define round_block(offs) \
+-  ((((offs) + block_size - 1) >> log2_block_size) << log2_block_size)
++  ((off_t) (((offs) + block_size - 1) >> log2_block_size) << log2_block_size)
+ 
+ /* block num --> byte offset on disk */
+-#define boffs(block) ((block) << log2_block_size)
++#define boffs(block) ((off_t) (block) << log2_block_size)
+ /* byte offset on disk --> block num */
+ #define boffs_block(offs) ((offs) >> log2_block_size)
+ 
++/* pointer to in-memory block -> index in disk_cache_info */
++#define bptr_index(ptr) (((char *)ptr - (char *)disk_cache) >> log2_block_size)
++
+ /* byte offset on disk --> pointer to in-memory block */
+-#define boffs_ptr(offs) (((char *)disk_image) + (offs))
++EXT2FS_EI char *
++boffs_ptr (off_t offset)
++{
++  block_t block = boffs_block (offset);
++  mutex_lock (&disk_cache_lock);
++  char *ptr = hurd_ihash_find (disk_cache_bptr, block);
++  mutex_unlock (&disk_cache_lock);
++  assert (ptr);
++  ptr += offset % block_size;
++  ext2_debug ("(%Ld) = %p", offset, ptr);
++  return ptr;
++}
++
+ /* pointer to in-memory block --> byte offset on disk */
+-#define bptr_offs(ptr) ((char *)(ptr) - ((char *)disk_image))
++EXT2FS_EI off_t
++bptr_offs (void *ptr)
++{
++  vm_offset_t mem_offset = (char *)ptr - (char *)disk_cache;
++  off_t offset;
++  assert (mem_offset < disk_cache_size);
++  mutex_lock (&disk_cache_lock);
++  offset = (off_t) disk_cache_info[boffs_block (mem_offset)].block
++    << log2_block_size;
++  assert (offset || mem_offset < block_size);
++  offset += mem_offset % block_size;
++  mutex_unlock (&disk_cache_lock);
++  ext2_debug ("(%p) = %Ld", ptr, offset);
++  return offset;
++}
+ 
+ /* block num --> pointer to in-memory block */
+ #define bptr(block) boffs_ptr(boffs(block))
+@@ -296,14 +377,24 @@ struct ext2_group_desc *group_desc_image
+ 
+ /* Convert an inode number to the dinode on disk. */
+ EXT2FS_EI struct ext2_inode *
+-dino (ino_t inum)
++dino_ref (ino_t inum)
+ {
+   unsigned long inodes_per_group = sblock->s_inodes_per_group;
+   unsigned long bg_num = (inum - 1) / inodes_per_group;
+   unsigned long group_inum = (inum - 1) % inodes_per_group;
+-  struct ext2_group_desc *bg = group_desc(bg_num);
++  struct ext2_group_desc *bg = group_desc (bg_num);
+   block_t block = bg->bg_inode_table + (group_inum / inodes_per_block);
+-  return ((struct ext2_inode *)bptr(block)) + group_inum % inodes_per_block;
++  struct ext2_inode *inode = disk_cache_block_ref (block);
++  inode += group_inum % inodes_per_block;
++  ext2_debug ("(%qd) = %p", inum, inode);
++  return inode;
++}
++
++EXT2FS_EI void
++dino_deref (struct ext2_inode *inode)
++{
++  ext2_debug ("(%p)", inode);
++  disk_cache_block_deref (inode);
+ }
+ 
+ /* ---------------------------------------------------------------- */
+@@ -356,27 +447,38 @@ global_block_modified (block_t block)
+ EXT2FS_EI void
+ record_global_poke (void *ptr)
+ {
+-  int boffs = trunc_block (bptr_offs (ptr));
+-  global_block_modified (boffs_block (boffs));
+-  pokel_add (&global_pokel, boffs_ptr(boffs), block_size);
++  block_t block = boffs_block (bptr_offs (ptr));
++  void *block_ptr = bptr (block);
++  ext2_debug ("(%p = %p)", ptr, block_ptr);
++  assert (disk_cache_block_is_ref (block));
++  global_block_modified (block);
++  pokel_add (&global_pokel, block_ptr, block_size);
+ }
+ 
+ /* This syncs a modification to a non-file block.  */
+ EXT2FS_EI void
+ sync_global_ptr (void *bptr, int wait)
+ {
+-  vm_offset_t boffs = trunc_block (bptr_offs (bptr));
+-  global_block_modified (boffs_block (boffs));
+-  pager_sync_some (diskfs_disk_pager, trunc_page (boffs), vm_page_size, wait);
++  block_t block = boffs_block (bptr_offs (bptr));
++  void *block_ptr = bptr (block);
++  ext2_debug ("(%p -> %u)", bptr, (block_t)block);
++  global_block_modified (block);
++  disk_cache_block_deref (block_ptr);
++  pager_sync_some (diskfs_disk_pager,
++		   block_ptr - disk_cache, block_size, wait);
++  
+ }
+ 
+ /* This records a modification to one of a file's indirect blocks.  */
+ EXT2FS_EI void
+ record_indir_poke (struct node *node, void *ptr)
+ {
+-  int boffs = trunc_block (bptr_offs (ptr));
+-  global_block_modified (boffs_block (boffs));
+-  pokel_add (&node->dn->indir_pokel, boffs_ptr(boffs), block_size);
++  block_t block = boffs_block (bptr_offs (ptr));
++  void *block_ptr = bptr (block);
++  ext2_debug ("(%d, %p)", (int)node->cache_id, ptr);
++  assert (disk_cache_block_is_ref (block));
++  global_block_modified (block);
++  pokel_add (&node->dn->indir_pokel, block_ptr, block_size);
+ }
+ 
+ /* ---------------------------------------------------------------- */
+@@ -384,6 +486,7 @@ record_indir_poke (struct node *node, vo
+ EXT2FS_EI void
+ sync_global (int wait)
+ {
++  ext2_debug ("%d", wait);
+   pokel_sync (&global_pokel, wait);
+ }
+ 
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/getblk.c hurd/ext2fs/getblk.c
+--- ../cvs/hurd/ext2fs/getblk.c	2004-01-11 00:08:58.000000000 +0200
++++ hurd/ext2fs/getblk.c	2004-11-11 18:16:15.000000000 +0200
+@@ -52,7 +52,7 @@ ext2_discard_prealloc (struct node *node
+   if (node->dn->info.i_prealloc_count)
+     {
+       int i = node->dn->info.i_prealloc_count;
+-      ext2_debug ("discarding %d prealloced blocks for inode %d",
++      ext2_debug ("discarding %d prealloced blocks for inode %Ld",
+ 		  i, node->cache_id);
+       node->dn->info.i_prealloc_count = 0;
+       ext2_free_blocks (node->dn->info.i_prealloc_block, i);
+@@ -104,8 +104,8 @@ ext2_alloc_block (struct node *node, blo
+ 
+   if (result && zero)
+     {
+-      char *bh = bptr (result);
+-      bzero (bh, block_size);
++      char *bh = disk_cache_block_ref (result);
++      memset (bh, 0, block_size);
+       record_indir_poke (node, bh);
+     }
+ 
+@@ -122,6 +122,8 @@ inode_getblk (struct node *node, int nr,
+   block_t hint;
+ #endif
+ 
++  assert (0 <= nr && nr < EXT2_N_BLOCKS);
++
+   *result = node->dn->info.i_data[nr];
+   if (*result)
+     return 0;
+@@ -180,14 +182,20 @@ block_getblk (struct node *node, block_t
+ {
+   int i;
+   block_t goal = 0;
+-  block_t *bh = (block_t *)bptr (block);
++  block_t *bh = (block_t *)disk_cache_block_ref (block);
+ 
+   *result = bh[nr];
+   if (*result)
+-    return 0;
++    {
++      disk_cache_block_deref (bh);
++      return 0;
++    }
+ 
+   if (!create)
+-    return EINVAL;
++    {
++      disk_cache_block_deref (bh);
++      return EINVAL;
++    }
+ 
+   if (node->dn->info.i_next_alloc_block == new_block)
+     goal = node->dn->info.i_next_alloc_goal;
+@@ -207,7 +215,10 @@ block_getblk (struct node *node, block_t
+ 
+   *result = ext2_alloc_block (node, goal, zero);
+   if (!*result)
+-    return ENOSPC;
++    {
++      disk_cache_block_deref (bh);
++      return ENOSPC;
++    }
+ 
+   bh[nr] = *result;
+ 
+@@ -243,9 +254,9 @@ ext2_getblk (struct node *node, block_t 
+       return EIO;
+     }
+   /*
+-     * If this is a sequential block allocation, set the next_alloc_block
+-     * to this block now so that all the indblock and data block
+-     * allocations use the same goal zone
++   * If this is a sequential block allocation, set the next_alloc_block
++   * to this block now so that all the indblock and data block
++   * allocations use the same goal zone
+    */
+ 
+   ext2_debug ("block = %u, next = %u, goal = %u", block,
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/hyper.c hurd/ext2fs/hyper.c
+--- ../cvs/hurd/ext2fs/hyper.c	2002-06-03 00:40:59.000000000 +0300
++++ hurd/ext2fs/hyper.c	2004-11-11 18:16:16.000000000 +0200
+@@ -58,12 +58,15 @@ static int ext2fs_clean;	/* fs clean bef
+ void
+ get_hypermetadata (void)
+ {
+-  error_t err = diskfs_catch_exception ();
+-  if (err)
+-    ext2_panic ("can't read superblock: %s", strerror (err));
+-
+-  sblock = (struct ext2_super_block *) boffs_ptr (SBLOCK_OFFS);
++  error_t err;
++  size_t read=0;
+ 
++  assert (! sblock);
++  err = store_read (store, SBLOCK_OFFS >> store->log2_block_size,
++		    SBLOCK_SIZE, (void **)&sblock, &read);
++  if (err || read != SBLOCK_SIZE)
++    ext2_panic ("Cannot read hypermetadata");
++  
+   if (sblock->s_magic != EXT2_SUPER_MAGIC
+ #ifdef EXT2FS_PRE_02B_COMPAT
+       && sblock->s_magic != EXT2_PRE_02B_MAGIC
+@@ -152,15 +155,22 @@ get_hypermetadata (void)
+ 
+   allocate_mod_map ();
+ 
+-  diskfs_end_catch_exception ();
++  /* A handy source of page-aligned zeros.  */
++  if (zeroblock == 0)
++    zeroblock = (vm_address_t) mmap (0, block_size, PROT_READ, MAP_ANON, 0, 0);
++
++  munmap (sblock, SBLOCK_SIZE);
++  sblock = NULL;
++}
++
++void
++map_hypermetadata (void)
++{
++  sblock = (struct ext2_super_block *) boffs_ptr (SBLOCK_OFFS);
+ 
+   /* Cache a convenient pointer to the block group descriptors for allocation.
+      These are stored in the filesystem blocks following the superblock.  */
+   group_desc_image = (struct ext2_group_desc *) bptr (bptr_block (sblock) + 1);
+-
+-  /* A handy source of page-aligned zeros.  */
+-  if (zeroblock == 0)
+-    zeroblock = (vm_address_t) mmap (0, block_size, PROT_READ, MAP_ANON, 0, 0);
+ }
+ 
+ error_t
+@@ -183,6 +193,7 @@ diskfs_set_hypermetadata (int wait, int 
+  if (sblock_dirty)
+    {
+      sblock_dirty = 0;
++     disk_cache_block_ref_ptr (sblock);
+      record_global_poke (sblock);
+    }
+ 
+@@ -199,7 +210,8 @@ diskfs_readonly_changed (int readonly)
+ 
+   (*(readonly ? store_set_flags : store_clear_flags)) (store, STORE_READONLY);
+ 
+-  mprotect (disk_image, store->size, PROT_READ | (readonly ? 0 : PROT_WRITE));
++  mprotect (disk_cache, disk_cache_size,
++	    PROT_READ | (readonly ? 0 : PROT_WRITE));
+ 
+   if (!readonly && !(sblock->s_state & EXT2_VALID_FS))
+     ext2_warning ("UNCLEANED FILESYSTEM NOW WRITABLE");
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/ialloc.c hurd/ext2fs/ialloc.c
+--- ../cvs/hurd/ext2fs/ialloc.c	2002-10-09 02:10:09.000000000 +0300
++++ hurd/ext2fs/ialloc.c	2004-11-11 18:16:16.000000000 +0200
+@@ -60,7 +60,7 @@ diskfs_free_node (struct node *np, mode_
+ 
+   assert (!diskfs_readonly);
+ 
+-  ext2_debug ("freeing inode %u", inum);
++  ext2_debug ("freeing inode %Lu", inum);
+ 
+   spin_lock (&global_lock);
+ 
+@@ -75,22 +75,25 @@ diskfs_free_node (struct node *np, mode_
+   bit = (inum - 1) % sblock->s_inodes_per_group;
+ 
+   gdp = group_desc (block_group);
+-  bh = bptr (gdp->bg_inode_bitmap);
++  bh = disk_cache_block_ref (gdp->bg_inode_bitmap);
+ 
+   if (!clear_bit (bit, bh))
+     ext2_warning ("bit already cleared for inode %Ld", inum);
+   else
+     {
++      disk_cache_block_ref_ptr (bh);
+       record_global_poke (bh);
+ 
+       gdp->bg_free_inodes_count++;
+       if (S_ISDIR (old_mode))
+ 	gdp->bg_used_dirs_count--;
++      disk_cache_block_ref_ptr (gdp);
+       record_global_poke (gdp);
+ 
+       sblock->s_free_inodes_count++;
+     }
+ 
++  disk_cache_block_deref (bh);
+   sblock_dirty = 1;
+   spin_unlock (&global_lock);
+   alloc_sync(0);
+@@ -111,14 +114,15 @@ diskfs_free_node (struct node *np, mode_
+ ino_t
+ ext2_alloc_inode (ino_t dir_inum, mode_t mode)
+ {
+-  char *bh;
++  char *bh = 0;
+   int i, j, inum, avefreei;
+   struct ext2_group_desc *gdp;
+   struct ext2_group_desc *tmp;
+ 
+   spin_lock (&global_lock);
+ 
+-repeat:
++ repeat:
++  assert (! bh);
+   gdp = NULL;
+   i = 0;
+ 
+@@ -213,7 +217,7 @@ repeat:
+       return 0;
+     }
+ 
+-  bh = bptr (gdp->bg_inode_bitmap);
++  bh = disk_cache_block_ref (gdp->bg_inode_bitmap);
+   if ((inum =
+        find_first_zero_bit ((unsigned long *) bh, sblock->s_inodes_per_group))
+       < sblock->s_inodes_per_group)
+@@ -221,12 +225,17 @@ repeat:
+       if (set_bit (inum, bh))
+ 	{
+ 	  ext2_warning ("bit already set for inode %d", inum);
++	  disk_cache_block_deref (bh);
++	  bh = 0;
+ 	  goto repeat;
+ 	}
+       record_global_poke (bh);
++      bh = 0;
+     }
+   else
+     {
++      disk_cache_block_deref (bh);
++      bh = 0;
+       if (gdp->bg_free_inodes_count != 0)
+ 	{
+ 	  ext2_error ("free inodes count corrupted in group %d", i);
+@@ -248,15 +257,25 @@ repeat:
+   gdp->bg_free_inodes_count--;
+   if (S_ISDIR (mode))
+     gdp->bg_used_dirs_count++;
++  disk_cache_block_ref_ptr (gdp);
+   record_global_poke (gdp);
+ 
+   sblock->s_free_inodes_count--;
+   sblock_dirty = 1;
+ 
+  sync_out:
++  assert (! bh);
+   spin_unlock (&global_lock);
+   alloc_sync (0);
+ 
++  /* Make sure the coming read_node won't complain about bad
++     fields.  */
++  {
++    struct ext2_inode *di = dino_ref (inum);
++    memset (di, 0, sizeof *di);
++    dino_deref (di);
++  }
++
+   return inum;
+ }
+ 
+@@ -354,10 +373,12 @@ ext2_count_free_inodes ()
+   gdp = NULL;
+   for (i = 0; i < groups_count; i++)
+     {
++      void *bh;
+       gdp = group_desc (i);
+       desc_count += gdp->bg_free_inodes_count;
+-      x = count_free (bptr (gdp->bg_inode_bitmap),
+-		      sblock->s_inodes_per_group / 8);
++      bh = disk_cache_block_ref (gdp->bg_inode_bitmap);
++      x = count_free (bh, sblock->s_inodes_per_group / 8);
++      disk_cache_block_deref (bh);
+       ext2_debug ("group %d: stored = %d, counted = %lu",
+ 		  i, gdp->bg_free_inodes_count, x);
+       bitmap_count += x;
+@@ -387,10 +408,12 @@ ext2_check_inodes_bitmap ()
+   gdp = NULL;
+   for (i = 0; i < groups_count; i++)
+     {
++      void *bh;
+       gdp = group_desc (i);
+       desc_count += gdp->bg_free_inodes_count;
+-      x = count_free (bptr (gdp->bg_inode_bitmap),
+-		      sblock->s_inodes_per_group / 8);
++      bh = disk_cache_block_ref (gdp->bg_inode_bitmap);
++      x = count_free (bh, sblock->s_inodes_per_group / 8);
++      disk_cache_block_deref (bh);
+       if (gdp->bg_free_inodes_count != x)
+ 	ext2_error ("wrong free inodes count in group %d, "
+ 		    "stored = %d, counted = %lu",
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/inode.c hurd/ext2fs/inode.c
+--- ../cvs/hurd/ext2fs/inode.c	2002-10-09 02:10:09.000000000 +0300
++++ hurd/ext2fs/inode.c	2004-11-11 18:16:16.000000000 +0200
+@@ -91,7 +91,7 @@ diskfs_cached_lookup (ino_t inum, struct
+   dn->dir_idx = 0;
+   dn->pager = 0;
+   rwlock_init (&dn->alloc_lock);
+-  pokel_init (&dn->indir_pokel, diskfs_disk_pager, disk_image);
++  pokel_init (&dn->indir_pokel, diskfs_disk_pager, disk_cache);
+ 
+   /* Create the new node.  */
+   np = diskfs_make_node (dn);
+@@ -200,13 +200,17 @@ read_node (struct node *np)
+   error_t err;
+   struct stat *st = &np->dn_stat;
+   struct disknode *dn = np->dn;
+-  struct ext2_inode *di = dino (np->cache_id);
++  struct ext2_inode *di;
+   struct ext2_inode_info *info = &dn->info;
+ 
++  ext2_debug ("(%d)", np->cache_id);
++
+   err = diskfs_catch_exception ();
+   if (err)
+     return err;
+ 
++  di = dino_ref (np->cache_id);
++
+   st->st_fstype = FSTYPE_EXT2FS;
+   st->st_fsid = getpid ();	/* This call is very cheap.  */
+   st->st_ino = np->cache_id;
+@@ -275,7 +279,9 @@ read_node (struct node *np)
+       info->i_high_size = di->i_size_high;
+       if (info->i_high_size)	/* XXX */
+ 	{
++	  dino_deref (di);
+ 	  ext2_warning ("cannot handle large file inode %Ld", np->cache_id);
++	  diskfs_end_catch_exception ();
+ 	  return EFBIG;
+ 	}
+     }
+@@ -297,20 +303,12 @@ read_node (struct node *np)
+     }
+   dn->info_i_translator = di->i_translator;
+ 
++  dino_deref (di);
+   diskfs_end_catch_exception ();
+ 
+   if (S_ISREG (st->st_mode) || S_ISDIR (st->st_mode)
+       || (S_ISLNK (st->st_mode) && st->st_blocks))
+-    {
+-      unsigned offset;
+-
+-      np->allocsize = np->dn_stat.st_size;
+-
+-      /* Round up to a block multiple.  */
+-      offset = np->allocsize & ((1 << log2_block_size) - 1);
+-      if (offset > 0)
+-	np->allocsize += block_size - offset;
+-    }
++    np->allocsize = round_block (np->dn_stat.st_size);
+   else
+     /* Allocsize should be zero for anything except directories, files, and
+        long symlinks.  These are the only things allowed to have any blocks
+@@ -398,7 +396,9 @@ write_node (struct node *np)
+ {
+   error_t err;
+   struct stat *st = &np->dn_stat;
+-  struct ext2_inode *di = dino (np->cache_id);
++  struct ext2_inode *di;
++
++  ext2_debug ("(%d)", np->cache_id);
+ 
+   if (np->dn->info.i_prealloc_count)
+     ext2_discard_prealloc (np);
+@@ -409,12 +409,14 @@ write_node (struct node *np)
+ 
+       assert (!diskfs_readonly);
+ 
+-      ext2_debug ("writing inode %d to disk", np->cache_id);
++      ext2_debug ("writing inode %Ld to disk", np->cache_id);
+ 
+       err = diskfs_catch_exception ();
+       if (err)
+ 	return NULL;
+ 
++      di = dino_ref (np->cache_id);
++
+       di->i_generation = st->st_gen;
+ 
+       /* We happen to know that the stat mode bits are the same
+@@ -490,6 +492,7 @@ write_node (struct node *np)
+       diskfs_end_catch_exception ();
+       np->dn_stat_dirty = 0;
+ 
++      /* Leave invoking dino_deref (di) to the caller.  */
+       return di;
+     }
+   else
+@@ -649,7 +652,7 @@ diskfs_set_translator (struct node *np, 
+   if (err)
+     return err;
+ 
+-  di = dino (np->cache_id);
++  di = dino_ref (np->cache_id);
+   blkno = di->i_translator;
+ 
+   if (namelen && !blkno)
+@@ -662,6 +665,7 @@ diskfs_set_translator (struct node *np, 
+ 			0, 0, 0);
+       if (blkno == 0)
+ 	{
++	  dino_deref (di);
+ 	  diskfs_end_catch_exception ();
+ 	  return ENOSPC;
+ 	}
+@@ -685,15 +689,20 @@ diskfs_set_translator (struct node *np, 
+       np->dn_stat.st_mode &= ~S_IPTRANS;
+       np->dn_set_ctime = 1;
+     }
++  else
++    dino_deref (di);
+ 
+   if (namelen)
+     {
++      void *blkptr;
++
+       buf[0] = namelen & 0xFF;
+       buf[1] = (namelen >> 8) & 0xFF;
+-      bcopy (name, buf + 2, namelen);
++      memcpy (buf + 2, name, namelen);
+ 
+-      bcopy (buf, bptr (blkno), block_size);
+-      record_global_poke (bptr (blkno));
++      blkptr = disk_cache_block_ref (blkno);
++      memcpy (blkptr, buf, block_size);
++      record_global_poke (blkptr);
+ 
+       np->dn_stat.st_mode |= S_IPTRANS;
+       np->dn_set_ctime = 1;
+@@ -711,7 +720,7 @@ diskfs_get_translator (struct node *np, 
+   error_t err = 0;
+   daddr_t blkno;
+   unsigned datalen;
+-  const void *transloc;
++  void *transloc;
+ 
+   assert (sblock->s_creator_os == EXT2_OS_HURD);
+ 
+@@ -719,9 +728,11 @@ diskfs_get_translator (struct node *np, 
+   if (err)
+     return err;
+ 
+-  blkno = (dino (np->cache_id))->i_translator;
++  struct ext2_inode *di = dino_ref (np->cache_id);
++  blkno = di->i_translator;
++  dino_deref (di);
+   assert (blkno);
+-  transloc = bptr (blkno);
++  transloc = disk_cache_block_ref (blkno);
+ 
+   datalen =
+     ((unsigned char *)transloc)[0] + (((unsigned char *)transloc)[1] << 8);
+@@ -736,6 +747,7 @@ diskfs_get_translator (struct node *np, 
+ 	memcpy (*namep, transloc + 2, datalen);
+     }
+ 
++  disk_cache_block_deref (transloc);
+   diskfs_end_catch_exception ();
+ 
+   *namelen = datalen;
+@@ -757,7 +769,7 @@ write_symlink (struct node *node, const 
+ 
+   assert (node->dn_stat.st_blocks == 0);
+ 
+-  bcopy (target, node->dn->info.i_data, len);
++  memcpy (node->dn->info.i_data, target, len);
+   node->dn_stat.st_size = len - 1;
+   node->dn_set_ctime = 1;
+   node->dn_set_mtime = 1;
+@@ -774,7 +786,7 @@ read_symlink (struct node *node, char *t
+ 
+   assert (node->dn_stat.st_size < MAX_INODE_SYMLINK);
+ 
+-  bcopy (node->dn->info.i_data, target, node->dn_stat.st_size);
++  memcpy (target, node->dn->info.i_data, node->dn_stat.st_size);
+   return 0;
+ }
+ 
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/pager.c hurd/ext2fs/pager.c
+--- ../cvs/hurd/ext2fs/pager.c	2002-06-12 00:38:01.000000000 +0300
++++ hurd/ext2fs/pager.c	2004-11-11 18:16:16.000000000 +0200
+@@ -18,17 +18,18 @@
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
+ 
++#include <unistd.h>
+ #include <string.h>
+ #include <errno.h>
+ #include <hurd/store.h>
+ #include "ext2fs.h"
+ 
++/* XXX */
++#include "../libpager/priv.h"
++
+ /* A ports bucket to hold pager ports.  */
+ struct port_bucket *pager_bucket;
+ 
+-/* Mapped image of the disk.  */
+-void *disk_image;
+-
+ spin_lock_t node_to_page_lock = SPIN_LOCK_INITIALIZER;
+ 
+ #ifdef DONT_CACHE_MEMORY_OBJECTS
+@@ -163,6 +164,9 @@ file_pager_read_page (struct node *node,
+   block_t pending_blocks = 0;
+   int num_pending_blocks = 0;
+ 
++  ext2_debug ("reading inode %Ld page %u[%d]",
++	      node->cache_id, page, vm_page_size);
++
+   /* Read the NUM_PENDING_BLOCKS blocks in PENDING_BLOCKS, into the buffer
+      pointed to by BUF (allocating it if necessary) at offset OFFS.  OFFS in
+      adjusted by the amount read, and NUM_PENDING_BLOCKS is zeroed.  Any read
+@@ -171,7 +175,8 @@ file_pager_read_page (struct node *node,
+     {
+       if (num_pending_blocks > 0)
+ 	{
+-	  block_t dev_block = pending_blocks << log2_dev_blocks_per_fs_block;
++	  store_offset_t dev_block = (store_offset_t) pending_blocks
++	    << log2_dev_blocks_per_fs_block;
+ 	  size_t amount = num_pending_blocks << log2_block_size;
+ 	  /* The buffer we try to read into; on the first read, we pass in a
+ 	     size of zero, so that the read is guaranteed to allocate a new
+@@ -198,7 +203,7 @@ file_pager_read_page (struct node *node,
+ 	      else
+ 		/* We've already got some buffer, so copy into it.  */
+ 		{
+-		  bcopy (new_buf, *buf + offs, new_len);
++		  memcpy (*buf + offs, new_buf, new_len);
+ 		  free_page_buf (new_buf); /* Return NEW_BUF to our pool.  */
+ 		  STAT_INC (file_pagein_freed_bufs);
+ 		}
+@@ -254,7 +259,7 @@ file_pager_read_page (struct node *node,
+ 		break;
+ 	      STAT_INC (file_pagein_alloced_bufs);
+ 	    }
+-	  bzero (*buf + offs, block_size);
++	  memset (*buf + offs, 0, block_size);
+ 	  offs += block_size;
+ 	}
+       else
+@@ -295,16 +300,17 @@ pending_blocks_write (struct pending_blo
+   if (pb->num > 0)
+     {
+       error_t err;
+-      block_t dev_block = pb->block << log2_dev_blocks_per_fs_block;
++      store_offset_t dev_block = (store_offset_t) pb->block
++	<< log2_dev_blocks_per_fs_block;
+       size_t length = pb->num << log2_block_size, amount;
+ 
+-      ext2_debug ("writing block %u[%ld]", pb->block, pb->num);
++      ext2_debug ("writing block %u[%Ld]", pb->block, pb->num);
+ 
+       if (pb->offs > 0)
+ 	/* Put what we're going to write into a page-aligned buffer.  */
+ 	{
+ 	  void *page_buf = get_page_buf ();
+-	  bcopy (pb->buf + pb->offs, (void *)page_buf, length);
++	  memcpy ((void *)page_buf, pb->buf + pb->offs, length);
+ 	  err = store_write (store, dev_block, page_buf, length, &amount);
+ 	  free_page_buf (page_buf);
+ 	}
+@@ -357,7 +363,7 @@ pending_blocks_add (struct pending_block
+   return 0;
+ }
+ 
+-/* Write one page for the pager backing NODE, at offset PAGE, into BUF.  This
++/* Write one page for the pager backing NODE, at OFFSET, into BUF.  This
+    may need to write several filesystem blocks to satisfy one page, and tries
+    to consolidate the i/o if possible.  */
+ static error_t
+@@ -381,7 +387,7 @@ file_pager_write_page (struct node *node
+   else if (offset + left > node->allocsize)
+     left = node->allocsize - offset;
+ 
+-  ext2_debug ("writing inode %d page %d[%d]", node->cache_id, offset, left);
++  ext2_debug ("writing inode %Ld page %u[%d]", node->cache_id, offset, left);
+ 
+   STAT_INC (file_pageouts);
+ 
+@@ -409,16 +415,31 @@ disk_pager_read_page (vm_offset_t page, 
+ {
+   error_t err;
+   size_t length = vm_page_size, read = 0;
+-  vm_size_t dev_end = store->size;
++  store_offset_t offset = page, dev_end = store->size;
+ 
+-  if (page + vm_page_size > dev_end)
+-    length = dev_end - page;
++  mutex_lock (&disk_cache_lock);
++  int index = offset >> log2_block_size;
++  offset = ((store_offset_t) disk_cache_info[index].block << log2_block_size)
++    + offset % block_size;
++  disk_cache_info[index].flags |= DC_INCORE;
++  disk_cache_info[index].flags &=~ DC_UNTOUCHED;
++#ifndef NDEBUG
++  disk_cache_info[index].last_read = disk_cache_info[index].block;
++  disk_cache_info[index].last_read_xor
++    = disk_cache_info[index].block ^ DISK_CACHE_LAST_READ_XOR;
++#endif
++  ext2_debug ("(%Ld)", offset >> log2_block_size);
++  mutex_unlock (&disk_cache_lock);
++
++  if (offset + vm_page_size > dev_end)
++    length = dev_end - offset;
+ 
+-  err = store_read (store, page >> store->log2_block_size, length, buf, &read);
++  err = store_read (store, offset >> store->log2_block_size, length,
++		    buf, &read);
+   if (read != length)
+     return EIO;
+   if (!err && length != vm_page_size)
+-    bzero ((void *)(*buf + length), vm_page_size - length);
++    memset ((void *)(*buf + length), 0, vm_page_size - length);
+ 
+   *writelock = 0;
+ 
+@@ -430,26 +451,38 @@ disk_pager_write_page (vm_offset_t page,
+ {
+   error_t err = 0;
+   size_t length = vm_page_size, amount;
+-  vm_size_t dev_end = store->size;
++  store_offset_t offset = page, dev_end = store->size;
++ 
++  mutex_lock (&disk_cache_lock);
++  int index = offset >> log2_block_size;
++  assert (disk_cache_info[index].block != DC_NO_BLOCK);
++  offset = ((store_offset_t) disk_cache_info[index].block << log2_block_size)
++    + offset % block_size;
++#ifndef NDEBUG			/* Not strictly needed.  */
++  assert ((disk_cache_info[index].last_read ^ DISK_CACHE_LAST_READ_XOR)
++	  == disk_cache_info[index].last_read_xor);
++  assert (disk_cache_info[index].last_read
++	  == disk_cache_info[index].block);
++#endif
++  mutex_unlock (&disk_cache_lock);
+ 
+-  if (page + vm_page_size > dev_end)
+-    length = dev_end - page;
++  if (offset + vm_page_size > dev_end)
++    length = dev_end - offset;
+ 
+-  ext2_debug ("writing disk page %d[%d]", page, length);
++  ext2_debug ("writing disk page %Ld[%d]", offset, length);
+ 
+   STAT_INC (disk_pageouts);
+ 
+   if (modified_global_blocks)
+     /* Be picky about which blocks in a page that we write.  */
+     {
+-      vm_offset_t offs = page;
+       struct pending_blocks pb;
+ 
+       pending_blocks_init (&pb, buf);
+ 
+       while (length > 0 && !err)
+ 	{
+-	  block_t block = boffs_block (offs);
++	  block_t block = boffs_block (offset);
+ 
+ 	  /* We don't clear the block modified bit here because this paging
+ 	     write request may not be the same one that actually set the bit,
+@@ -467,7 +500,7 @@ disk_pager_write_page (vm_offset_t page,
+ 	    /* Otherwise just skip it.  */
+ 	    err = pending_blocks_skip (&pb);
+ 
+-	  offs += block_size;
++	  offset += block_size;
+ 	  length -= block_size;
+ 	}
+ 
+@@ -476,7 +509,7 @@ disk_pager_write_page (vm_offset_t page,
+     }
+   else
+     {
+-      err = store_write (store, page >> store->log2_block_size,
++      err = store_write (store, offset >> store->log2_block_size,
+ 			 buf, length, &amount);
+       if (!err && length != amount)
+ 	err = EIO;
+@@ -484,6 +517,18 @@ disk_pager_write_page (vm_offset_t page,
+ 
+   return err;
+ }
++
++static void
++disk_pager_notify_evict (vm_offset_t page)
++{
++  int index = page >> log2_block_size;
++
++  ext2_debug ("(block %u)", index);
++
++  mutex_lock (&disk_cache_lock);
++  disk_cache_info[index].flags &= ~DC_INCORE;
++  mutex_unlock (&disk_cache_lock);
++}
+ 
+ /* Satisfy a pager read request for either the disk pager or file pager
+    PAGER, to the page at offset PAGE into BUF.  WRITELOCK should be set if
+@@ -493,9 +538,11 @@ pager_read_page (struct user_pager_info 
+ 		 vm_address_t *buf, int *writelock)
+ {
+   if (pager->type == DISK)
+-    return disk_pager_read_page (page, (void **)buf, writelock);
++    return disk_pager_read_page (page, (void **)buf,
++				 writelock);
+   else
+-    return file_pager_read_page (pager->node, page, (void **)buf, writelock);
++    return file_pager_read_page (pager->node, page, (void **)buf,
++				 writelock);
+ }
+ 
+ /* Satisfy a pager write request for either the disk pager or file pager
+@@ -509,6 +556,14 @@ pager_write_page (struct user_pager_info
+   else
+     return file_pager_write_page (pager->node, page, (void *)buf);
+ }
++
++void
++pager_notify_evict (struct user_pager_info *pager, vm_offset_t page)
++{
++  if (pager->type == DISK)
++    disk_pager_notify_evict (page);
++}
++
+ 
+ /* Make page PAGE writable, at least up to ALLOCSIZE.  This function and
+    diskfs_grow are the only places that blocks are actually added to the
+@@ -558,10 +613,10 @@ pager_unlock_page (struct user_pager_inf
+ 
+ #ifdef EXT2FS_DEBUG
+       if (dn->last_page_partially_writable)
+-	ext2_debug ("made page %u[%lu] in inode %d partially writable",
++	ext2_debug ("made page %u[%Lu] in inode %Ld partially writable",
+ 		    page, node->allocsize - page, node->cache_id);
+       else
+-	ext2_debug ("made page %u[%u] in inode %d writable",
++	ext2_debug ("made page %u[%u] in inode %Ld writable",
+ 		    page, vm_page_size, node->cache_id);
+ #endif
+ 
+@@ -619,8 +674,8 @@ diskfs_grow (struct node *node, off_t si
+ 	  block_t old_page_end_block =
+ 	    round_page (old_size) >> log2_block_size;
+ 
+-	  ext2_debug ("growing inode %d to %lu bytes (from %lu)", node->cache_id,
+-		      new_size, old_size);
++	  ext2_debug ("growing inode %Ld to %Lu bytes (from %Lu)",
++		      node->cache_id, new_size, old_size);
+ 
+ 	  if (dn->last_page_partially_writable
+ 	      && old_page_end_block > end_block)
+@@ -656,11 +711,11 @@ diskfs_grow (struct node *node, off_t si
+ 
+       STAT_INC (file_grows);
+ 
+-      ext2_debug ("new size: %ld%s.", new_size,
++      ext2_debug ("new size: %Lu%s.", new_size,
+ 		  dn->last_page_partially_writable
+ 		  ? " (last page writable)": "");
+       if (err)
+-	ext2_warning ("inode=%Ld, target=%Ld: %s",
++	ext2_warning ("inode=%Ld, target=%Lu: %s",
+ 		      node->cache_id, new_size, strerror (err));
+ 
+       node->allocsize = new_size;
+@@ -765,6 +820,374 @@ pager_dropweak (struct user_pager_info *
+ {
+ }
+ 
++/* Cached blocks from disk.  */
++void *disk_cache;
++
++/* DISK_CACHE size in bytes and blocks.  */
++store_offset_t disk_cache_size;
++int disk_cache_blocks;
++
++/* block num --> pointer to in-memory block */
++hurd_ihash_t disk_cache_bptr;
++/* Cached blocks' info.  */
++struct disk_cache_info *disk_cache_info;
++/* Hint index for which cache block to reuse next.  */
++int disk_cache_hint;
++/* Lock for these structures.  */
++struct mutex disk_cache_lock;
++/* Fired when a re-association is done.  */
++struct condition disk_cache_reassociation;
++
++/* Finish mapping initialization. */
++static void
++disk_cache_init (void)
++{
++  if (block_size != vm_page_size)
++    ext2_panic ("Block size %d != vm_page_size %d",
++		block_size, vm_page_size);
++
++  mutex_init (&disk_cache_lock);
++  condition_init (&disk_cache_reassociation);
++
++  /* Allocate space for block num -> in-memory pointer mapping.  */
++  if (hurd_ihash_create (&disk_cache_bptr, HURD_IHASH_NO_LOCP))
++    ext2_panic ("Can't allocate memory for disk_pager_bptr");
++
++  /* Allocate space for disk cache blocks' info.  */
++  disk_cache_info = malloc ((sizeof *disk_cache_info) * disk_cache_blocks);
++  if (!disk_cache_info)
++    ext2_panic ("Cannot allocate space for disk cache info");
++
++  /* Initialize disk_cache_info.  */
++  for (int i = 0; i < disk_cache_blocks; i++)
++    {
++      disk_cache_info[i].block = DC_NO_BLOCK;
++      disk_cache_info[i].flags = 0;
++      disk_cache_info[i].ref_count = 0;
++#ifndef NDEBUG
++      disk_cache_info[i].last_read = DC_NO_BLOCK;
++      disk_cache_info[i].last_read_xor
++	= DC_NO_BLOCK ^ DISK_CACHE_LAST_READ_XOR;
++#endif
++    }
++  disk_cache_hint = 0;
++
++  /* Map the superblock and the block group descriptors.  */
++  block_t fixed_first = boffs_block (SBLOCK_OFFS);
++  block_t fixed_last = fixed_first
++    + (round_block ((sizeof *group_desc_image) * groups_count)
++       >> log2_block_size);
++  ext2_debug ("%d-%d\n", fixed_first, fixed_last);
++  assert (fixed_last - fixed_first + 1 <= (block_t)disk_cache_blocks + 3);
++  for (block_t i = fixed_first; i <= fixed_last; i++)
++    {
++      disk_cache_block_ref (i);
++      assert (disk_cache_info[i-fixed_first].block == i);
++      disk_cache_info[i-fixed_first].flags |= DC_FIXED;
++    }
++}
++
++static void
++disk_cache_return_unused (void)
++{
++  int index;
++
++  /* XXX: Touch all pages.  It seems that sometimes GNU Mach "forgets"
++     to notify us about evicted pages.  Disk cache must be
++     unlocked.  */
++  for (vm_offset_t i = 0; i < disk_cache_size; i += vm_page_size)
++    *(volatile char *)(disk_cache + i);
++
++  /* Release some references to cached blocks.  */
++  pokel_sync (&global_pokel, 1); 
++
++  /* Return unused pages that are in core.  */
++  int pending_begin = -1, pending_end = -1;
++  mutex_lock (&disk_cache_lock);
++  for (index = 0; index < disk_cache_blocks; index++)
++    if (! (disk_cache_info[index].flags & (DC_DONT_REUSE & ~DC_INCORE))
++	&& ! disk_cache_info[index].ref_count)
++      {
++	ext2_debug ("return %u -> %d",
++		    disk_cache_info[index].block, index);
++	if (index != pending_end)
++	  {
++	    /* Return previous region, if there is such, ... */
++	    if (pending_end >= 0)
++	      {
++		mutex_unlock (&disk_cache_lock);
++		pager_return_some (diskfs_disk_pager,
++				   pending_begin * vm_page_size,
++				   (pending_end - pending_begin)
++				   * vm_page_size,
++				   1);
++		mutex_lock (&disk_cache_lock);
++	      }
++	    /* ... and start new region.  */
++	    pending_begin = index;
++	  }
++	pending_end = index + 1;
++      }
++
++  mutex_unlock (&disk_cache_lock);
++
++  /* Return last region, if there is such.   */
++  if (pending_end >= 0)
++    pager_return_some (diskfs_disk_pager,
++		       pending_begin * vm_page_size,
++		       (pending_end - pending_begin) * vm_page_size,
++		       1);
++  else
++    {
++      printf ("ext2fs: disk cache is starving\n");
++
++      /* Give it some time.  This should happen rarely.  */
++      sleep (1);
++    }
++}
++
++/* Map block and return pointer to it.  */
++void *
++disk_cache_block_ref (block_t block)
++{
++  int index;
++  void *bptr;
++
++  assert (0 <= block && block < store->size >> log2_block_size);
++
++  ext2_debug ("(%u)", block);
++
++  mutex_lock (&disk_cache_lock);
++
++  bptr = hurd_ihash_find (disk_cache_bptr, block);
++  if (bptr)
++    /* Already mapped.  */
++    {
++      index = bptr_index (bptr);
++
++      /* In process of re-associating?  */
++      if (disk_cache_info[index].flags & DC_UNTOUCHED)
++	{
++	  /* Wait re-association to finish.  */
++	  condition_wait (&disk_cache_reassociation, &disk_cache_lock);
++	  mutex_unlock (&disk_cache_lock);
++
++#if 0
++	  printf ("Re-association -- wait finished.\n");
++#endif
++
++	  /* Try again.  */
++	  return disk_cache_block_ref (block); /* tail recursion */
++	}
++
++      /* Just increment reference and return.  */
++      assert (disk_cache_info[index].ref_count + 1
++	      > disk_cache_info[index].ref_count);
++      disk_cache_info[index].ref_count++;
++
++      ext2_debug ("cached %u -> %d (ref_count = %d, flags = 0x%x, ptr = %p)",
++		  disk_cache_info[index].block, index,
++		  disk_cache_info[index].ref_count,
++		  disk_cache_info[index].flags, bptr);
++
++      mutex_unlock (&disk_cache_lock);
++
++      return bptr;
++    }
++
++  /* Search for a block that is not in core and is not referenced.  */
++  index = disk_cache_hint;
++  while ((disk_cache_info[index].flags & DC_DONT_REUSE)
++	 || (disk_cache_info[index].ref_count))
++    {
++      ext2_debug ("reject %u -> %d (ref_count = %d, flags = 0x%x)",
++		  disk_cache_info[index].block, index,
++		  disk_cache_info[index].ref_count,
++		  disk_cache_info[index].flags);
++
++      /* Just move to next block.  */
++      index++;
++      if (index >= disk_cache_blocks)
++	index -= disk_cache_blocks;
++
++      /* If we return to where we started, than there is no suitable 
++	 block. */
++      if (index == disk_cache_hint)
++	break;
++    }
++
++  /* The next place in the disk cache becomes the current hint.  */
++  disk_cache_hint = index + 1;
++  if (disk_cache_hint >= disk_cache_blocks)
++    disk_cache_hint -= disk_cache_blocks;
++
++  /* Is suitable place found?  */
++  if ((disk_cache_info[index].flags & DC_DONT_REUSE)
++      || disk_cache_info[index].ref_count)
++    /* No place is found.  Try to release some blocks and try
++       again.  */
++    {
++      ext2_debug ("flush %u -> %d", disk_cache_info[index].block, index);
++
++      mutex_unlock (&disk_cache_lock);
++
++      disk_cache_return_unused ();
++
++      return disk_cache_block_ref (block); /* tail recursion */
++    }
++
++  /* Suitable place is found.  */
++
++  /* Calculate pointer to data.  */
++  bptr = (char *)disk_cache + (index << log2_block_size);
++  ext2_debug ("map %u -> %d (%p)", block, index, bptr);
++
++  /* This pager_return_some is used only to set PM_FORCEREAD for the
++     page.  DC_UNTOUCHED is set so that we catch if someone has
++     referenced the block while we didn't hold disk_cache_lock.  */
++  disk_cache_info[index].flags |= DC_UNTOUCHED;
++
++#if 0 /* XXX: Let's see if this is needed at all.  */
++
++  mutex_unlock (&disk_cache_lock);
++  pager_return_some (diskfs_disk_pager, bptr - disk_cache, vm_page_size, 1);
++  mutex_lock (&disk_cache_lock);
++
++  /* Has someone used our bptr?  Has someone mapped requested block
++     while we have unlocked disk_cache_lock?  If so, environment has
++     changed and we have to restart operation.  */
++  if ((! (disk_cache_info[index].flags & DC_UNTOUCHED))
++      || hurd_ihash_find (disk_cache_bptr, block))
++    {
++      mutex_unlock (&disk_cache_lock);
++      return disk_cache_block_ref (block); /* tail recursion */
++    }
++
++#elif 0
++
++  /* XXX: Use libpager internals.  */
++  
++  mutex_lock (&diskfs_disk_pager->interlock);
++  int page = (bptr - disk_cache) / vm_page_size;
++  assert (page >= 0);
++  int is_incore = (page < diskfs_disk_pager->pagemapsize
++		   && (diskfs_disk_pager->pagemap[page] & PM_INCORE));
++  mutex_unlock (&diskfs_disk_pager->interlock);
++  if (is_incore)
++    {
++      mutex_unlock (&disk_cache_lock);
++      printf ("INCORE\n");
++      return disk_cache_block_ref (block); /* tail recursion */
++    }
++
++#endif
++
++  /* Re-associate.  */
++  if (disk_cache_info[index].block != DC_NO_BLOCK)
++    /* Remove old association.  */
++    hurd_ihash_remove (disk_cache_bptr, disk_cache_info[index].block);
++  /* New association.  */
++  if (hurd_ihash_add (disk_cache_bptr, block, bptr))
++    ext2_panic ("Couldn't hurd_ihash_add new disk block");
++  assert (! (disk_cache_info[index].flags & DC_DONT_REUSE & ~DC_UNTOUCHED));
++  disk_cache_info[index].block = block;
++  assert (! disk_cache_info[index].ref_count);
++  disk_cache_info[index].ref_count = 1;
++
++  /* All data structures are set up.  */
++  mutex_unlock (&disk_cache_lock);
++
++  /* Try to read page.  */
++  *(volatile char *) bptr;
++
++  /* Check if it's actually read.  */
++  mutex_lock (&disk_cache_lock);
++  if (disk_cache_info[index].flags & DC_UNTOUCHED)
++    /* It's not read.  */
++    {
++      /* Remove newly created association.  */
++      hurd_ihash_remove (disk_cache_bptr, block);
++      disk_cache_info[index].block = DC_NO_BLOCK;
++      disk_cache_info[index].flags &=~ DC_UNTOUCHED;
++      disk_cache_info[index].ref_count = 0;
++      mutex_unlock (&disk_cache_lock);
++
++      /* Prepare next time association of this page to succeed.  */
++      pager_flush_some (diskfs_disk_pager, bptr - disk_cache,
++			vm_page_size, 0);
++
++#if 0
++      printf ("Re-association failed.\n");
++#endif
++
++      /* Try again.  */
++      return disk_cache_block_ref (block); /* tail recursion */
++    }
++  mutex_unlock (&disk_cache_lock);
++
++  /* Re-association was successful.  */
++  condition_broadcast (&disk_cache_reassociation);
++
++  ext2_debug ("(%u) = %p", block, bptr);
++  return bptr;
++}
++
++void
++disk_cache_block_ref_ptr (void *ptr)
++{
++  int index;
++
++  mutex_lock (&disk_cache_lock);
++  index = bptr_index (ptr);
++  assert (disk_cache_info[index].ref_count >= 1);
++  assert (disk_cache_info[index].ref_count + 1
++	  > disk_cache_info[index].ref_count);
++  disk_cache_info[index].ref_count++;
++  assert (! (disk_cache_info[index].flags & DC_UNTOUCHED));
++  ext2_debug ("(%p) (ref_count = %d, flags = 0x%x)",
++	      ptr,
++	      disk_cache_info[index].ref_count,
++	      disk_cache_info[index].flags);
++  mutex_unlock (&disk_cache_lock);
++}
++
++void
++disk_cache_block_deref (void *ptr)
++{
++  int index;
++
++  assert (disk_cache <= ptr && ptr <= disk_cache + disk_cache_size);
++
++  mutex_lock (&disk_cache_lock);
++  index = bptr_index (ptr);
++  ext2_debug ("(%p) (ref_count = %d, flags = 0x%x)",
++	      ptr,
++	      disk_cache_info[index].ref_count - 1,
++	      disk_cache_info[index].flags);
++  assert (! (disk_cache_info[index].flags & DC_UNTOUCHED));
++  assert (disk_cache_info[index].ref_count >= 1);
++  disk_cache_info[index].ref_count--;
++  mutex_unlock (&disk_cache_lock);
++}
++
++/* Not used.  */
++int
++disk_cache_block_is_ref (block_t block)
++{
++  int ref;
++  void *ptr;
++
++  mutex_lock (&disk_cache_lock);
++  ptr = hurd_ihash_find (disk_cache_bptr, block);
++  if (! ptr)
++    ref = 0;
++  else				/* XXX: Should check for DC_UNTOUCHED too.  */
++    ref = disk_cache_info[bptr_index (ptr)].ref_count;
++  mutex_unlock (&disk_cache_lock);
++
++  return ref;
++}
++
+ /* Create the DISK pager.  */
+ void
+ create_disk_pager (void)
+@@ -774,8 +1197,12 @@ create_disk_pager (void)
+     ext2_panic ("can't create disk pager: %s", strerror (errno));
+   upi->type = DISK;
+   pager_bucket = ports_create_bucket ();
+-  diskfs_start_disk_pager (upi, pager_bucket, MAY_CACHE, store->size,
+-			   &disk_image);
++  get_hypermetadata ();
++  disk_cache_blocks = DISK_CACHE_BLOCKS;
++  disk_cache_size = disk_cache_blocks << log2_block_size;
++  diskfs_start_disk_pager (upi, pager_bucket, MAY_CACHE, 1,
++			   disk_cache_size, &disk_cache);
++  disk_cache_init ();
+ }
+ 
+ /* Call this to create a FILE_DATA pager and return a send right.
+@@ -815,7 +1242,7 @@ diskfs_get_filemap (struct node *node, v
+ 	  diskfs_nref_light (node);
+ 	  node->dn->pager =
+ 	    pager_create (upi, pager_bucket, MAY_CACHE,
+-			  MEMORY_OBJECT_COPY_DELAY);
++			  MEMORY_OBJECT_COPY_DELAY, 0);
+ 	  if (node->dn->pager == 0)
+ 	    {
+ 	      diskfs_nrele_light (node);
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/pokel.c hurd/ext2fs/pokel.c
+--- ../cvs/hurd/ext2fs/pokel.c	1996-01-16 00:28:56.000000000 +0200
++++ hurd/ext2fs/pokel.c	2004-11-11 18:16:16.000000000 +0200
+@@ -67,12 +67,27 @@ pokel_add (struct pokel *pokel, void *lo
+       vm_offset_t p_offs = pl->offset;
+       vm_size_t p_end = p_offs + pl->length;
+ 
+-      if (p_offs == offset && p_end == end)
+-	break;
++      if (p_offs <= offset && end <= p_end)
++	{
++	  if (pokel->image == disk_cache)
++	    for (vm_offset_t i = offset; i < end; i += block_size)
++	      disk_cache_block_deref (disk_cache + i);
++
++	  break;
++	}
+       else if (p_end >= offset && end >= p_offs)
+ 	{
+ 	  pl->offset = offset < p_offs ? offset : p_offs;
+ 	  pl->length = (end > p_end ? end : p_end) - pl->offset;
++
++	  if (pokel->image == disk_cache)
++	    {
++	      vm_offset_t i_begin = p_offs > offset ? p_offs : offset;
++	      vm_offset_t i_end = p_end < end ? p_end : end;
++	      for (vm_offset_t i = i_begin; i < i_end; i += block_size)
++		disk_cache_block_deref (disk_cache + i);
++	    }
++
+ 	  ext2_debug ("extended 0x%x[%ul] to 0x%x[%ul]",
+ 		      p_offs, p_end - p_offs, pl->offset, pl->length);
+ 	  break;
+@@ -106,18 +121,28 @@ void
+ _pokel_exec (struct pokel *pokel, int sync, int wait)
+ {
+   struct poke *pl, *pokes, *last = NULL;
+-  
++
+   spin_lock (&pokel->lock);
+   pokes = pokel->pokes;
+   pokel->pokes = NULL;
+   spin_unlock (&pokel->lock);
+ 
+   for (pl = pokes; pl; last = pl, pl = pl->next)
+-    if (sync)
+-      {
+-	ext2_debug ("syncing 0x%x[%ul]", pl->offset, pl->length);
+-	pager_sync_some (pokel->pager, pl->offset, pl->length, wait);
+-      }
++    {
++      if (sync)
++	{
++	  ext2_debug ("syncing 0x%x[%ul]", pl->offset, pl->length);
++	  pager_sync_some (pokel->pager, pl->offset, pl->length, wait);
++	}
++
++      if (pokel->image == disk_cache)
++	{
++	  vm_offset_t begin = trunc_block (pl->offset);
++	  vm_offset_t end = round_block (pl->offset + pl->length);
++	  for (vm_offset_t i = begin; i != end; i += block_size)
++	    disk_cache_block_deref (pokel->image + i);
++	}    
++    }
+ 
+   if (last)
+     {
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ext2fs/truncate.c hurd/ext2fs/truncate.c
+--- ../cvs/hurd/ext2fs/truncate.c	2000-12-03 06:41:37.000000000 +0200
++++ hurd/ext2fs/truncate.c	2004-11-11 18:16:16.000000000 +0200
+@@ -124,7 +124,7 @@ trunc_indirect (struct node *node, block
+     {
+       unsigned index;
+       int modified = 0, all_freed = 1;
+-      block_t *ind_bh = (block_t *)bptr (*p);
++      block_t *ind_bh = (block_t *)disk_cache_block_ref (*p);
+       unsigned first = end < offset ? 0 : end - offset;
+ 
+       for (index = first; index < addr_per_block; index++)
+@@ -139,11 +139,16 @@ trunc_indirect (struct node *node, block
+ 
+       if (first == 0 && all_freed)
+ 	{
+-	  pager_flush_some (diskfs_disk_pager, boffs (*p), block_size, 1);
++	  pager_flush_some (diskfs_disk_pager,
++			    bptr_index (ind_bh) << log2_block_size,
++			    block_size, 1);
+ 	  free_block_run_free_ptr (fbr, p);
++	  disk_cache_block_deref (ind_bh);
+ 	}
+       else if (modified)
+ 	record_indir_poke (node, ind_bh);
++      else
++	disk_cache_block_deref (ind_bh);
+     }
+ }
+ 
+@@ -218,7 +223,7 @@ poke_pages (memory_object_t obj, vm_offs
+ /* Flush all the data past the new size from the kernel.  Also force any
+    delayed copies of this data to take place immediately.  (We are implicitly
+    changing the data to zeros and doing it without the kernel's immediate
+-   knowledge; accordingl we must help out the kernel thusly.) */
++   knowledge; accordingly we must help out the kernel thusly.) */
+ static void
+ force_delayed_copies (struct node *node, off_t length)
+ {
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/fatfs/pager.c hurd/fatfs/pager.c
+--- ../cvs/hurd/fatfs/pager.c	2003-07-29 01:42:26.000000000 +0300
++++ hurd/fatfs/pager.c	2004-11-11 18:16:16.000000000 +0200
+@@ -596,6 +596,13 @@ pager_unlock_page (struct user_pager_inf
+   return 0;
+ }
+ 
++void
++pager_notify_evict (struct user_pager_info *pager,
++		    vm_offset_t page)
++{
++  assert (!"unrequested notification on eviction");
++}
++
+ /* Grow the disk allocated to locked node NODE to be at least SIZE
+    bytes, and set NODE->allocsize to the actual allocated size.  (If
+    the allocated size is already SIZE bytes, do nothing.)  CRED
+@@ -752,7 +759,7 @@ create_fat_pager (void)
+   struct user_pager_info *upi = malloc (sizeof (struct user_pager_info));
+   upi->type = FAT;
+   pager_bucket = ports_create_bucket ();
+-  diskfs_start_disk_pager (upi, pager_bucket, MAY_CACHE,
++  diskfs_start_disk_pager (upi, pager_bucket, MAY_CACHE, 0,
+ 			   bytes_per_sector * sectors_per_fat,
+ 			   &fat_image);
+ }
+@@ -794,7 +801,7 @@ diskfs_get_filemap (struct node *node, v
+           diskfs_nref_light (node);
+           node->dn->pager =
+             pager_create (upi, pager_bucket, MAY_CACHE,
+-                          MEMORY_OBJECT_COPY_DELAY);
++                          MEMORY_OBJECT_COPY_DELAY, 0);
+           if (node->dn->pager == 0)
+             {
+               diskfs_nrele_light (node);
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/isofs/pager.c hurd/isofs/pager.c
+--- ../cvs/hurd/isofs/pager.c	2001-01-07 19:06:26.000000000 +0200
++++ hurd/isofs/pager.c	2004-11-11 18:16:16.000000000 +0200
+@@ -94,6 +94,13 @@ pager_unlock_page (struct user_pager_inf
+   return EROFS;
+ }
+ 
++void
++pager_notify_evict (struct user_pager_info *pager,
++		    vm_offset_t page)
++{
++  assert (!"unrequested notification on eviction");
++}
++
+ /* Tell how big the file is. */
+ error_t
+ pager_report_extent (struct user_pager_info *pager,
+@@ -137,7 +144,7 @@ create_disk_pager (void)
+   upi->type = DISK;
+   upi->np = 0;
+   pager_bucket = ports_create_bucket ();
+-  diskfs_start_disk_pager (upi, pager_bucket, 1, store->size, &disk_image);
++  diskfs_start_disk_pager (upi, pager_bucket, 1, 0, store->size, &disk_image);
+   upi->p = diskfs_disk_pager;
+ }
+ 
+@@ -168,7 +175,8 @@ diskfs_get_filemap (struct node *np, vm_
+ 	upi->type = FILE_DATA;
+ 	upi->np = np;
+ 	diskfs_nref_light (np);
+-	upi->p = pager_create (upi, pager_bucket, 1, MEMORY_OBJECT_COPY_DELAY);
++	upi->p = pager_create (upi, pager_bucket, 1,
++			       MEMORY_OBJECT_COPY_DELAY, 0);
+ 	if (upi->p == 0)
+ 	  {
+ 	    diskfs_nrele_light (np);
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/libdiskfs/disk-pager.c hurd/libdiskfs/disk-pager.c
+--- ../cvs/hurd/libdiskfs/disk-pager.c	2002-05-08 12:56:56.000000000 +0300
++++ hurd/libdiskfs/disk-pager.c	2004-11-11 18:16:17.000000000 +0200
+@@ -46,7 +46,8 @@ service_paging_requests (any_t arg)
+ 
+ void
+ diskfs_start_disk_pager (struct user_pager_info *upi,
+-			 struct port_bucket *pager_bucket, int may_cache,
++			 struct port_bucket *pager_bucket,
++			 int may_cache, int notify_on_evict,
+ 			 size_t size, void **image)
+ {
+   error_t err;
+@@ -58,7 +59,8 @@ diskfs_start_disk_pager (struct user_pag
+ 
+   /* Create the pager.  */
+   diskfs_disk_pager = pager_create (upi, pager_bucket,
+-				    may_cache, MEMORY_OBJECT_COPY_NONE);
++				    may_cache, MEMORY_OBJECT_COPY_NONE,
++				    notify_on_evict);
+   assert (diskfs_disk_pager);
+ 
+   /* Get a port to the disk pager.  */
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/libdiskfs/diskfs-pager.h hurd/libdiskfs/diskfs-pager.h
+--- ../cvs/hurd/libdiskfs/diskfs-pager.h	1997-02-05 18:39:19.000000000 +0200
++++ hurd/libdiskfs/diskfs-pager.h	2004-11-11 18:16:17.000000000 +0200
+@@ -33,7 +33,8 @@
+    mapped is returned in IMAGE.  INFO, PAGER_BUCKET, & MAY_CACHE are passed
+    to `pager_create'.  */
+ extern void diskfs_start_disk_pager (struct user_pager_info *info,
+-				     struct port_bucket *pager_bucket, int may_cache,
++				     struct port_bucket *pager_bucket,
++				     int may_cache, int notify_on_evict,
+ 				     size_t size, void **image);
+ 
+ extern struct pager *diskfs_disk_pager;
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/libpager/data-request.c hurd/libpager/data-request.c
+--- ../cvs/hurd/libpager/data-request.c	2002-05-08 12:22:14.000000000 +0300
++++ hurd/libpager/data-request.c	2004-11-11 19:43:24.000000000 +0200
+@@ -40,11 +40,11 @@ _pager_seqnos_memory_object_data_request
+   if (!p)
+     return EOPNOTSUPP;
+ 
+-  /* Acquire the right to meddle with the pagemap */
++  /* Acquire the right to meddle with the pagemap.  */
+   mutex_lock (&p->interlock);
+   _pager_wait_for_seqno (p, seqno);
+ 
+-  /* sanity checks -- we don't do multi-page requests yet.  */
++  /* Sanity checks -- we don't do multi-page requests yet.  */
+   if (control != p->memobjcntl)
+     {
+       printf ("incg data request: wrong control port\n");
+@@ -121,7 +123,8 @@ _pager_seqnos_memory_object_data_request
+     goto error_read;
+ 
+   memory_object_data_supply (p->memobjcntl, offset, page, length, 1,
+-			     write_lock ? VM_PROT_WRITE : VM_PROT_NONE, 0,
++			     write_lock ? VM_PROT_WRITE : VM_PROT_NONE,
++			     p->notify_on_evict ? 1 : 0,
+ 			     MACH_PORT_NULL);
+   mutex_lock (&p->interlock);
+   _pager_mark_object_error (p, offset, length, 0);
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/libpager/data-return.c hurd/libpager/data-return.c
+--- ../cvs/hurd/libpager/data-return.c	2002-05-08 12:22:14.000000000 +0300
++++ hurd/libpager/data-return.c	2004-11-11 20:08:53.000000000 +0200
+@@ -39,6 +39,7 @@ _pager_do_write_request (mach_port_t obj
+   struct pager *p;
+   short *pm_entries;
+   int npages, i;
++  char *notified;
+   error_t *pagerrs;
+   struct lock_request *lr;
+   struct lock_list {struct lock_request *lr;
+@@ -71,9 +72,6 @@ _pager_do_write_request (mach_port_t obj
+       goto release_out;
+     }
+ 
+-  if (! dirty)
+-    goto release_out;
+-
+   if (p->pager_state != NORMAL)
+     {
+       printf ("pager in wrong state for write\n");
+@@ -83,6 +81,11 @@ _pager_do_write_request (mach_port_t obj
+   npages = length / __vm_page_size;
+   pagerrs = alloca (npages * sizeof (error_t));
+ 
++  notified = alloca (npages * (sizeof *notified));
++#ifndef NDEBUG
++  memset (notified, -1, npages * (sizeof *notified));
++#endif
++
+   _pager_block_termination (p);	/* until we are done with the pagemap
+ 				   when the write completes. */
+ 
+@@ -90,6 +93,23 @@ _pager_do_write_request (mach_port_t obj
+ 
+   pm_entries = &p->pagemap[offset / __vm_page_size];
+ 
++  if (! dirty && ! kcopy)
++    {
++      /* Prepare notified array.  */
++      for (i = 0; i < npages; i++)
++	notified[i] = (p->notify_on_evict
++		       && ! (pm_entries[i] & PM_PAGEINWAIT));
++
++      _pager_release_seqno (p, seqno);
++      goto notify;
++    }
++
++  if (! dirty)
++    {
++      _pager_allow_termination (p);
++      goto release_out;
++    }
++
+   /* Make sure there are no other in-progress writes for any of these
+      pages before we begin.  This imposes a little more serialization
+      than we really have to require (because *all* future writes on
+@@ -120,10 +140,6 @@ _pager_do_write_request (mach_port_t obj
+     for (i = 0; i < npages; i++)
+       pm_entries[i] |= PM_PAGINGOUT | PM_INIT;
+ 
+-  if (!kcopy)
+-    for (i = 0; i < npages; i++)
+-      pm_entries[i] &= ~PM_INCORE;
+-
+   /* If this write occurs while a lock is pending, record
+      it.  We have to keep this list because a lock request
+      might come in while we do the I/O; in that case there
+@@ -163,7 +179,10 @@ _pager_do_write_request (mach_port_t obj
+   for (i = 0; i < npages; i++)
+     {
+       if (omitdata & (1 << i))
+-	continue;
++	{
++	  notified[i] = 0;
++	  continue;
++	}
+ 
+       if (pm_entries[i] & PM_WRITEWAIT)
+ 	wakeup = 1;
+@@ -179,14 +198,22 @@ _pager_do_write_request (mach_port_t obj
+ 	pm_entries[i] |= PM_INVALID;
+ 
+       if (pm_entries[i] & PM_PAGEINWAIT)
+-	memory_object_data_supply (p->memobjcntl,
+-				   offset + (vm_page_size * i),
+-				   data + (vm_page_size * i),
+-				   vm_page_size, 1,
+-				   VM_PROT_NONE, 0, MACH_PORT_NULL);
++	{
++	  memory_object_data_supply (p->memobjcntl,
++				     offset + (vm_page_size * i),
++				     data + (vm_page_size * i),
++				     vm_page_size, 1,
++				     VM_PROT_NONE, 0, MACH_PORT_NULL);
++	  notified[i] = 0;
++	}
+       else
+-	munmap ((caddr_t) (data + (vm_page_size * i)),
+-		vm_page_size);
++	{
++	  munmap ((caddr_t) (data + (vm_page_size * i)),
++		  vm_page_size);
++	  notified[i] = (! kcopy && p->notify_on_evict);
++	  if (! kcopy)
++	    pm_entries[i] &= ~PM_INCORE;
++	}
+ 
+       pm_entries[i] &= ~(PM_PAGINGOUT | PM_PAGEINWAIT | PM_WRITEWAIT);
+     }
+@@ -198,10 +225,29 @@ _pager_do_write_request (mach_port_t obj
+   if (wakeup)
+     condition_broadcast (&p->wakeup);
+ 
++ notify:
+   _pager_allow_termination (p);
+-
+   mutex_unlock (&p->interlock);
+ 
++  for (i = 0; i < npages; i++)
++    {
++      assert (notified[i] == 0 || notified[i] == 1);
++      if (notified[i])
++	{
++	  short *pm_entry = &pm_entries[i];
++
++	  /* Do notify user.  */
++	  pager_notify_evict (p->upi, offset + (i * vm_page_size));
++
++	  /* Clear any error that is left.  Notification on eviction
++	     is used only to change association of page, so any
++	     error may no longer be valid.  */
++ 	  mutex_lock (&p->interlock);
++	  *pm_entry = SET_PM_ERROR (SET_PM_NEXTERROR (*pm_entry, 0), 0);
++ 	  mutex_unlock (&p->interlock);
++	}
++    }
++
+   ports_port_deref (p);
+   return 0;
+ 
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/libpager/pager-create.c hurd/libpager/pager-create.c
+--- ../cvs/hurd/libpager/pager-create.c	1996-05-09 19:47:42.000000000 +0300
++++ hurd/libpager/pager-create.c	2004-11-11 18:16:17.000000000 +0200
+@@ -22,7 +22,8 @@ struct pager *
+ pager_create (struct user_pager_info *upi,
+ 	      struct port_bucket *bucket,
+ 	      boolean_t may_cache,
+-	      memory_object_copy_strategy_t copy_strategy)
++	      memory_object_copy_strategy_t copy_strategy,
++	      boolean_t notify_on_evict)
+ {
+   struct pager *p;
+ 
+@@ -38,6 +39,7 @@ pager_create (struct user_pager_info *up
+   p->attribute_requests = 0;
+   p->may_cache = may_cache;
+   p->copy_strategy = copy_strategy;
++  p->notify_on_evict = notify_on_evict;
+   p->memobjcntl = MACH_PORT_NULL;
+   p->memobjname = MACH_PORT_NULL;
+   p->seqno = -1;
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/libpager/pager.h hurd/libpager/pager.h
+--- ../cvs/hurd/libpager/pager.h	1999-07-04 02:51:02.000000000 +0300
++++ hurd/libpager/pager.h	2004-11-11 18:16:17.000000000 +0200
+@@ -32,18 +32,21 @@ int pager_demuxer (mach_msg_header_t *in
+ 		   mach_msg_header_t *outp);
+ 
+ /* Create a new pager.  The pager will have a port created for it
+-   (using libports, in BUCKET) and will be immediately ready
+-   to receive requests.  U_PAGER will be provided to later calls to
++   (using libports, in BUCKET) and will be immediately ready to
++   receive requests.  U_PAGER will be provided to later calls to
+    pager_find_address.  The pager will have one user reference
+    created.  MAY_CACHE and COPY_STRATEGY are the original values of
+-   those attributes as for memory_object_ready.  Users may create
+-   references to pagers by use of the relevant ports library
+-   functions.  On errors, return null and set errno.  */
++   those attributes as for memory_object_ready.  If NOTIFY_ON_EVICT is
++   non-zero, pager_notify_evict user callback will be called when page
++   is evicted.  Users may create references to pagers by use of the
++   relevant ports library functions.  On errors, return null and set
++   errno.  */
+ struct pager *
+ pager_create (struct user_pager_info *u_pager,
+ 	      struct port_bucket *bucket,
+ 	      boolean_t may_cache,
+-	      memory_object_copy_strategy_t copy_strategy);
++	      memory_object_copy_strategy_t copy_strategy,
++	      boolean_t notify_on_evict);
+ 
+ /* Return the user_pager_info struct associated with a pager. */
+ struct user_pager_info *
+@@ -110,7 +113,7 @@ pager_offer_page (struct pager *pager,
+ /* Change the attributes of the memory object underlying pager PAGER.
+    Args MAY_CACHE and COPY_STRATEGY are as for
+    memory_object_change_atributes.  Wait for the kernel to report completion
+-   off WAIT is set.*/
++   iff WAIT is set.  */
+ void
+ pager_change_attributes (struct pager *pager,
+ 			 boolean_t may_cache,
+@@ -172,6 +175,18 @@ error_t
+ pager_unlock_page (struct user_pager_info *pager,
+ 		   vm_offset_t address);
+ 
++/* The user must define this function.  It is used when you want be
++   able to change association of pages to backing store.  To use it,
++   pass non-zero value in NOTIFY_ON_EVICT when pager is created with
++   pager_create.  You can change association of page only when
++   pager_notify_evict has been called and you haven't touched page
++   content after that.  Note there is a possibility that a page is
++   evicted, but user is not notified about that.  The user should be
++   able to handle this case.  */
++void
++pager_notify_evict (struct user_pager_info *pager,
++		    vm_offset_t page);
++
+ /* The user must define this function.  It should report back (in
+    *OFFSET and *SIZE the minimum valid address the pager will accept
+    and the size of the object.   */
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/libpager/priv.h hurd/libpager/priv.h
+--- ../cvs/hurd/libpager/priv.h	2000-07-25 22:40:27.000000000 +0300
++++ hurd/libpager/priv.h	2004-11-11 19:42:20.000000000 +0200
+@@ -45,6 +45,7 @@ struct pager
+ 
+   boolean_t may_cache;
+   memory_object_copy_strategy_t copy_strategy;
++  boolean_t notify_on_evict;
+ 
+   /* Interface ports */
+   memory_object_control_t memobjcntl;
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/storeio/pager.c hurd/storeio/pager.c
+--- ../cvs/hurd/storeio/pager.c	2002-05-08 13:17:41.000000000 +0300
++++ hurd/storeio/pager.c	2004-11-11 18:16:18.000000000 +0200
+@@ -109,6 +109,13 @@ pager_unlock_page (struct user_pager_inf
+     return 0;
+ }
+ 
++void
++pager_notify_evict (struct user_pager_info *pager,
++		    vm_offset_t page)
++{
++  assert (!"unrequested notification on eviction");
++}
++
+ /* The user must define this function.  It should report back (in
+    *OFFSET and *SIZE the minimum valid address the pager will accept
+    and the size of the object.   */
+@@ -232,7 +239,7 @@ dev_get_memory_object (struct dev *dev, 
+ 	{
+ 	  dev->pager =
+ 	    pager_create ((struct user_pager_info *)dev, pager_port_bucket,
+-			  1, MEMORY_OBJECT_COPY_DELAY);
++			  1, MEMORY_OBJECT_COPY_DELAY, 0);
+ 	  if (dev->pager == NULL)
+ 	    {
+ 	      mutex_unlock (&dev->pager_lock);
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/tmpfs/pager-stubs.c hurd/tmpfs/pager-stubs.c
+--- ../cvs/hurd/tmpfs/pager-stubs.c	2001-02-26 06:13:58.000000000 +0200
++++ hurd/tmpfs/pager-stubs.c	2004-11-11 18:16:18.000000000 +0200
+@@ -57,6 +57,14 @@ pager_unlock_page (struct user_pager_inf
+   return EIEIO;
+ }
+ 
++void
++pager_notify_evict (struct user_pager_info *pager,
++		    vm_offset_t page)
++{
++  abort();
++}
++
++
+ /* The user must define this function.  It should report back (in
+    *OFFSET and *SIZE the minimum valid address the pager will accept
+    and the size of the object.   */
+diff -urpN --exclude='*~' --exclude=build ../cvs/hurd/ufs/pager.c hurd/ufs/pager.c
+--- ../cvs/hurd/ufs/pager.c	1999-09-13 09:35:07.000000000 +0300
++++ hurd/ufs/pager.c	2004-11-11 18:16:18.000000000 +0200
+@@ -425,6 +425,13 @@ pager_unlock_page (struct user_pager_inf
+   return err;
+ }
+ 
++void
++pager_notify_evict (struct user_pager_info *pager,
++		    vm_offset_t page)
++{
++  assert (!"unrequested notification on eviction");
++}
++
+ /* Implement the pager_report_extent callback from the pager library.  See
+    <hurd/pager.h> for the interface description. */
+ inline error_t
+@@ -477,7 +484,7 @@ create_disk_pager (void)
+   upi->type = DISK;
+   upi->np = 0;
+   pager_bucket = ports_create_bucket ();
+-  diskfs_start_disk_pager (upi, pager_bucket, MAY_CACHE, store->size,
++  diskfs_start_disk_pager (upi, pager_bucket, MAY_CACHE, 0, store->size,
+ 			   &disk_image);
+   upi->p = diskfs_disk_pager;
+ }
+@@ -570,7 +577,7 @@ diskfs_get_filemap (struct node *np, vm_
+ 	upi->unlocked_pagein_length = 0;
+ 	diskfs_nref_light (np);
+ 	upi->p = pager_create (upi, pager_bucket,
+-			       MAY_CACHE, MEMORY_OBJECT_COPY_DELAY);
++			       MAY_CACHE, MEMORY_OBJECT_COPY_DELAY, 0);
+ 	if (upi->p == 0)
+ 	  {
+ 	    diskfs_nrele_light (np);

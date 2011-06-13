@@ -1,10 +1,11 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 # $Id: PKGBUILD 83737 2010-06-22 18:32:52Z andrea $
 # Maintainer:
 # Contributor: Judd Vinet <jvinet@zeroflux.org>
 
 pkgname=libldap
-pkgver=2.4.23
+pkgver=2.4.24
 pkgrel=1
 pkgdesc="Lightweight Directory Access Protocol (LDAP) client libraries"
 arch=('i686')
@@ -15,15 +16,26 @@ depends=('libsasl' 'openssl')
 makedepends=('tcp_wrappers')
 options=('!libtool')
 source=("ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-${pkgver}.tgz"
-        'hurd_sasl.patch'
         'ntlm.patch')
 
 build() {
   cd ${srcdir}/openldap-${pkgver}
-  patch -Np1 -i ${srcdir}/ntlm.patch
-  patch -p1 -i ${srcdir}/hurd_sasl.patch
-
-  ./configure --prefix= \
+  if [ -e ${srcdir}/.patched ]
+  then
+    msg "Already patched"
+  else
+    msg "Patching"
+    patch -Np1 -i ${srcdir}/ntlm.patch
+    #patch -p1 -i ${srcdir}/hurd_sasl.patch
+    touch ${srcdir}/.patched
+  fi
+  
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    ./configure --prefix= \
               --libexecdir=/sbin \
               --sysconfdir=/etc \
 	      --mandir=/share/man \
@@ -32,6 +44,8 @@ build() {
               --with-threads --enable-wrappers \
 	      --enable-spasswd --with-cyrus-sasl \
 	      --disable-bdb --disable-hdb
+    touch ${srcdir}/.configured
+  fi
 
   cd include
   make
@@ -72,6 +86,5 @@ package() {
   install -Dm644 ${srcdir}/openldap-${pkgver}/LICENSE \
     ${pkgdir}/share/licenses/$pkgname/LICENSE
 }
-md5sums=('90150b8c0d0192e10b30157e68844ddf'
-         'c53d3439f8bfb336f1531ce9442e27aa'
+md5sums=('116fe1e23a7b67686d5e62274367e6c0'
          'dfa9eb6f2fd9d0a3dab0e1860923489e')

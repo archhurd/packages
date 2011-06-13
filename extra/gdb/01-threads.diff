@@ -1,0 +1,54 @@
+diff -rupN a/gdb/gnu-nat.c b/gdb/gnu-nat.c
+--- a/gdb/gnu-nat.c	2011-03-27 19:15:15.210869681 -0400
++++ b/gdb/gnu-nat.c	2011-03-27 19:17:37.690097805 -0400
+@@ -75,6 +75,8 @@
+ #include "exc_request_U.h"
+ #include "msg_U.h"
+ 
++extern void prune_threads (void);
++
+ static process_t proc_server = MACH_PORT_NULL;
+ 
+ /* If we've sent a proc_wait_request to the proc server, the pid of the
+@@ -1578,8 +1580,8 @@ rewait:
+ 	  if (--inf->pending_execs == 0)
+ 	    /* We're done!  */
+ 	    {
++	      prune_threads ();	/* Get rid of the old shell threads */
+ #if 0				/* do we need this? */
+-	      prune_threads (1);	/* Get rid of the old shell threads */
+ 	      renumber_threads (0);	/* Give our threads reasonable names. */
+ #endif
+ 	    }
+@@ -2137,6 +2139,10 @@ gnu_create_inferior (struct target_ops *
+     inf_steal_exc_ports (inf);
+   else
+     inf_restore_exc_ports (inf);
++
++#if 0
++  prune_threads ();
++#endif
+ }
+ 
+ 
+diff -rupN a/gdb/thread.c b/gdb/thread.c
+--- a/gdb/thread.c	2011-03-27 19:15:15.634200721 -0400
++++ b/gdb/thread.c	2011-03-27 19:15:52.630666961 -0400
+@@ -61,7 +61,7 @@ static int thread_alive (struct thread_i
+ static void info_threads_command (char *, int);
+ static void thread_apply_command (char *, int);
+ static void restore_current_thread (ptid_t);
+-static void prune_threads (void);
++void prune_threads (void);
+ 
+ /* Frontend view of the thread state.  Possible extensions: stepping,
+    finishing, until(ling),...  */
+@@ -518,7 +518,7 @@ thread_alive (struct thread_info *tp)
+   return 1;
+ }
+
+-static void
++void
+ prune_threads (void)
+ {
+   struct thread_info *tp, *next;

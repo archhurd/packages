@@ -1,26 +1,22 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=pacman
-pkgver=3.4.1
+pkgver=3.5.2
 pkgrel=1
 pkgdesc="A library-based package manager with dependency support"
 arch=(i686)
 url="http://www.archlinux.org/pacman/"
 license=('GPL')
 groups=('base')
-depends=('bash' 'libarchive>=2.8.4-2' 'libfetch' 'pacman-mirrorlist')
-optdepends=('fakeroot: for makepkg usage as normal user')
+depends=('bash' 'libarchive>=2.8.4-2' 'libfetch>=2.28' 'pacman-mirrorlist')
+optdepends=('fakeroot: for makepkg usage as normal user'
+	    'curl: for rankmirrors usage')
 backup=(etc/pacman.conf etc/makepkg.conf)
 source=(ftp://ftp.archlinux.org/other/pacman/$pkgname-$pkgver.tar.gz
         pacman.conf
         makepkg.conf
         pacman_hurd.patch
         pacman_hurd_fakeroot.patch)
-md5sums=('4e4e8e4f636d9878fbed9cf840f162cf'
-         '7e6f21f9990f986edfcb9e573ff4f9f2'
-         '6cdd59f2a598861f084748d567d49599'
-         '210e7165adf4fa8822c4eb935bc92935'
-         'd248452ac7df02e6988f49055aaae4ed')
 
 build() {
   cd "$srcdir/$pkgname-$pkgver"
@@ -35,11 +31,16 @@ build() {
 
 package() {
   cd $srcdir/$pkgname-$pkgver
-  make DESTDIR="$pkgdir/" install
+  make DESTDIR="$pkgdir" install
 
-  mkdir -p $pkgdir/etc/pacman.d
-  install -m644 $srcdir/pacman.conf $pkgdir/etc
-  install -m644 $srcdir/makepkg.conf $pkgdir/etc
+  install -m644 ${srcdir}/pacman.conf ${pkgdir}/etc/pacman.conf
+
+  sed -i ${pkgdir}/etc/makepkg.conf \
+    -e "s|@CARCH[@]|1686|g" \
+    -e "s|@CHOST[@]|i686-pc-gnu|g" \
+    -e "s|@CARCHFLAGS[@]|-march=i686 |g"
+
+
 
   # install completion files
   mkdir -p $pkgdir/etc/bash_completion.d/
@@ -49,7 +50,11 @@ package() {
 
   #patch for hurd fakeroot
   cd $pkgdir
-  patch -Np1 < $srcdir/pacman_hurd_fakeroot.patch
+  patch -Np1 < $srcdir/pacman_hurd_fakeroot.patch || true
 }
 
-
+md5sums=('b4f1fdbc17100923071ebe8fe9377be5'
+         'e330888b8ad2307d87d69eb187521127'
+         'b2d359f0e760186b94a44ce174670a91'
+         '210e7165adf4fa8822c4eb935bc92935'
+         '69f6dc180ea25c38a6376a6d5fd1303d')

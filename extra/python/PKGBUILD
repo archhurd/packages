@@ -1,83 +1,95 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# $Id: PKGBUILD 101741 2010-12-01 12:46:53Z stephane $
+# Maintainer: Allan McRae <allan@archlinux.org>
+# Contributer: Jason Chu <jason@archlinux.org>
 
 pkgname=python
-pkgver=2.6.6
-pkgrel=1
-_pybasever=2.6
-pkgdesc="A high-level scripting language"
+pkgver=3.2
+pkgrel=3
+_pybasever=3.2
+pkgdesc="Next generation of the python high-level scripting language"
 arch=('i686')
 license=('custom')
 url="http://www.python.org"
-depends=('db' 'bzip2' 'gdbm' 'openssl' 'zlib' 'expat' 'sqlite3')
-makedepends=('tk')
-optdepends=('tk: for IDLE, pynche and modulator')
-provides=('python2' 'python-elementtree' 'python-ctypes')
+depends=('expat' 'bzip2' 'gdbm' 'openssl' 'libffi' 'zlib')
+makedepends=('tk' 'sqlite3')
+optdepends=('tk: for tkinter')
+provides=('python3')
+replaces=('python3')
+options=('!makeflags')
 source=(http://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.bz2
-	python-internal-expat.patch
-  python-db-4.8.patch
-	modulator-launcher
-	pynche-launcher
-  hurd-broken-poll.diff
-  hurd-disable-nonworking-constants.diff)
+	hurd-broken-poll.diff
+	hurd-disable-nonworking-constants.diff)
+md5sums=('92e94b5b6652b96349d6362b8337811d'
+         '49b10b02f78becfe7abae8b0ab7b7612'
+         'f255ad891e46f3acaa8b19078acdab6e')
 
 build() {
-  cd ${srcdir}/Python-${pkgver}
+  cd "${srcdir}/Python-${pkgver}"
 
-  patch -Np0 -i ${srcdir}/python-internal-expat.patch
-  patch -Np0 -i ${srcdir}/python-db-4.8.patch  
+  if [ -e ${srcdir}/.patched ]
+  then
+    msg "Already patched"
+  else
+    msg "Patching"
+    # Ensure that we are using the system copy of various libraries (expat, zlib and libffi),
+    # rather than copies shipped in the tarball
+    patch -Np1 -i ../hurd-broken-poll.diff
+    patch -Np1 -i ../hurd-disable-nonworking-constants.diff
+    
+    # can't be too careful...
+    sed 's/PATH_MAX/4096/' -i Python/*.c
+    sed 's/MAX_PATH/4096/' -i Python/*.c
+    touch ${srcdir}/.patched
+  fi
 
-  # Hurd 
-  patch -p1 -i ${srcdir}/hurd-disable-nonworking-constants.diff 
-  patch -p1 -i ${srcdir}/hurd-broken-poll.diff
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    export OPT="${CFLAGS}"
+    export CPPFLAGS="$(pkg-config --cflags-only-I libffi)"
+    ./configure --prefix= \
+              --enable-shared \
+              --with-threads \
+              --with-computed-gotos \
+              --enable-ipv6 \
+              --with-wide-unicode \
+              --with-system-ffi \
+	      --with-system-expat
+    touch ${srcdir}/.configured
+  fi
 
-  #http://bugs.python.org/issue6949
+  make
 
-  export OPT="${CFLAGS}"
-  ./configure --prefix= --enable-shared --with-threads \
-    --enable-unicode 
-
-  make  
+#  # Run the upstream test suite
+#  LD_LIBRARY_PATH=${srcdir}/Python-${pkgver}:${LD_LIBRARY_PATH} PYTHON=./python \
+#     ./runtests.sh -x test_distutils
+#  for testname in $(cat BAD); do
+#     echo "== ${testname} =="
+#     cat OUT/${testname}.out
+#  done
 }
 
 package() {
-  cd ${srcdir}/Python-${pkgver}
-  
-  make DESTDIR=${pkgdir} install 
-  
-  rm ${pkgdir}/bin/python
-  ln -sf python${_pybasever} ${pkgdir}/bin/python
-  ln -sf python${_pybasever} ${pkgdir}/bin/python2
+  cd "${srcdir}/Python-${pkgver}"
+  make DESTDIR=${pkgdir} install
 
-  ln -sf ../../libpython${_pybasever}.so \
-    ${pkgdir}/lib/python${_pybasever}/config/libpython${_pybasever}.so
+  # why are these not done by default...
+  ln -sf python3 ${pkgdir}/bin/python
+  ln -sf python3-config ${pkgdir}/bin/python-config
+  ln -sf idle3 ${pkgdir}/bin/idle
+  ln -sf pydoc3 ${pkgdir}/bin/pydoc
 
-  # Install the tools
-  #modulator
-  sed -i "s#%%PYBASEVER%%#${_pybasever}#" ${srcdir}/modulator-launcher
-  install -m755 ${srcdir}/modulator-launcher ${pkgdir}/bin/modulator
-  cp -r Tools/modulator ${pkgdir}/lib/python${_pybasever}/site-packages/
+  # clean-up reference to build directory
+  sed -i "s#${srcdir}/Python-${pkgver}:##" $pkgdir/lib/python3.2/config-3.2mu/Makefile
 
-  #pynche
-  sed -i "s#%%PYBASEVER%%#${_pybasever}#" ${srcdir}/pynche-launcher
-  install -m755 ${srcdir}/pynche-launcher ${pkgdir}/bin/pynche
-  rm -f Tools/pynche/*.pyw
-  cp -r Tools/pynche ${pkgdir}/lib/python${_pybasever}/site-packages/
-
-  #gettext
-  install -m755 Tools/i18n/pygettext.py ${pkgdir}/bin/
-  install -m755 Tools/i18n/msgfmt.py ${pkgdir}/bin/
-
-  mkdir -p ${pkgdir}/lib/python${_pybasever}/Tools/scripts
-  install -m644 Tools/scripts/README ${pkgdir}/lib/python${_pybasever}/Tools/scripts/
-  install -m755 Tools/scripts/*py ${pkgdir}/lib/python${_pybasever}/Tools/scripts/
+  # Fix conflicts with python2 - python2 version is newer...
+  rm ${pkgdir}/bin/2to3
 
   # license
   install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
-md5sums=('cf4e6881bb84a7ce6089e4a307f71f14'
-         '993800dbcc0c4f199c1ceee998a06e71'
-         '10eb5449ead95b9cb13eae9f9a65894e'
-         '793f25c6dfc74e75cadb72b2134f7c67'
-         '108370afad19062abd2df4edaf060e57'
-         'ecf1a0d5eddbcfe757034381152c8f66'
-         '80088c2e94ad8bd419c78a63dc12d55b')
+

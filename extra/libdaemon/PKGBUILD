@@ -1,0 +1,24 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Manolis Tzanidakis
+# Contributor: Mark Rosenstand <mark@archlinux.org>
+# Contributor: Thayer Williams <thayer@archlinux.org>
+
+pkgname=libdaemon
+pkgver=0.14
+pkgrel=1
+pkgdesc="A lightweight C library which eases the writing of UNIX daemons"
+url="http://0pointer.de/lennart/projects/libdaemon/"
+license=('LGPL')
+arch=('i686')
+depends=('glibc')
+source=(http://0pointer.de/lennart/projects/libdaemon/$pkgname-$pkgver.tar.gz)
+options=('!libtool')
+md5sums=('509dc27107c21bcd9fbf2f95f5669563')
+
+build() {
+  cd $srcdir/$pkgname-$pkgver
+  ./configure --prefix= --localstatedir=/var --disable-lynx
+  make
+  make DESTDIR=$pkgdir install
+}
+

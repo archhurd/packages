@@ -1,7 +1,11 @@
 # Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Andrea Scarpino <andrea@archlinux.org>
+# Contributor: Pierre Schmitz <pierre@archlinux.de>
+# Contributor: damir <damir@archlinux.org>
+# Contributor: Konstantinos Pachnis <kpachnis@mes-direct.com>
 
 pkgname=cmake
-pkgver=2.8.3
+pkgver=2.8.4
 pkgrel=1
 pkgdesc="A cross-platform open-source make system"
 arch=('i686')
@@ -11,24 +15,21 @@ depends=('expat' 'curl' 'gcc-libs' 'shared-mime-info')
 install=${pkgname}.install
 source=("http://www.cmake.org/files/v2.8/${pkgname}-${pkgver}.tar.gz"
 	"hurd_complete_patch.patch")
-md5sums=('a76a44b93acf5e3badda9de111385921'
+md5sums=('209b7d1d04b2e00986538d74ba764fcf'
          '991d95283400665c0c3a4735b5e5a460')
 
 build() {
 	cd $srcdir/$pkgname-$pkgver
-	if [ -f .patched ]
+	if [ -f ${srcdir}/.patched ]
 	#my builds fail a lot...
 	then
-		echo "already patched..."
+		msg "already patched..."
 	else
-		echo "patching..."
+		msg "patching..."
 		patch -p1 < ${srcdir}/hurd_complete_patch.patch
-		touch .patched
+		touch ${srcdir}/.patched
 	fi
-	./bootstrap --prefix= \
-		--mandir=/share/man \
-		--docdir=/share/doc/cmake \
-		--system-libs
+	./bootstrap --prefix= --mandir=/share/man --docdir=/share/doc/cmake -system-libs
 	make
 }
 

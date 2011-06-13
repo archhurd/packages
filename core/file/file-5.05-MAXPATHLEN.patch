@@ -1,0 +1,13 @@
+--- magic.c.orig	2011-03-25 02:22:51.730000000 +0000
++++ magic.c	2011-03-25 02:23:47.390000000 +0000
+@@ -86,6 +86,10 @@
+ #define	STDIN_FILENO	0
+ #endif
+ 
++#ifndef MAXPATHLEN
++#define MAXPATHLEN	1024
++#endif
++
+ #ifdef WIN32
+ BOOL WINAPI DllMain(HINSTANCE hinstDLL,
+     DWORD fdwReason __attribute__((__unused__)),

@@ -1,27 +1,35 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 # $Id: PKGBUILD 104541 2011-01-03 22:33:16Z tpowa $
-# Maintainer: judd <jvinet@zeroflux.org>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Contributor: judd <jvinet@zeroflux.org>
 pkgname=groff
 pkgver=1.21
 pkgrel=1
 pkgdesc="GNU troff text-formatting system"
-arch=(i686)
+arch=('i686')
 url="http://www.gnu.org/software/groff/groff.html"
 license=('GPL')
 depends=('perl' 'gcc-libs' 'texinfo')
-makedepends=('netpbm' 'psutils' 'ghostscript')
-optdepends=('netpbm: for use together with man -H command interaction in browsers'
-            'psutils: for use together with man -H command interaction in browsers')
+#makedepends=('netpbm' 'psutils' 'ghostscript')
+#optdepends=('netpbm: for use together with man -H command interaction in browsers'
+#            'psutils: for use together with man -H command interaction in browsers')
 source=(ftp://ftp.gnu.org/gnu/groff/groff-$pkgver.tar.gz
         site.tmac)
-options=('!makeflags')
-install=groff.install
 md5sums=('8b8cd29385b97616a0f0d96d0951c5bf'
          'a1fedafd7863b37968d32ad9ae1d8c13')
+options=('!makeflags')
+install=groff.install
 
 build() {
   cd $srcdir/$pkgname-$pkgver
-  ./configure --prefix= --without-x
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    ./configure --prefix= --without-x
+    touch ${srcdir}/.configured
+  fi
   mkdir -p $pkgdir
   make
 }
@@ -42,5 +50,3 @@ package() {
   cat $srcdir/site.tmac >> \
     $pkgdir/share/groff/site-tmac/mdoc.local
 }
-md5sums=('8b8cd29385b97616a0f0d96d0951c5bf'
-         'a1fedafd7863b37968d32ad9ae1d8c13')

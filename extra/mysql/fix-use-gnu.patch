@@ -1,0 +1,11 @@
+diff -rupN a/include/my_global.h b/include/my_global.h
+--- a/include/my_global.h	2011-04-02 11:41:48.769783490 -0400
++++ b/include/my_global.h	2011-04-02 11:43:43.955826140 -0400
+@@ -1356,6 +1356,7 @@ do { doubleget_union _tmp; \
+ 
+ #ifdef HAVE_DLOPEN
+ #if defined(HAVE_DLFCN_H)
++#define __USE_GNU
+ #include <dlfcn.h>
+ #endif
+ #endif

@@ -1,0 +1,74 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Kaiting Chen <kaiting.chen@kiwilight.com>
+# Contributor: Gaetan Bisson <bisson@archlinux.org>
+
+pkgname='cronie'
+pkgver=1.4.7
+pkgrel=2
+pkgdesc='Daemon that runs specified programs at scheduled times and related tools'
+url='https://fedorahosted.org/cronie/'
+license=('custom:BSD')
+arch=('i686')
+groups=('base')
+depends=('pam' 'bash' 'run-parts')
+
+source=("https://fedorahosted.org/releases/c/r/${pkgname}/${pkgname}-${pkgver}.tar.gz"
+        'cron.deny'
+        'crontab'
+        'pam.d'
+        'rc.d'
+	'01-path_max-fix.patch'
+	'02-pipe_buf-fix.patch')
+backup=('etc/crontab'
+        'etc/anacrontab'
+        'etc/conf.d/crond'
+        'etc/pam.d/crond'
+        'etc/cron.deny')
+
+conflicts=('dcron')
+replaces=('dcron')
+provides=('cron')
+groups=('base')
+
+build() {
+	cd "${srcdir}/${pkgname}-${pkgver}"
+	patch -Np1 -i ${srcdir}/01-path_max-fix.patch
+	patch -Np1 -i ${srcdir}/02-pipe_buf-fix.patch
+	./configure \
+		--prefix= \
+		--sysconfdir=/etc \
+		--localstatedir=/var \
+		--enable-anacron \
+		--without-inotify \
+		--with-pam \
+
+	make
+}
+
+package() {
+	cd "${srcdir}/${pkgname}-${pkgver}"
+
+	make DESTDIR="${pkgdir}" install
+
+	install -d "${pkgdir}"/etc/cron.{d,hourly,daily,weekly,monthly}
+	install -d "${pkgdir}"/var/spool/{ana,}cron
+	chmod u+s "${pkgdir}"/bin/crontab
+
+	install -Dm755 ../rc.d "${pkgdir}"/etc/rc.d/crond
+	install -Dm644 ../pam.d "${pkgdir}"/etc/pam.d/crond
+	install -Dm644 ../crontab "${pkgdir}"/etc/crontab
+	install -Dm644 ../cron.deny "${pkgdir}"/etc/cron.deny
+	install -Dm644 crond.sysconfig "${pkgdir}"/etc/conf.d/crond
+	install -Dm644 contrib/0hourly "${pkgdir}"/etc/cron.d/0hourly
+	install -Dm755 contrib/0anacron "${pkgdir}"/etc/cron.hourly/0anacron
+	install -Dm644 contrib/anacrontab "${pkgdir}"/etc/anacrontab
+
+	install -Dm644 COPYING "${pkgdir}"/share/licenses/cronie/COPYING
+}
+md5sums=('dfc26c47756d0c40ee27ae3c7ee98e0d'
+         '2962d9812fbbbdee1bd7f1c1ccb5e372'
+         '0dc9f561dd2ea7a4c4dfe65c0f828eb2'
+         '47a811bfb46596ed1e49d7d8aae1d738'
+         '4559d3de3a1e0d58e45f08cff4521d98'
+         'b9043cb730929f5754ff4e609bf30534'
+         '170f22fa93d4cf88b5661cc1cfd4d916')

@@ -1,7 +1,7 @@
 # Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=libidn
-pkgver=1.19
+pkgver=1.22
 pkgrel=1
 pkgdesc="Implementation of the Stringprep, Punycode and IDNA specifications"
 url="http://www.gnu.org/software/libidn/"
@@ -11,17 +11,24 @@ depends=('glibc' 'texinfo')
 makedepends=('pkgconfig')
 options=('!libtool')
 source=(http://ftp.gnu.org/gnu/${pkgname}/${pkgname}-${pkgver}.tar.gz)
-md5sums=('a45142126d28162014c995f969bdb5a8')
 
 install=libidn.install
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  ./configure --prefix=
-  make
-  make DESTDIR=${pkgdir} install
+  if [ -e ${srcdir}/.configured ]; then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    ./configure --prefix=
+    touch ${srcdir}/.configured
+  fi
 
-  # handle info files
-  rm ${pkgdir}/share/info/{dir,libidn-components.png} # nobody is missing a png I assume
-  gzip ${pkgdir}/share/info/*
+  make
 }
+
+package() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install
+}
+md5sums=('893a1df0cf3b28b72d248382eaeaca71')

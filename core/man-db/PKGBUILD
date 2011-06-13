@@ -1,10 +1,10 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
-# $Id: PKGBUILD 99794 2010-11-17 19:07:22Z andyrtr $
-# Maintainer: Andreas Radke <andyrtr@archlinux.org>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Contributor: Andreas Radke <andyrtr@archlinux.org>
 # Contributor: Sergej Pupykin <sergej@aur.archlinux.org>
 
 pkgname=man-db
-pkgver=2.5.9
+pkgver=2.6.0.2
 pkgrel=1
 pkgdesc="A utility for reading man pages"
 arch=('i686')
@@ -20,7 +20,6 @@ provides=('man')
 replaces=('man')
 install=${pkgname}.install
 source=(http://savannah.nongnu.org/download/man-db/$pkgname-$pkgver.tar.gz
-	#http://launchpad.net/man-db/main/${pkgver}/+download/${pkgname}-${pkgver}.tar.gz
         convert-mans man-db.cron.daily)
 options=('!libtool')
 
@@ -48,6 +47,6 @@ package() {
   install -D -m744 ${srcdir}/man-db.cron.daily ${pkgdir}/etc/cron.daily/man-db
 }
 
-md5sums=('9841394f5c5fe7e2dd2e0c5fb4766d0f'
+md5sums=('2b41c96efec032d2b74ccbf2e401f93e'
          '2b7662a7d5b33fe91f9f3e034361a2f6'
          '6950aec56f56569580698745e79d6765')

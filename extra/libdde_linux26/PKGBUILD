@@ -1,0 +1,63 @@
+# Maintainer Stephen Gilles <stephendgilles@gmail.com>
+
+pkgname=libdde_linux26
+pkgver=20110515
+pkgrel=1
+pkgdesc="Part of the requirements for building DDE drivers"
+arch=(i686)
+url="http://www.gnu.org/software/hurd/user/zhengda.html"
+license=('GPL')
+groups=('dde')
+makedepends=('git' 'mig' 'glibc')
+depends=('gnumach-userleveldrivers' 'libpciaccess')
+#depends=('libpciaccess')
+
+__gitroot="git://git.sv.gnu.org/hurd/incubator.git"
+__gitname="incubator"
+
+build() {
+  cd "$srcdir"
+  msg "Connecting to GIT server...."
+
+  if [[ -d $__gitname ]]; then
+    cd $__gitname && git pull origin/dde || true
+    cd $srcdir
+  else
+    git clone $__gitroot $__gitname
+    cd $__gitname
+    git fetch --all
+    git checkout origin/dde
+    cd $srcdir
+  fi
+
+  msg "GIT checkout done or server timeout"
+  msg "Starting make..."
+
+  #
+  # BUILD HERE
+  #
+
+  rm -rvf $srcdir/$__gitname-build
+  git clone $srcdir/$__gitname $srcdir/$__gitname-build
+  cd $srcdir/$__gitname-build/
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
+    autoreconf -vif
+    #todo: fix this so that configure does not need to be so awkward
+    ./configure --host=i686-pc-gnu --prefix=${pkgdir} 
+  fi
+  cd $srcdir/$__gitname-build/libdde_linux26
+  make prefix=${pkgdir} DESTDIR=${pkgdir}
+}
+
+package() {
+  cd $srcdir/$__gitname-build/libdde_linux26
+  
+  # I do not understand the makefile system for this at all
+  cp -r build/* ${pkgdir}
+} 
+

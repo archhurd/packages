@@ -1,0 +1,11 @@
+diff -rupN a/Imath/ImathMatrix.h b/Imath/ImathMatrix.h
+--- a/Imath/ImathMatrix.h	2011-05-03 19:43:07.000000000 -0400
++++ b/Imath/ImathMatrix.h	2011-05-03 19:43:35.000000000 -0400
+@@ -51,6 +51,7 @@
+ 
+ #include <iostream>
+ #include <iomanip>
++#include <string.h>
+ 
+ #if (defined _WIN32 || defined _WIN64) && defined _MSC_VER
+ // suppress exception specification warnings

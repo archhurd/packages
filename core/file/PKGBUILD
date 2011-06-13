@@ -1,7 +1,10 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Contributor: Allan McRae <allan@archlinux.org>
+# Contributor: Andreas Radke <andyrtr@archlinux.org>
 
 pkgname=file
-pkgver=5.04
+pkgver=5.06
 pkgrel=1
 pkgdesc="File type identification utility"
 arch=('i686')
@@ -11,14 +14,24 @@ url="http://www.darwinsys.com/file/"
 depends=('glibc' 'zlib')
 options=('!libtool')
 source=(ftp://ftp.astron.com/pub/$pkgname/$pkgname-$pkgver.tar.gz
-        file-5.04-MAXPATHLEN.patch)
+        file-5.05-MAXPATHLEN.patch
+	file-5.05-python-3.2.patch)
 
 build() {
-  patch -p0 < $startdir/file-5.04-MAXPATHLEN.patch
   cd ${srcdir}/$pkgname-$pkgver
-  
+
+  if [ -e ${srcdir}/.patched ]
+  then
+    msg "Already patched"
+  else
+    msg "Patching"
+    patch -p0  < ${srcdir}/file-5.05-python-3.2.patch
+    patch src/magic.c < ${srcdir}/file-5.05-MAXPATHLEN.patch
+    touch ${srcdir}/.patched
+  fi
+
   ./configure --prefix= --datadir=/share/file
-  make || return 1
+  make
 }
 
 package(){
@@ -30,6 +43,6 @@ package(){
   
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/COPYING
 }
-
-md5sums=('accade81ff1cc774904b47c72c8aeea0'
-         'a572d3354e9504aefdff927d97304fbf')
+md5sums=('deb12b0fb9d09e7681be72bad6eba4e0'
+         'd2d5ec39b67020188e894dc8201146a2'
+         '3f5e147be5b9c36c74323a1317328538')

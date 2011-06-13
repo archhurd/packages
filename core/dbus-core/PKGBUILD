@@ -1,10 +1,10 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
-# $Id: PKGBUILD 90541 2010-09-13 10:46:30Z jgc $
-# Maintainer: Jan de Groot <jgc@archlinux.org>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Contributor: Jan de Groot <jgc@archlinux.org>
 # Contributor: Link Dupont <link@subpop.net>
-#
+
 pkgname=dbus-core
-pkgver=1.4.1
+pkgver=1.4.6
 pkgrel=1
 pkgdesc="Freedesktop.org message bus system"
 url="http://www.freedesktop.org/Software/dbus"
@@ -56,5 +56,5 @@ package() {
   install -d -m755 "${pkgdir}/share/licenses/dbus-core"
   install -m644 COPYING "${pkgdir}/share/licenses/dbus-core/"
 }
-md5sums=('99cb057700c0455fb68f8d57902f77ac'
+md5sums=('99b165f727dd8a5c4b7e2c20a8bf5db6'
          '08f93dd19cffd1b45ab05c1fd4efb560')

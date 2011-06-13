@@ -1,0 +1,25 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Tobias Powalowski <tpowa@archlinux.org>
+pkgname=openslp
+pkgver=1.2.1
+pkgrel=1
+pkgdesc="Open-source implementation of Service Location Protocol"
+arch=('i686')
+url="http://www.openslp.org"
+license=('BSD')
+depends=('glibc' 'bash' 'openssl')
+backup=('etc/slp.conf' 'etc/slp.reg' 'etc/slp.spi')
+options=('!libtool')
+source=(http://downloads.sourceforge.net/sourceforge/${pkgname}/${pkgname}-${pkgver}.tar.gz 
+	rc.slpd)
+md5sums=('ff9999d1b44017281dd00ed2c4d32330'
+         'cd96c6ea6b26a47ea81489323ed8fc7f')
+
+build() {
+  cd ${srcdir}/${pkgname}-${pkgver}
+  ./configure --prefix= 
+  make
+  make DESTDIR=${pkgdir} DOC_DIR=/share/doc/openslp-${pkgver} install
+  install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/LICENSE
+  install -D -m755 ../rc.slpd ${pkgdir}/etc/rc.d/slpd
+}

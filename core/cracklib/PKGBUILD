@@ -1,7 +1,8 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=cracklib
-pkgver=2.8.16
+pkgver=2.8.18
 pkgrel=1
 pkgdesc="Password Checking Library"
 arch=('i686')
@@ -11,19 +12,18 @@ groups=('base')
 depends=('glibc' 'zlib')
 options=('!libtool')
 source=(http://downloads.sourceforge.net/sourceforge/$pkgname/$pkgname-$pkgver.tar.gz)
+md5sums=('79053ad8bc714a44cd660cb12116211b')
 
 build() {
-  cd $startdir/src/$pkgname-$pkgver
+  cd ${srcdir}/${pkgname}-${pkgver}
   ./configure --prefix= --without-python
-  make || return 1
+  make
 }
 
 package() {
-  cd $startdir/src/$pkgname-$pkgver
-  mkdir -p $startdir/pkg/share/dict
-  make DESTDIR=$startdir/pkg install
-  cp dicts/cracklib-small $startdir/pkg/share/dict
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make DESTDIR=${pkgdir} install
+  install -Dm644 dicts/cracklib-small ${pkgdir}/share/dict/cracklib-small
   sh ./util/cracklib-format dicts/cracklib-small \
     | sh ./util/cracklib-packer $startdir/pkg/share/cracklib/pw_dict
 }
-md5sums=('3bfb22db8fcffd019463ee415a1b25b7')

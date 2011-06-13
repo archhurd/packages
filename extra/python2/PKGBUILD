@@ -1,0 +1,113 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+
+pkgname=python2
+pkgver=2.7.1
+pkgrel=3
+_pybasever=2.7
+pkgdesc="A high-level scripting language"
+arch=('i686')
+license=('custom')
+url="http://www.python.org"
+depends=('db' 'bzip2' 'gdbm' 'openssl' 'zlib' 'expat' 'sqlite3')
+makedepends=('tk')
+optdepends=('tk: for IDLE, pynche and modulator')
+conflicts=('python<3')
+provides=('python2' 'python-elementtree' 'python-ctypes')
+source=(http://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.bz2
+  	hurd-broken-poll.diff
+  	hurd-disable-nonworking-constants.diff)
+md5sums=('aa27bc25725137ba155910bd8e5ddc4f'
+         '45b7a5b9ee08f7f428677bc489dfa751'
+         '97bfc79cafffb1f26a122780e2cf516c')
+build() {
+  cd ${srcdir}/Python-${pkgver}
+
+
+  if [ -e ${srcdir}/.patched ]
+  then
+    msg "Already patched"
+  else
+    msg "Patching"
+    # Hurd 
+    patch -p1 -i ${srcdir}/hurd-disable-nonworking-constants.diff 
+    patch -p1 -i ${srcdir}/hurd-broken-poll.diff
+    touch ${srcdir}/.patched
+  fi
+
+  #http://bugs.python.org/issue6949
+  
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    export OPT="${CFLAGS}"
+    ./configure --prefix= \
+                --enable-shared \
+                --with-threads \
+                --enable-unicode \
+                --with-system-expat \
+                --with-system-ffi \
+                --enable-ipv6
+    touch ${srcdir}/.configured
+  fi
+
+  make  
+}
+
+package() {
+  cd ${srcdir}/Python-${pkgver}
+  
+  make DESTDIR=${pkgdir} altinstall maninstall
+  
+  # rm ${pkgdir}/bin/python
+  ln -sf python${_pybasever} ${pkgdir}/bin/python2
+  ln -sf python${_pybasever}-config ${pkgdir}/bin/python2-config
+
+  ln -sf ../../libpython${_pybasever}.so \
+    ${pkgdir}/lib/python${_pybasever}/config/libpython${_pybasever}.so
+
+  # Install the tools
+
+  # some useful "stuff"
+  install -dm755 ${pkgdir}/lib/python${_pybasever}/Tools/{i18n,scripts}
+  install -m755 Tools/i18n/{msgfmt,pygettext}.py \
+    "${pkgdir}/lib/python${_pybasever}/Tools/i18n/"
+  
+  #modulator - nonexistant
+  #sed -i "s#%%PYBASEVER%%#${_pybasever}#" ${srcdir}/modulator-launcher
+  #install -m755 ${srcdir}/modulator-launcher ${pkgdir}/bin/modulator
+  #cp -r Tools/modulator ${pkgdir}/lib/python${_pybasever}/site-packages/
+
+  #pynche - nonexistant
+  #sed -i "s#%%PYBASEVER%%#${_pybasever}#" ${srcdir}/pynche-launcher
+  #install -m755 ${srcdir}/pynche-launcher ${pkgdir}/bin/pynche
+  #rm -f Tools/pynche/*.pyw
+  #cp -r Tools/pynche ${pkgdir}/lib/python${_pybasever}/site-packages/
+
+  #gettext - taken care of above
+  # install -m755 Tools/i18n/pygettext.py ${pkgdir}/bin/
+  # install -m755 Tools/i18n/msgfmt.py ${pkgdir}/bin/
+  
+  # I'm not sure what this does, so commented out for now
+  # mkdir -p ${pkgdir}/lib/python${_pybasever}/Tools/scripts
+  # install -m644 Tools/scripts/README ${pkgdir}/lib/python${_pybasever}/Tools/scripts/
+  # install -m755 Tools/scripts/*py ${pkgdir}/lib/python${_pybasever}/Tools/scripts/
+  
+  # fix conflicts with python
+  mv ${pkgdir}/bin/idle{,2}
+  mv ${pkgdir}/bin/pydoc{,2}
+  
+  # although I could have sworn python 3.x doesn't install a 2to3...
+  mv ${pkgdir}/bin/2to3{,-2.7}
+  
+  # clean up #!s
+  find "${pkgdir}/lib/python${_pybasever}/" -name '*.py' | \
+    xargs sed -i "s|#[ ]*![ ]*/bin/env python$|#!/bin/env python2|"
+ 
+  # clean-up reference to build directory
+  sed -i "s#${srcdir}/Python-${pkgver}:##" "${pkgdir}/lib/python${_pybasever}/config/Makefile" 
+
+  # license
+  install -Dm644 LICENSE ${pkgdir}/share/licenses/python2/LICENSE
+}

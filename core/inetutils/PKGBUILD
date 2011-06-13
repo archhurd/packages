@@ -2,7 +2,7 @@
 
 pkgname=inetutils
 pkgver=1.8
-pkgrel=1
+pkgrel=2
 pkgdesc="A collection of common network programs"
 arch=('i686')
 url="http://www.gnu.org/software/inetutils/"
@@ -14,7 +14,8 @@ backup=('etc/conf.d/ftpd' 'etc/xinetd.d/telnet' 'etc/xinetd.d/talk')
 options=('!emptydirs')
 install=inetutils.install
 source=(http://ftp.gnu.org/gnu/inetutils/${pkgname}-${pkgver}.tar.gz \
-        ftpd.rc ftpd.conf telnet.xinetd talk.xinetd)
+        ftpd.rc ftpd.conf telnet.xinetd talk.xinetd 
+	no_eth0_segfault.patch)
 
 build() {
   ## stupid hack to fix a stupid problem.
@@ -24,6 +25,12 @@ build() {
   echo "#include <stdlib.h>" > flags.h
   cat flags.h.bak >> flags.h
   ## end stupid hack
+  
+  ## now apply the patch that fixes segfaulting with no devices
+  cd "${srcdir}/${pkgname}-${pkgver}/ifconfig"
+  patch -Rup0 options.c < ${srcdir}/no_eth0_segfault.patch
+  ## patch applied
+
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix= --libexec=/sbin --localstatedir=/var \
     --mandir=/share/man --infodir=/share/info \
@@ -57,4 +64,5 @@ md5sums=('ad8fdcdf1797b9ca258264a6b04e48fd'
          'abb31b95485802d23b7df3f96fa3c75a'
          'e6e6e5990a2e8159a276fef8fbf54c04'
          '433b6535e931f22654102de62402d76e'
-         'c84c281926ec95095971a666b3b11516')
+         'c84c281926ec95095971a666b3b11516'
+         'a04025e6a02649e2c8c26dc649900ea5')

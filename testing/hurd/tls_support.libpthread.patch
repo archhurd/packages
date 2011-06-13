@@ -1,0 +1,208 @@
+diff --git a/pthread/pt-create.c b/pthread/pt-create.c
+index 8f62b78..9ef684e 100644
+--- a/pthread/pt-create.c
++++ b/pthread/pt-create.c
+@@ -129,6 +129,11 @@ __pthread_create_internal (struct __pthread **thread,
+   if (err)
+     goto failed_thread_alloc;
+ 
++  pthread->tcb = _dl_allocate_tls (NULL);
++  if (!pthread->tcb)
++    goto failed_thread_tls_alloc;
++  pthread->tcb->tcb = pthread->tcb;
++
+   /* And initialize the rest of the machine context.  This may include
+      additional machine- and system-specific initializations that
+      prove convenient.  */
+@@ -194,6 +199,8 @@ __pthread_create_internal (struct __pthread **thread,
+  failed_sigstate:
+   __pthread_sigstate_destroy (pthread);
+  failed_setup:
++  _dl_deallocate_tls (pthread->tcb, 1);
++ failed_thread_tls_alloc:
+   __pthread_thread_dealloc (pthread);
+   __pthread_thread_halt (pthread);
+  failed_thread_alloc:
+diff --git a/pthread/pt-exit.c b/pthread/pt-exit.c
+index 5fe0ba8..b352207 100644
+--- a/pthread/pt-exit.c
++++ b/pthread/pt-exit.c
+@@ -84,7 +84,9 @@ pthread_exit (void *status)
+          deallocate our own stack.  However, it will eventually be
+          reused when this thread structure is recycled.  */
+       __pthread_mutex_unlock (&self->state_lock);
+-
++      
++      if (self->tcb)
++        _dl_deallocate_tls (self->tcb, 1);
+       __pthread_dealloc (self);
+ 
+       break;
+diff --git a/pthread/pt-internal.h b/pthread/pt-internal.h
+index cb441d0..3c1b6d2 100644
+--- a/pthread/pt-internal.h
++++ b/pthread/pt-internal.h
+@@ -54,6 +54,14 @@ enum pthread_state
+ # define PTHREAD_SYSDEP_MEMBERS
+ #endif
+ 
++/* Type of the TCB.  */
++typedef struct
++{
++  void *tcb;			/* Points to this structure.  */
++  void *dtv;			/* Vector of pointers to TLS data.  */
++  thread_t self;		/* This thread's control port.  */
++} tcbhead_t;
++
+ /* This structure describes a POSIX thread.  */
+ struct __pthread
+ {
+@@ -89,6 +97,8 @@ struct __pthread
+ 
+   PTHREAD_SYSDEP_MEMBERS
+ 
++  tcbhead_t *tcb;
++
+   struct __pthread *next, **prevp;
+ };
+ 
+@@ -287,4 +297,13 @@ const struct __pthread_rwlockattr __pthread_default_rwlockattr;
+ /* Default condition attributes.  */
+ const struct __pthread_condattr __pthread_default_condattr;
+ 
++
++/* From glibc.  */
++
++/* Dynamic linker TLS allocation.  */
++extern void *_dl_allocate_tls(void *);
++
++/* Dynamic linker TLS deallocation.  */
++extern void _dl_deallocate_tls(void *, int);
++
+ #endif /* pt-internal.h */
+diff --git a/sysdeps/mach/hurd/ia32/pt-machdep.c b/sysdeps/mach/hurd/ia32/pt-machdep.c
+index face46c..0f6e825 100644
+--- a/sysdeps/mach/hurd/ia32/pt-machdep.c
++++ b/sysdeps/mach/hurd/ia32/pt-machdep.c
+@@ -21,12 +21,28 @@
+ 
+ #include <mach.h>
+ #include <mach/i386/thread_status.h>
++#include <mach/i386/mach_i386.h>
++#include <mach/mig_errors.h>
+ #include <mach/thread_status.h>
+ 
++#define HURD_TLS_DESC_DECL(desc, tcb)					      \
++  struct descriptor desc =						      \
++    {				/* low word: */				      \
++      0xffff			/* limit 0..15 */			      \
++      | (((unsigned int) (tcb)) << 16) /* base 0..15 */			      \
++      ,				/* high word: */			      \
++      ((((unsigned int) (tcb)) >> 16) & 0xff) /* base 16..23 */		      \
++      | ((0x12 | 0x60 | 0x80) << 8) /* access = ACC_DATA_W|ACC_PL_U|ACC_P */  \
++      | (0xf << 16)		/* limit 16..19 */			      \
++      | ((4 | 8) << 20)		/* granularity = SZ_32|SZ_G */		      \
++      | (((unsigned int) (tcb)) & 0xff000000) /* base 24..31 */		      \
++    }
++
+ int
+-__thread_set_pcsp (thread_t thread,
++__thread_set_pcsptp (thread_t thread,
+ 		   int set_ip, void *ip,
+-		   int set_sp, void *sp)
++		   int set_sp, void *sp,
++		   int set_tp, void *tp)
+ {
+   error_t err;
+   struct i386_thread_state state;
+@@ -34,7 +50,7 @@ __thread_set_pcsp (thread_t thread,
+ 
+   state_count = i386_THREAD_STATE_COUNT;
+ 
+-  err = __thread_get_state (thread, i386_THREAD_STATE,
++  err = __thread_get_state (thread, i386_REGS_SEGS_STATE,
+ 			    (thread_state_t) &state, &state_count);
+   if (err)
+     return err;
+@@ -43,8 +59,21 @@ __thread_set_pcsp (thread_t thread,
+     state.uesp = (unsigned int) sp;
+   if (set_ip)
+     state.eip = (unsigned int) ip;
++  if (set_tp) {
++    HURD_TLS_DESC_DECL(desc, tp);
++    int sel;
++
++    asm ("mov %%gs, %w0" : "=q" (sel) : "0" (0));
++    if (__builtin_expect (sel, 0x48) & 4) /* LDT selector */
++      err = __i386_set_ldt (thread, sel, &desc, 1);
++    else
++      err = __i386_set_gdt (thread, &sel, desc);
++    if (err)
++      return err;
++    state.gs = sel;
++  }
+ 
+-  err = __thread_set_state (thread, i386_THREAD_STATE,
++  err = __thread_set_state (thread, i386_REGS_SEGS_STATE,
+ 			    (thread_state_t) &state,
+ 			    i386_THREAD_STATE_COUNT);
+   if (err)
+diff --git a/sysdeps/mach/hurd/ia32/pt-setup.c b/sysdeps/mach/hurd/ia32/pt-setup.c
+index ba438d6..cb9bcd0 100644
+--- a/sysdeps/mach/hurd/ia32/pt-setup.c
++++ b/sysdeps/mach/hurd/ia32/pt-setup.c
+@@ -91,12 +91,15 @@ __pthread_setup (struct __pthread *thread,
+   thread->mcontext.pc = entry_point;
+   thread->mcontext.sp = stack_setup (thread, start_routine, arg);
+ 
++  thread->tcb->self = thread->kernel_thread;
++
+   ktid = __mach_thread_self ();
+   if (thread->kernel_thread != ktid)
+     {
+-      err = __thread_set_pcsp (thread->kernel_thread,
++      err = __thread_set_pcsptp (thread->kernel_thread,
+ 			       1, thread->mcontext.pc,
+-			       1, thread->mcontext.sp);
++			       1, thread->mcontext.sp,
++			       1, thread->tcb);
+       assert_perror (err);
+     }
+   __mach_port_deallocate (__mach_task_self (), ktid);
+diff --git a/sysdeps/mach/hurd/pt-docancel.c b/sysdeps/mach/hurd/pt-docancel.c
+index b81a5c7..b3d31a5 100644
+--- a/sysdeps/mach/hurd/pt-docancel.c
++++ b/sysdeps/mach/hurd/pt-docancel.c
+@@ -52,8 +52,8 @@ __pthread_do_cancel (struct __pthread *p)
+       err = __thread_abort (p->kernel_thread);
+       assert_perror (err);
+ 
+-      err = __thread_set_pcsp (p->kernel_thread,
+-			       1, (void *) call_exit, 0, 0);
++      err = __thread_set_pcsptp (p->kernel_thread,
++			       1, (void *) call_exit, 0, 0, 0, 0);
+       assert_perror (err);
+ 
+       err = __thread_resume (p->kernel_thread);
+diff --git a/sysdeps/mach/hurd/pt-sysdep.h b/sysdeps/mach/hurd/pt-sysdep.h
+index f14a136..2a39ef4 100644
+--- a/sysdeps/mach/hurd/pt-sysdep.h
++++ b/sysdeps/mach/hurd/pt-sysdep.h
+@@ -60,11 +60,13 @@ __pthread_stack_dealloc (void *stackaddr, size_t stacksize)
+   __vm_deallocate (__mach_task_self (), (vm_offset_t) stackaddr, stacksize);
+ }
+ 
+-/* Change thread THREAD's program counter to PC if SET_PC is true and
+-   its stack pointer to SP if SET_IP is true.  */
+-extern int __thread_set_pcsp (thread_t thread,
++/* Change thread THREAD's program counter to PC if SET_PC is true,
++   its stack pointer to SP if SET_IP is true, and its thread pointer
++   to TP if SET_TP is true.  */
++extern int __thread_set_pcsptp (thread_t thread,
+ 			      int set_pc, void *pc,
+-			      int set_sp, void *sp);
++			      int set_sp, void *sp,
++			      int set_tp, void *tp);
+ 
+ 
+ #endif /* pt-sysdep.h */

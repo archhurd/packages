@@ -1,0 +1,41 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Aaron Griffin <aaron@archlinux.org>
+# Contributor: Judd Vinet <jvinet@zeroflux.org>
+
+pkgname=logrotate
+pkgver=3.7.9
+pkgrel=1
+pkgdesc="Rotates system logs automatically"
+url='http://cvs.fedora.redhat.com'
+arch=('i686')
+license=('GPL')
+groups=('base')
+depends=('popt' 'cron' 'gzip')
+backup=('etc/logrotate.conf')
+source=(https://fedorahosted.org/releases/l/o/${pkgname}/${pkgname}-${pkgver}.tar.gz
+        logrotate.conf
+        logrotate.cron.daily
+        hurd_Makefile_patch.diff)
+
+md5sums=('eeba9dbca62a9210236f4b83195e4ea5'
+         '462a5f364717461537eb2ae6394ad23e'
+         '0289a7e3eaf06d3c16fa6306f0e3fa18'
+         '29f866ff3dee9a7b5536d6e85189d980')
+
+build() {
+  cd $srcdir/${pkgname}-${pkgver}
+
+  sed -i 's|#define DEFAULT_MAIL_COMMAND .*|#define DEFAULT_MAIL_COMMAND "/bin/mail"|'\
+    config.h
+  sed -i "s|CFLAGS = -Wall|CFLAGS = -Wall $CFLAGS|" Makefile
+  sed -i 's|$(BASEDIR)/man|$(BASEDIR)/share/man|' Makefile
+  patch -p0 Makefile < ${srcdir}/hurd_Makefile_patch.diff
+  make
+}
+
+package(){
+  cd $srcdir/${pkgname}-${pkgver}
+  make PREFIX=$pkgdir install
+  install -Dm644 $srcdir/logrotate.conf $pkgdir/etc/logrotate.conf
+  install -Dm744 $srcdir/logrotate.cron.daily $pkgdir/etc/cron.daily/logrotate
+}

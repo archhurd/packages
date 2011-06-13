@@ -1,0 +1,47 @@
+diff -rupN a/src/popen.c b/src/popen.c
+--- a/src/popen.c	2011-04-30 12:16:09.690000000 -0400
++++ b/src/popen.c	2011-04-30 13:05:58.740000000 -0400
+@@ -54,13 +54,20 @@ FILE *cron_popen(char *program, const ch
+ 	PID_T pid;
+ 	char *argv[MAX_ARGS];
+ 	ssize_t out;
+-	char buf[PIPE_BUF];
+ 	struct sigaction sa;
+ 
+ #ifdef __GNUC__
+ 	(void) &iop;	/* Avoid fork clobbering */
+ #endif
+ 
++#ifdef PIPE_BUF
++	char buf[PIPE_BUF];
++#else
++	char *buf;
++	buf = (char *)malloc(sizeof(char) * fpathconf(STDIN, _PC_PIPE_BUF));
++#endif
++
++
+ 	if ((*type != 'r' && *type != 'w') || type[1])
+ 		return (NULL);
+ 
+@@ -116,10 +123,20 @@ FILE *cron_popen(char *program, const ch
+ 
+ 			log_it("CRON", getpid(), "EXEC FAILED", program, save_errno);
+ 			if (*type != 'r') {
+-				while (0 != (out = read(STDIN, buf, PIPE_BUF))) {
++			  while 
++#ifdef PIPE_BUF
++				(0 != (out = read(STDIN, buf, PIPE_BUF)))
++#else
++				(0 != (out = read(STDIN, buf, fpathconf(STDIN, _PC_PIPE_BUF))))
++#endif
++				  {
+ 					if ((out == -1) && (errno != EINTR))
+ 						break;
+ 				}
++#ifndef PIPE_BUF
++			  free(buf);
++			  buf = NULL;
++#endif
+ 			}
+ 		}
+ 		_exit(1);
