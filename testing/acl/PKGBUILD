@@ -1,35 +1,37 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=acl
-pkgver=2.2.49
-pkgrel=3
+pkgver=2.2.51
+pkgrel=1
 pkgdesc="Library for filesystem ACL support"
 arch=('i686')
 url="http://savannah.nongnu.org/projects/acl"
 license=('LGPL')
+groups=('base')
 depends=('attr')
 replaces=('xfsacl')
 provides=('xfsacl')
 conflicts=('xfsacl')
 options=('!libtool')
-source=(http://mirrors.zerg.biz/nongnu/${pkgname}/${pkgname}-${pkgver}.src.tar.gz
-	acl-hurd-PATH_MAX.patch)
+source=(http://download.savannah.gnu.org/releases-noredirect/$pkgname/$pkgname-$pkgver.src.tar.gz acl-hurd-PATH_MAX.patch)
+sha256sums=('06854521cf5d396801af7e54b9636680edf8064355e51c07657ec7442a185225'
+            '1f3d5ad14dda6181589de4b2339520689956abf177a0765965529b6175c3cff0')
 
 build() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd $srcdir/acl-$pkgver
   patch -p1 < $srcdir/acl-hurd-PATH_MAX.patch
 
   export INSTALL_USER=root INSTALL_GROUP=root
-  ./configure --prefix= --libdir=/lib --libexecdir=/lib 
-  make  
+  ./configure --prefix= --libdir=/lib --libexecdir=/lib  
+  make
 }
 
 package() {
-  cd "${srcdir}/${pkgname}-${pkgver}"
+  cd $srcdir/acl-$pkgver
+
   make DIST_ROOT="${pkgdir}" install install-dev install-lib
 
-  rm ${pkgdir}/lib/libacl.a
+  rm -f ${pkgdir}/lib/libacl.a
   chmod 0755 ${pkgdir}/lib/libacl.so.*.*.*
 }
-md5sums=('181445894cca986da9ae0099d5ce2d08'
-         '10e571a4c8a9d0e0a8e4e01c77733da7')
