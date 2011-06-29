@@ -7,58 +7,95 @@ pkgname=(
   'dde-driver-ne2k_pci'
   'dde-driver-pcnet32')
 pkgbase=dde
-pkgver=20100903
+pkgver=$(date +%Y%m%d)
 pkgrel=1
 pkgdesc="DDE split package"
 arch=(i686)
 url="http://www.gnu.org/software/hurd/hurd.html"
 license=('GPL')
-depends=(gnumach-userleveldrivers libpcap)
-#depends=(libpcap)
+#depends=(gnumach-userleveldrivers libpcap)
+depends=(libpcap)
+makedepends=(libmachdev)
 
-_gitroot="git://git.sv.gnu.org/hurd/incubator.git"
-_gitname=dde
+__gitroot="git://git.sv.gnu.org/hurd/incubator.git"
+__gitname=incubator
 
 build() {
   cd "$srcdir"
   msg "Connecting to GIT server...."
 
-  if [ -d "$_gitname" ]; then
-    cd "$_gitname"
-    git pull origin || return 0
-    # current build process is two-step, and the second-step cannot have 
-    # internet access
-    msg "The local files are updated."
+  if [[ -d $__gitname ]]; then
+    cd $__gitname
+    git pull origin dde || true
+    cd $srcdir
   else
-    git clone -b "$_gitname" "$_gitroot" "$_gitname"
+    git clone $__gitroot $__gitname
+    cd $__gitname
+    git fetch --all
+    git checkout origin/dde
+    cd $srcdir
   fi
 
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
 
-  rm -rf "$srcdir/$_gitname-build"
-  git clone "$srcdir/$_gitname" "$srcdir/$_gitname-build"
-  cd "$srcdir/$_gitname-build"
-
   #
   # BUILD HERE
   #
- 
-  export LDFLAGS=""
-  autoreconf -vif
-  ./configure --prefix= --disable-profile
+  
+  # This makes a rm -rf ${srcdir} necessary every rebuild
+  # but I am still tweaking the PKGBUILD
+  if [ -e ${srcdir}/.cloned ]; then
+    msg "Already cloned"
+  else
+    rm -rvf $srcdir/$__gitname-build
+    git clone $srcdir/$__gitname $srcdir/$__gitname-build
 
-  find -name "*.d" | xargs rm
+    # fix an issue that breaks ourdevices.def
+    cd $srcdir/$__gitname-build
+    git revert --no-edit fb489ff
+    cd $srcdir
 
-  make libmachdev
-  make libhurd-slab
+    touch ${srcdir}/.cloned
+  fi
+
+  export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
+  export LDFLAGS="-lmachuser -lhurduser"
+  cd $srcdir/$__gitname-build/
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    msg "Configuring"
+    autoreconf -vif
+    #todo: fix this so that configure does not need to be so awkward
+    ./configure --prefix= --disable-profile
+    touch ${srcdir}/.configured
+    find -name "*.d" | xargs rm || true  #there don't actually seem to be .d's
+  fi
+
+  # TODO: find out for which ones libmachdev is really needed
+  # also switch it out for the newly created libmachdev package
+
+  # I must point something else out as well.
+  # on advice from #hurd, I have run
+  # echo "INPUT ( AS_NEEDED ( -lmachuser -lhurduser ) ) >> /lib/libc.so
+  # this should be part of our official glibc.  I am not brave enough to 
+  # take that on, however.
+  
+  make -C devnode
+  make libtrivfs
+  LDLIBS="/lib/libmachuser.so" make libmachdev   # I'm not sure why system copies don't work
+  make libhurd-slab # ditto.
+  make libthreads
   make -C libbpf
-  make pfinet
-  make devnode
+  make libhurdbugaddr
+  make libfshelp
+  make -C pfinet
   make libddekit
-  make -C libdde_linux26
-  LIBS="-L../libbpf" make -C dde_pcnet32
-  LIBS="-L../libbpf" make -C dde_ne2k_pci
+  make -C libdde_linux26 # and ditto
+  LDFLAGS="-L../libbpf/" make -C dde_pcnet32
+  LDFLAGS="-L../libbpf/" make -C dde_ne2k_pci
 }
 
 package_ddeutils() {
@@ -67,7 +104,7 @@ package_ddeutils() {
   license=('GPL')
   depends=(gnumach-userleveldrivers libpcap)
 
-  cd "$srcdir/$_gitname-build"
+  cd "$srcdir/$__gitname-build"
   make prefix="$pkgdir" -C pfinet install
   make prefix="$pkgdir" -C devnode install
   install -m755 -d "$pkgdir/hurd/dde"
@@ -80,7 +117,7 @@ package_libbpf() {
   license=('GPL')
   depends=(gnumach-userleveldrivers)
 
-  cd "$srcdir/$_gitname-build/libbpf"
+  cd "$srcdir/$__gitname-build/libbpf"
   make prefix="$pkgdir" install
 }
 
@@ -90,7 +127,7 @@ package_dde-driver-ne2k_pci() {
   license=('GPL')
   depends=(gnumach-userleveldrivers libbpf)
 
-  cd "$srcdir/$_gitname-build/dde_ne2k_pci"
+  cd "$srcdir/$__gitname-build/dde_ne2k_pci"
   install -D -m755 dde_ne2k_pci "$pkgdir/hurd/dde/dde_ne2k_pci"
 }
 
@@ -100,7 +137,7 @@ package_dde-driver-pcnet32() {
   license=('GPL')
   depends=(gnumach-userleveldrivers libbpf)
 
-  cd "$srcdir/$_gitname-build/dde_pcnet32"
+  cd "$srcdir/$__gitname-build/dde_pcnet32"
   install -D -m755 dde_pcnet32 "$pkgdir/hurd/dde/dde_pcnet32"
 }
 
