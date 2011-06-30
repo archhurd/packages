@@ -4,7 +4,7 @@
 # Contributor: Judd <jvinet@zeroflux.org>
 
 pkgname=libevent
-pkgver=2.0.10
+pkgver=2.0.12
 pkgrel=1
 pkgdesc="An event notification library"
 license=('GPL2')
@@ -18,11 +18,12 @@ build() {
   cd $srcdir/$pkgname-$pkgver-stable
   sed -i 's/python/python2/' event_rpcgen.py
   ./configure --prefix= --sysconfdir=/etc
-  make 
+  PYTHONHOME=/ make -e
 }
 
 package() {
   cd $srcdir/$pkgname-$pkgver-stable
-  make DESTDIR=$pkgdir install 
+  DESTDIR=$pkgdir PYTHONHOME=/ make -e DESTDIR=$pkgdir install 
 }
-md5sums=('a37401d26cbbf28185211d582741a3d4')
+
+md5sums=('42986228baf95e325778ed328a93e070')
