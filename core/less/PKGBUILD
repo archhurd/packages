@@ -3,7 +3,7 @@
 # Contributor: judd <jvinet@zeroflux.org>
 
 pkgname=less
-pkgver=443
+pkgver=444
 pkgrel=1
 pkgdesc="A terminal based program for viewing text files"
 license=('GPL3')
@@ -27,5 +27,4 @@ package() {
   make prefix=${pkgdir} install
 
 }
-
-md5sums=('47db098fb3cdaf847b3c4be05ee954fc')
+md5sums=('56f9f76ffe13f70155f47f6b3c87d421')
