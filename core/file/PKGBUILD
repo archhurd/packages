@@ -4,7 +4,7 @@
 # Contributor: Andreas Radke <andyrtr@archlinux.org>
 
 pkgname=file
-pkgver=5.06
+pkgver=5.07
 pkgrel=1
 pkgdesc="File type identification utility"
 arch=('i686')
@@ -13,9 +13,9 @@ groups=('base')
 url="http://www.darwinsys.com/file/"
 depends=('glibc' 'zlib')
 options=('!libtool')
-source=(ftp://ftp.astron.com/pub/$pkgname/$pkgname-$pkgver.tar.gz
+source=(ftp://ftp.astron.com/pub/${pkgname}/${pkgname}-${pkgver}.tar.gz
         file-5.05-MAXPATHLEN.patch
-	file-5.05-python-3.2.patch)
+	file-5.07-zip-detect.patch)
 
 build() {
   cd ${srcdir}/$pkgname-$pkgver
@@ -25,8 +25,8 @@ build() {
     msg "Already patched"
   else
     msg "Patching"
-    patch -p0  < ${srcdir}/file-5.05-python-3.2.patch
     patch src/magic.c < ${srcdir}/file-5.05-MAXPATHLEN.patch
+    patch -p0  < ${srcdir}/file-5.07-zip-detect.patch
     touch ${srcdir}/.patched
   fi
 
@@ -43,6 +43,6 @@ package(){
   
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/COPYING
 }
-md5sums=('deb12b0fb9d09e7681be72bad6eba4e0'
+md5sums=('b8d1f9a8a644067bd0a703cebf3f4858'
          'd2d5ec39b67020188e894dc8201146a2'
-         '3f5e147be5b9c36c74323a1317328538')
+         'bcbf2e152f38003a2736298bbd0f37f8')
