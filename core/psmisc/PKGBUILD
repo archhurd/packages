@@ -16,7 +16,7 @@ source=(http://downloads.sourceforge.net/psmisc/${pkgname}-${pkgver}.tar.gz
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -Np0 src/killall.c -i ${srcdir}/hurd-path-max.patch
+  patch -Np0 -i ${srcdir}/hurd-path-max.patch
   autoreconf -vif
   ./configure --prefix=
   make

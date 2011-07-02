@@ -1,0 +1,15 @@
+diff -rupN a/src/fuser.c b/src/fuser.c
+--- a/src/fuser.c	2011-06-20 07:41:13.000000000 -0400
++++ b/src/fuser.c	2011-06-29 23:03:48.000000000 -0400
+@@ -56,6 +56,11 @@
+ //#define DEBUG 1
+ 
+ #define NAME_FIELD 20		/* space reserved for file name */
++
++#ifndef PATH_MAX
++#define PATH_MAX 4096
++#endif
++
+ /* Function defines */
+ static void add_matched_proc(struct names *name_list, const pid_t pid,
+ 			     const uid_t uid, const char access);
