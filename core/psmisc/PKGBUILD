@@ -2,7 +2,7 @@
 # Contributor: Eric Belanger <eric@archlinux.org>
 
 pkgname=psmisc
-pkgver=22.13
+pkgver=22.14
 pkgrel=1
 pkgdesc="Miscellaneous procfs tools"
 arch=('i686')
@@ -12,12 +12,12 @@ groups=('base')
 depends=('glibc' 'ncurses')
 changelog=ChangeLog
 source=(http://downloads.sourceforge.net/psmisc/${pkgname}-${pkgver}.tar.gz
-	killall-path-max.diff)
+	hurd-path-max.patch)
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -p0 src/killall.c < ${srcdir}/killall-path-max.diff
-  autoreconf
+  patch -Np0 src/killall.c -i ${srcdir}/hurd-path-max.patch
+  autoreconf -vif
   ./configure --prefix=
   make
 }
@@ -26,5 +26,6 @@ package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
 }
-md5sums=('e2c339e6b65b730042084023784a729e'
-         '4ec1ca4c47b42f8e459bf5ce17f93f13')
+
+md5sums=('ba3f4e971895c92bba7770d81c981503'
+         '23a6b0aaa8e9f3270063ac520b98fc81')
