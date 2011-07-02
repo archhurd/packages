@@ -3,8 +3,8 @@
 # Contributor: Gaetan Bisson <bisson@archlinux.org>
 
 pkgname='cronie'
-pkgver=1.4.7
-pkgrel=2
+pkgver=1.4.8
+pkgrel=1
 pkgdesc='Daemon that runs specified programs at scheduled times and related tools'
 url='https://fedorahosted.org/cronie/'
 license=('custom:BSD')
@@ -65,7 +65,7 @@ package() {
 
 	install -Dm644 COPYING "${pkgdir}"/share/licenses/cronie/COPYING
 }
-md5sums=('dfc26c47756d0c40ee27ae3c7ee98e0d'
+md5sums=('9b1d2ce6db8d1883e06635f437170657'
          '2962d9812fbbbdee1bd7f1c1ccb5e372'
          '0dc9f561dd2ea7a4c4dfe65c0f828eb2'
          '47a811bfb46596ed1e49d7d8aae1d738'
