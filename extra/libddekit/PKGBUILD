@@ -19,7 +19,7 @@ build() {
   msg "Connecting to GIT server...."
 
   if [ -d $__gitname ] ; then
-#   cd $__gitname && git pull origin/dde
+   cd $__gitname && git pull origin/dde
     msg "The local files are updated."
   else
     git clone $__gitroot $__gitname
