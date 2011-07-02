@@ -1,0 +1,39 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+
+pkgname=attr
+pkgver=2.4.46
+pkgrel=1
+pkgdesc="Extended attribute support library for ACL support"
+arch=('i686')
+url="http://oss.sgi.com/projects/xfs/"
+license=('LGPL')
+groups=('base')
+depends=('glibc') 
+makedepends=('gettext') 
+replaces=('xfsattr')
+provides=('xfsattr')
+conflicts=('xfsattr')
+options=('!libtool')
+source=(http://download.savannah.gnu.org/releases/${pkgname}/${pkgname}-${pkgver}.src.tar.gz)
+sha256sums=('dcd69bdca7ff166bc45141eddbcf21967999a6b66b0544be12a1cc2fd6340e1f')
+
+build() {
+  cd "${srcdir}"/${pkgname}-${pkgver}
+
+  export INSTALL_USER=root INSTALL_GROUP=root
+  ./configure --prefix= --libdir=/lib --libexecdir=/lib
+  make
+}
+
+package() {
+  cd "${srcdir}"/${pkgname}-${pkgver}
+
+  make DIST_ROOT="${pkgdir}" install install-lib install-dev
+
+  rm -f "${pkgdir}"/lib/libattr.a
+  chmod 0755 "${pkgdir}"/lib/libattr.so.*.*.*
+
+  rm -rf "${pkgdir}"/share/man/man2
+}
+
