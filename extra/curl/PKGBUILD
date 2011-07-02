@@ -2,7 +2,7 @@
 # Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=curl
-pkgver=7.21.6
+pkgver=7.21.7
 pkgrel=1
 pkgdesc="An URL retrival utility and library"
 arch=('i686')
@@ -38,4 +38,4 @@ package() {
 
   # upstream Arch Linux at this point replaces curlbuild.h with a file that seems to be designed to allow cross-arch compiling. As 32-bit only, we don't need this.
 }
-md5sums=('6611989a81ebd7b03a35adc3001ddee0')
+md5sums=('5f6d50c4d4ee38c57fe37e3cff75adbd')
