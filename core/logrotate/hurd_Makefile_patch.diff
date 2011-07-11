@@ -1,14 +1,5 @@
 --- Makefile.orig	2010-09-16 01:58:44.000000000 +0000
 +++ Makefile	2010-09-19 16:00:19.970000000 +0000
-@@ -1,7 +1,7 @@
- VERSION = $(shell awk '/Version:/ { print $$2 }' logrotate.spec)
- OS_NAME = $(shell uname -s)
- LFS = $(shell echo `getconf LFS_CFLAGS 2>/dev/null`)
--CFLAGS = -Wall -march=i686 -mtune=generic -O2 -D_GNU_SOURCE -D$(OS_NAME) -DVERSION=\"$(VERSION)\" $(RPM_OPT_FLAGS) $(LFS)
-+CFLAGS = -Wall -march=i686 -mtune=generic -O2 -D_GNU_SOURCE -D$(OS_NAME) -DVERSION=\"$(VERSION)\" $(RPM_OPT_FLAGS) $(LFS) -DPATH_MAX=4096 -DMADV_DONTFORK=0 -DMAP_POPULATE=0
- PROG = logrotate
- MAN = logrotate.8
- MAN5 = logrotate.conf.5
 @@ -53,6 +53,13 @@
      BASEDIR = /usr
  endif
