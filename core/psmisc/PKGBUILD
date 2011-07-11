@@ -12,13 +12,29 @@ groups=('base')
 depends=('glibc' 'ncurses')
 changelog=ChangeLog
 source=(http://downloads.sourceforge.net/psmisc/${pkgname}-${pkgver}.tar.gz
-	hurd-path-max.patch)
+	hurd-path-max.patch
+	hurd-define-EBADE.patch)
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -Np0 -i ${srcdir}/hurd-path-max.patch
-  autoreconf -vif
-  ./configure --prefix=
+  if [ -e ${srcdir}/.patched ]
+  then
+    msg "Already patched"
+  else
+    patch -p1 -i ${srcdir}/hurd-path-max.patch
+    patch -p1 -i ${srcdir}/hurd-define-EBADE.patch
+    touch ${srcidr}/.patched
+  fi
+  
+  if [ -e ${srcdir}/.configured ]
+  then
+    msg "Already configured"
+  else
+    autoreconf -vif
+    ./configure --prefix=
+    touch ${srcdir}/.configured
+  fi
+
   make
 }
 
@@ -28,4 +44,5 @@ package() {
 }
 
 md5sums=('ba3f4e971895c92bba7770d81c981503'
-         '23a6b0aaa8e9f3270063ac520b98fc81')
+         '23a6b0aaa8e9f3270063ac520b98fc81'
+         '6e41ce0b1120ee2e578db93fc8223956')

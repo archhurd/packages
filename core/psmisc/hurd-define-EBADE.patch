@@ -1,0 +1,18 @@
+diff -rupN a/src/fuser.c b/src/fuser.c
+--- a/src/fuser.c	2011-07-10 22:53:28.840000000 -0400
++++ b/src/fuser.c	2011-07-10 23:03:55.170000000 -0400
+@@ -61,6 +61,14 @@
+ #define PATH_MAX 4096
+ #endif
+ 
++/* EBADE would be defined in /usr/include/asm/errno.h 
++ * This is part of Linux API headers, however.  Define it here
++ * so that compilation can be happy.
++ */
++#ifndef EBADE
++#define EBADE	52	/* Invalid exchange */
++#endif
++
+ /* Function defines */
+ static void add_matched_proc(struct names *name_list, const pid_t pid,
+ 			     const uid_t uid, const char access);
