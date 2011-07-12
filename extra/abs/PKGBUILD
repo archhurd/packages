@@ -1,7 +1,8 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=abs
-pkgver=2.3.4.1
+pkgver=2.4.2
 pkgrel=1
 pkgdesc="Utilities to download and work with the ArchLinux Build System (ABS)"
 arch=('i686')
@@ -16,18 +17,19 @@ source=(ftp://ftp.archlinux.org/other/abs/${pkgname}-${pkgver}.tar.gz
 build() {
   cd ${srcdir}/${pkgname}
 
-  patch -p1 < ${srcdir}/abs-archhurd.patch
+  patch -p1 -i ${srcdir}/abs-archhurd.patch
 
-  make CONFDIR=/etc/ || return 1
+  make CONFDIR=/etc/
 }
 
 package() {
   cd ${srcdir}/${pkgname}
-  make CONFDIR=/etc/ DESTDIR=${pkgdir} install || return 1
+  make CONFDIR=/etc/ DESTDIR=${pkgdir} install
 
   # Add readme file, and make base /var/abs path
   install -dm0755 ${pkgdir}/var/abs/local/
   install -Dm0644 ${srcdir}/abs/README ${pkgdir}/var/abs/README
 }
-md5sums=('286825d64f19f801d510ff1f7cc05ea6'
-         'fd1605b839269992b0f75fd24b7de7e4')
+
+md5sums=('7be7cfc67443cff62e20f27ca57dc17a'
+         '2eced23c977338c89312633d38123d7d')

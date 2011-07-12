@@ -1,6 +1,26 @@
-diff -upr abs/abs abs-archhurd//abs
---- abs/abs	2010-01-25 13:01:25.000000000 +0000
-+++ abs-archhurd//abs	2010-08-16 16:57:28.770000000 +0000
+diff -rupN a/Makefile b/Makefile
+--- a/Makefile	2011-07-11 20:54:03.040000000 -0400
++++ b/Makefile	2011-07-11 20:58:23.030000000 -0400
+@@ -11,7 +11,7 @@ all: config_abs
+ config_abs: 
+ 	sed -i -e 's#%%ABS_VERSION%%#$(ABS_VERSION)#g' \
+ 	       -e 's#%%CONF_DIR%%#$(CONFDIR)#g' \
+-			abs makeworld scripts/svn2abs
++			abs makeworld
+ 
+ install:
+ 	# install the scripts
+@@ -68,7 +68,6 @@ zip:
+ 	cp COPYING $(BUILDDIR)/abs/
+ 	cp -R conf $(BUILDDIR)/abs/
+ 	cp -R prototypes $(BUILDDIR)/abs/
+-	cp -R scripts $(BUILDDIR)/abs/
+ 	cd $(BUILDDIR) && tar czf abs-$(ABS_VERSION).tar.gz "abs/"
+ 	mv $(BUILDDIR)/abs-$(ABS_VERSION).tar.gz .
+ 	rm -rf $(BUILDDIR)
+diff -rupN a/abs b/abs
+--- a/abs	2011-07-11 20:54:02.680000000 -0400
++++ b/abs	2011-07-11 20:56:27.180000000 -0400
 @@ -26,7 +26,6 @@ ABS_VERSION="%%ABS_VERSION%%"
  CONFDIR="%%CONF_DIR%%"
  SYNCCMD='rsync'
@@ -9,7 +29,16 @@ diff -upr abs/abs abs-archhurd//abs
  
  ##
  # Script Exit Reasons
-@@ -138,7 +137,7 @@ update_rsync() {
+@@ -83,7 +82,7 @@ usage() {
+ 	echo "  -V, --version  Display version information then exit."
+ 	echo "  -t, --tarball  Sync ABS tree using tarballs from your pacman mirror."
+ 	echo
+-	echo "abs will synchronize PKGBUILD scripts from the Arch Linux repositories"
++	echo "abs will synchronize PKGBUILD scripts from the Arch Hurd repositories"
+ 	echo "into $ABSROOT via rsync. If no argument is given, abs will synchronize"
+ 	echo "the repositories specified in ${CONFDIR}abs.conf."
+ 	echo
+@@ -137,7 +136,7 @@ update_rsync() {
  	fi
  
  	msg "Starting ABS sync..."
@@ -18,9 +47,9 @@ diff -upr abs/abs abs-archhurd//abs
  }
  
  update_tarball() {
-diff -upr abs/conf/abs.conf abs-archhurd//conf/abs.conf
---- abs/conf/abs.conf	2010-01-25 13:01:25.000000000 +0000
-+++ abs-archhurd//conf/abs.conf	2010-08-16 16:58:30.500000000 +0000
+diff -rupN a/conf/abs.conf b/conf/abs.conf
+--- a/conf/abs.conf	2011-07-11 20:54:02.900000000 -0400
++++ b/conf/abs.conf	2011-07-11 20:57:20.170000000 -0400
 @@ -8,7 +8,7 @@
  #
  # Server to sync from
@@ -34,32 +63,12 @@ diff -upr abs/conf/abs.conf abs-archhurd//conf/abs.conf
  # Note: If a repo is removed, it is still fetched!
  # Repos must be preceded with a ! to prevent fetching
  #
--REPOS=(core extra community testing community-testing)
-+REPOS=(core extra testing sound)
+-REPOS=(core extra community multilib !testing !community-testing !multilib-testing !staging !community-staging)
++REPOS=(core extra !testing)
  
-diff -upr abs/Makefile abs-archhurd//Makefile
---- abs/Makefile	2010-01-25 13:01:25.000000000 +0000
-+++ abs-archhurd//Makefile	2010-08-16 17:04:08.290000000 +0000
-@@ -11,7 +11,7 @@ all: config_abs
- config_abs: 
- 	sed -i -e 's#%%ABS_VERSION%%#$(ABS_VERSION)#g' \
- 	       -e 's#%%CONF_DIR%%#$(CONFDIR)#g' \
--			abs makeworld scripts/svn2abs
-+			abs makeworld 
- 
- install:
- 	# install the scripts
-@@ -64,7 +64,6 @@ zip:
- 	cp COPYING $(BUILDDIR)/abs/
- 	cp -R conf $(BUILDDIR)/abs/
- 	cp -R prototypes $(BUILDDIR)/abs/
--	cp -R scripts $(BUILDDIR)/abs/
- 	cd $(BUILDDIR) && tar czf abs-$(ABS_VERSION).tar.gz "abs/"
- 	mv $(BUILDDIR)/abs-$(ABS_VERSION).tar.gz .
- 	rm -rf $(BUILDDIR)
-diff -upr abs/makeworld abs-archhurd//makeworld
---- abs/makeworld	2010-01-25 13:01:25.000000000 +0000
-+++ abs-archhurd//makeworld	2010-08-16 17:00:24.050000000 +0000
+diff -rupN a/makeworld b/makeworld
+--- a/makeworld	2011-07-11 20:54:03.330000000 -0400
++++ b/makeworld	2011-07-11 20:58:32.320000000 -0400
 @@ -20,7 +20,6 @@
  #
  
@@ -68,4 +77,3 @@ diff -upr abs/makeworld abs-archhurd//makeworld
  toplevel=$(pwd)
  
  ##
-Nur in abs: scripts.
