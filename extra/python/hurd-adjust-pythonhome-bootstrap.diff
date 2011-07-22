@@ -1,0 +1,12 @@
+diff -rupN a/configure b/configure
+--- a/configure	2011-07-21 06:56:45.000000000 -0400
++++ b/configure	2011-07-21 07:00:29.000000000 -0400
+@@ -4966,6 +4966,8 @@ $as_echo "#define Py_ENABLE_SHARED 1" >>
+ 	      FreeBSD*)
+ 		SOVERSION=`echo $SOVERSION|cut -d "." -f 1`
+ 		;;
++	      GNU*)
++		RUNSHARED=PYTHONHOME=`pwd`:${PYTHONHOME} LD_LIBRARY_PATH=`pwd`:${LD_LIBRARY_PATH}
+ 	  esac
+ 	  INSTSONAME="$LDLIBRARY".$SOVERSION
+ 	  if test "$with_pydebug" != yes

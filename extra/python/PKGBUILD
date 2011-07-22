@@ -5,8 +5,8 @@
 # Contributer: Jason Chu <jason@archlinux.org>
 
 pkgname=python
-pkgver=3.2
-pkgrel=3
+pkgver=3.2.1
+pkgrel=1
 _pybasever=3.2
 pkgdesc="Next generation of the python high-level scripting language"
 arch=('i686')
@@ -20,10 +20,9 @@ replaces=('python3')
 options=('!makeflags')
 source=(http://www.python.org/ftp/python/${pkgver}/Python-${pkgver}.tar.bz2
 	hurd-broken-poll.diff
-	hurd-disable-nonworking-constants.diff)
-md5sums=('92e94b5b6652b96349d6362b8337811d'
-         '49b10b02f78becfe7abae8b0ab7b7612'
-         'f255ad891e46f3acaa8b19078acdab6e')
+	hurd-disable-nonworking-constants.diff
+	hurd-broken-pipe.diff
+	hurd-adjust-pythonhome-bootstrap.diff)
 
 build() {
   cd "${srcdir}/Python-${pkgver}"
@@ -35,12 +34,19 @@ build() {
     msg "Patching"
     # Ensure that we are using the system copy of various libraries (expat, zlib and libffi),
     # rather than copies shipped in the tarball
-    patch -Np1 -i ../hurd-broken-poll.diff
-    patch -Np1 -i ../hurd-disable-nonworking-constants.diff
+    rm -r Modules/expat
+    rm -r Modules/zlib
+    rm -r Modules/_ctypes/{darwin,libffi}*
+
+    patch -Np1 -i ${srcdir}/hurd-broken-poll.diff
+    patch -Np1 -i ${srcdir}/hurd-broken-pipe.diff
+    patch -Np1 -i ${srcdir}/hurd-disable-nonworking-constants.diff
+    patch -Np1 -i ${srcdir}/hurd-adjust-pythonhome-bootstrap.diff
     
     # can't be too careful...
     sed 's/PATH_MAX/4096/' -i Python/*.c
     sed 's/MAX_PATH/4096/' -i Python/*.c
+    
     touch ${srcdir}/.patched
   fi
 
@@ -61,21 +67,23 @@ build() {
 	      --with-system-expat
     touch ${srcdir}/.configured
   fi
-
+  
+  # The last step of make (something like './python -E setup.py build' needs to be run by hand, or else the options need to be modified
+  OPTS=$(echo $OPTS | sed s/-pipe//)
   make
-
-#  # Run the upstream test suite
-#  LD_LIBRARY_PATH=${srcdir}/Python-${pkgver}:${LD_LIBRARY_PATH} PYTHON=./python \
-#     ./runtests.sh -x test_distutils
-#  for testname in $(cat BAD); do
-#     echo "== ${testname} =="
-#     cat OUT/${testname}.out
-#  done
 }
+
+#check() {
+#  cd ${srcdir}/Python-${pkgver}
+#  LD_LIBRARY_PATH="${srcdir}/Python-${pkgver}":${LD_LIBRARY_PATH} \
+#    "${srcdir}/Python-${pkgver}/python" -m test.regrtest -x test_distutils \
+#    test_site
+#}
 
 package() {
   cd "${srcdir}/Python-${pkgver}"
-  make DESTDIR=${pkgdir} install
+  OPTS=$(echo $OPTS | sed s/-pipe//)
+  make DESTDIR=${pkgdir} install maninstall
 
   # why are these not done by default...
   ln -sf python3 ${pkgdir}/bin/python
@@ -83,13 +91,18 @@ package() {
   ln -sf idle3 ${pkgdir}/bin/idle
   ln -sf pydoc3 ${pkgdir}/bin/pydoc
 
-  # clean-up reference to build directory
-  sed -i "s#${srcdir}/Python-${pkgver}:##" $pkgdir/lib/python3.2/config-3.2mu/Makefile
+  # Fix FS#22552
+  ln -sf ../../libpython${_pybasever}mu.so \
+    "${pkgdir}/lib/python${_pybasever}/config-${_pybasever}mu/libpython${_pybasever}mu.so"
 
-  # Fix conflicts with python2 - python2 version is newer...
-  rm ${pkgdir}/bin/2to3
+  # clean-up reference to build directory
+  sed -i "s#${srcdir}/Python-${pkgver}:##" ${pkgdir}/lib/python${_pybasever}/config-${_pybasever}mu/Makefile
 
   # license
   install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
-
+md5sums=('f0869ba3f3797aacb1f954ef24c256f3'
+         '49b10b02f78becfe7abae8b0ab7b7612'
+         'f255ad891e46f3acaa8b19078acdab6e'
+         '3b57ce55849674fc0507af3c53750974'
+         '7ee3f1af678263525d78871d6a3eeb15')

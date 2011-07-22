@@ -1,0 +1,21 @@
+diff -rupN a/configure b/configure
+--- a/configure	2011-07-21 07:02:59.000000000 -0400
++++ b/configure	2011-07-21 07:10:02.000000000 -0400
+@@ -13905,9 +13905,14 @@ esac
+ 
+ ac_fn_c_check_func "$LINENO" "pipe2" "ac_cv_func_pipe2"
+ if test "x$ac_cv_func_pipe2" = xyes; then :
+-
+-$as_echo "#define HAVE_PIPE2 1" >>confdefs.h
+-
++    case $ac_sys_system in
++	GNU*)
++	    $as_echo "#define HAVE_PIPE2 0" >>confdefs.h
++	    ;;
++	*)
++	    $as_echo "#define HAVE_PIPE2 1" >>confdefs.h
++	    ;;
++	esac
+ fi
+ 
+ 
