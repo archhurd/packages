@@ -5,6 +5,8 @@ pkgname=(
   'ddeutils'
   'libbpf'
   'dde-driver-ne2k_pci'
+  'dde-driver-e100'
+  'dde-driver-e1000'
   'dde-driver-pcnet32')
 pkgbase=dde
 pkgver=$(date +%Y%m%d)
@@ -51,11 +53,6 @@ build() {
     rm -rvf $srcdir/$__gitname-build
     git clone $srcdir/$__gitname $srcdir/$__gitname-build
 
-    # fix an issue that breaks ourdevices.def
-    cd $srcdir/$__gitname-build
-    git revert --no-edit fb489ff
-    cd $srcdir
-
     touch ${srcdir}/.cloned
   fi
 
@@ -83,7 +80,7 @@ build() {
   # this should be part of our official glibc.  I am not brave enough to 
   # take that on, however.
   
-  make -C devnode
+  make devnode
   make libtrivfs
   LDLIBS="/lib/libmachuser.so" make libmachdev   # I'm not sure why system copies don't work
   make libhurd-slab # ditto.
@@ -93,9 +90,12 @@ build() {
   make libfshelp
   make -C pfinet
   make libddekit
-  make -C libdde_linux26 # and ditto
-  LDFLAGS="-L../libbpf/" make -C dde_pcnet32
+  LDFLAGS="-L/lib/libmachuser.so" make -C libdde_linux26 # and ditto
+
+  LDFLAGS="-L../libbpf/" make -C dde_e100
+  LDFLAGS="-L../libbpf/" make -C dde_e1000
   LDFLAGS="-L../libbpf/" make -C dde_ne2k_pci
+  LDFLAGS="-L../libbpf/" make -C dde_pcnet32
 }
 
 package_ddeutils() {
@@ -129,6 +129,26 @@ package_dde-driver-ne2k_pci() {
 
   cd "$srcdir/$__gitname-build/dde_ne2k_pci"
   install -D -m755 dde_ne2k_pci "$pkgdir/hurd/dde/dde_ne2k_pci"
+}
+
+package_dde-driver-e100() {
+  pkgdesc="e100 DDE driver."
+  arch=(i686)
+  license=('GPL')
+  depends=(gnumach-userleveldrivers libbpf)
+
+  cd "$srcdir/$__gitname-build/dde_e100"
+  install -D -m755 dde_e100 "$pkgdir/hurd/dde/dde_e100"
+}
+
+package_dde-driver-e1000() {
+  pkgdesc="e1000 DDE driver."
+  arch=(i686)
+  license=('GPL')
+  depends=(gnumach-userleveldrivers libbpf)
+
+  cd "$srcdir/$__gitname-build/dde_e1000"
+  install -D -m755 dde_e1000 "$pkgdir/hurd/dde/ddee_e1000"
 }
 
 package_dde-driver-pcnet32() {
