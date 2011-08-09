@@ -1,8 +1,8 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=pacman
-pkgver=3.5.2
-pkgrel=3
+pkgver=3.5.3
+pkgrel=1
 pkgdesc="A library-based package manager with dependency support"
 arch=(i686)
 url="http://www.archlinux.org/pacman/"
@@ -53,8 +53,8 @@ package() {
   patch -Np1 < $srcdir/pacman_hurd_fakeroot.patch || true
 }
 
-md5sums=('b4f1fdbc17100923071ebe8fe9377be5'
-         'e330888b8ad2307d87d69eb187521127'
+md5sums=('c36c18ed4d8ec69c0ecb4f9684266901'
+         '1ad006dbed00fbfeaeda3d902ae9d7f5'
          '6b2bdf5a9bf2635c1e6f951bd5933bd0'
          '210e7165adf4fa8822c4eb935bc92935'
          '69f6dc180ea25c38a6376a6d5fd1303d')
