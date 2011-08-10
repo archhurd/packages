@@ -5,8 +5,8 @@
 # Contributor: Jan de Groot <jgc@archlinux.org>
 
 pkgname=gdb
-pkgver=7.2
-pkgrel=3
+pkgver=7.3
+pkgrel=1
 pkgdesc="The GNU Debugger"
 arch=('i686')
 url="http://www.gnu.org/software/gdb/"
@@ -59,6 +59,8 @@ package() {
   # resolve conflicts with binutils
   rm -f ${pkgdir}/include/{bfd,dis-asm,symcat,ansidecl,bfdlink}.h
   rm -f ${pkgdir}/lib/{libiberty,libbfd,libopcodes}.a
-  rm -f ${pkgdir}/share/info/{bfd.info,configure.info,standards.info}
+  rm -f ${pkgdir}/share/info/{bfd.info,configure.info,standards.info,dir}
 }
 
+md5sums=('485022b8df7ba2221f217e128f479fe7'
+         'c354c338c8999736f148449c11b88667')
