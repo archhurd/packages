@@ -1,8 +1,9 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=wget
-pkgver=1.12
-pkgrel=2
+pkgver=1.13
+pkgrel=1
 pkgdesc="A network utility to retrieve files from the Web"
 arch=('i686')
 url="http://www.gnu.org/software/wget/wget.html"
@@ -13,8 +14,6 @@ backup=('etc/wgetrc')
 install=wget.install
 source=(ftp://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.gz
         wget_hurd.patch)
-md5sums=('141461b9c04e454dc8933c9d1f2abf83'
-         '609c1aafd66d918f6bb3ca8b73973c1f')
 
 build() {
   cd ${srcdir}/$pkgname-$pkgver
@@ -22,10 +21,12 @@ build() {
   patch -Np2 < ${srcdir}/wget_hurd.patch
   
   ./configure --host=i686-pc-gnu --prefix= --sysconfdir=/etc
-  make || return 1
+  make
 }
 
 package() {
   cd ${srcdir}/$pkgname-$pkgver
   make DESTDIR=${pkgdir} install
 }
+md5sums=('d3698837e6a9567ca9be10f115989940'
+         '609c1aafd66d918f6bb3ca8b73973c1f')
