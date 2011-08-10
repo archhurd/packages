@@ -5,7 +5,7 @@
 # Contributor: Judd Vinet <jvinet@zeroflux.org>
 
 pkgname=libldap
-pkgver=2.4.24
+pkgver=2.4.26
 pkgrel=1
 pkgdesc="Lightweight Directory Access Protocol (LDAP) client libraries"
 arch=('i686')
@@ -16,19 +16,20 @@ depends=('libsasl' 'openssl')
 makedepends=('tcp_wrappers')
 options=('!libtool')
 source=("ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-${pkgver}.tgz"
-        'ntlm.patch')
+        #'ntlm.patch'
+	)
 
 build() {
   cd ${srcdir}/openldap-${pkgver}
-  if [ -e ${srcdir}/.patched ]
-  then
-    msg "Already patched"
-  else
-    msg "Patching"
-    patch -Np1 -i ${srcdir}/ntlm.patch
+  #if [ -e ${srcdir}/.patched ]
+  #then
+    #msg "Already patched"
+  #else
+    #msg "Patching"
+    #patch -Np1 -i ${srcdir}/ntlm.patch
     #patch -p1 -i ${srcdir}/hurd_sasl.patch
-    touch ${srcdir}/.patched
-  fi
+    #touch ${srcdir}/.patched
+  #fi
   
   if [ -e ${srcdir}/.configured ]
   then
@@ -86,5 +87,4 @@ package() {
   install -Dm644 ${srcdir}/openldap-${pkgver}/LICENSE \
     ${pkgdir}/share/licenses/$pkgname/LICENSE
 }
-md5sums=('116fe1e23a7b67686d5e62274367e6c0'
-         'dfa9eb6f2fd9d0a3dab0e1860923489e')
+md5sums=('f36f3086031dd56ae94f722ffae8df5e')
