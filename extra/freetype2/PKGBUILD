@@ -1,7 +1,8 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=freetype2
-pkgver=2.4.2
+pkgver=2.4.6
 pkgrel=1
 pkgdesc="TrueType font rendering library"
 arch=('i686')
@@ -26,6 +27,6 @@ package() {
   cd "${srcdir}/freetype-${pkgver}"
   make DESTDIR="${pkgdir}" install 
 }
-md5sums=('647ee8ed266f9a4117c8d0a4855b3d3e'
+md5sums=('5e6510613f612809d2d7862592b92ab7'
          '816dc8619a6904a7385769433c0a8653'
          '214119610444c9b02766ccee5e220680')
