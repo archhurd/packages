@@ -2,14 +2,14 @@
 
 pkgname=inetutils
 pkgver=1.8
-pkgrel=2
+pkgrel=3
 pkgdesc="A collection of common network programs"
 arch=('i686')
 url="http://www.gnu.org/software/inetutils/"
 license=('GPL')
 replaces=('hostname')
 provides=('hostname')
-depends=('readline' 'ncurses' 'pam' 'tcp_wrappers')
+depends=('readline' 'ncurses' 'pam')
 backup=('etc/conf.d/ftpd' 'etc/xinetd.d/telnet' 'etc/xinetd.d/talk')
 options=('!emptydirs')
 install=inetutils.install
@@ -27,14 +27,15 @@ build() {
   ## end stupid hack
   
   ## now apply the patch that fixes segfaulting with no devices
-  cd "${srcdir}/${pkgname}-${pkgver}/ifconfig"
-  patch -Rup0 options.c < ${srcdir}/no_eth0_segfault.patch
+  # for some reason, breaks...
+  # cd "${srcdir}/${pkgname}-${pkgver}/ifconfig"
+  # patch -Rup0 options.c < ${srcdir}/no_eth0_segfault.patch
   ## patch applied
 
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix= --libexec=/sbin --localstatedir=/var \
     --mandir=/share/man --infodir=/share/info \
-    --with-wrap --with-pam \
+    --without-wrap --with-pam \
     --enable-ftp --enable-ftpd \
     --enable-telnet --enable-telnetd \
     --enable-talk --enable-talkd \
@@ -47,18 +48,23 @@ build() {
     --disable-logger --enable-syslogd \
     --enable-inetd --enable-whois \
     --disable-uucpd --enable-hostname \
-    --enable-ifconfig --disable-traceroute || return 1
-  make || return 1
+    --enable-ifconfig --disable-traceroute
+  make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install || return 1
+  make DESTDIR="${pkgdir}" install
 
-  install -D -m755 "${srcdir}/ftpd.rc" "${pkgdir}/etc/rc.d/ftpd" || return 1
-  install -D -m644 "${srcdir}/ftpd.conf" "${pkgdir}/etc/conf.d/ftpd" || return 1
-  install -D -m644 "${srcdir}/telnet.xinetd" "${pkgdir}/etc/xinetd.d/telnet" || return 1
-  install -D -m644 "${srcdir}/talk.xinetd" "${pkgdir}/etc/xinetd.d/talk" || return 1
+  install -D -m755 "${srcdir}/ftpd.rc" "${pkgdir}/etc/rc.d/ftpd"
+  install -D -m644 "${srcdir}/ftpd.conf" "${pkgdir}/etc/conf.d/ftpd"
+  install -D -m644 "${srcdir}/telnet.xinetd" "${pkgdir}/etc/xinetd.d/telnet"
+  install -D -m644 "${srcdir}/talk.xinetd" "${pkgdir}/etc/xinetd.d/talk"
+
+  # fix conflict with every other package...
+  if [ -e ${pkgdir}/share/info/dir ]; then
+    rm ${pkgdir}/share/info/dir
+  fi
 }
 md5sums=('ad8fdcdf1797b9ca258264a6b04e48fd'
          'abb31b95485802d23b7df3f96fa3c75a'
