@@ -1,14 +1,15 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=syslog-ng
 pkgver=3.2.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Next-generation syslogd with advanced networking and filtering capabilities"
 arch=('i686')
 license=('GPL2')
 groups=('base')
 url="http://www.balabit.com/network-security/syslog-ng/"
-depends=('glib2' 'eventlog' 'tcp_wrappers' 'openssl')
+depends=('glib2' 'eventlog' 'openssl')
 optdepends=('logrotate')
 provides=('logger')
 backup=('etc/syslog-ng.conf' 'etc/logrotate.d/syslog-ng')
@@ -26,7 +27,7 @@ build() {
                 --prefix= \
                 --sysconfdir=/etc \
                 --localstatedir=/var/lib/syslog-ng \
-                --enable-tcp-wrapper \
+                --disable-tcp-wrapper \
                 --with-pidfile-dir=/var/run \
                 --disable-spoof-source \
                 --disable-linux-caps
@@ -35,14 +36,19 @@ build() {
 }
 
 package() {
-    cd $srcdir/$pkgname-$pkgver
-    make DESTDIR=$pkgdir install 
-    install -dm755 $pkgdir/var/lib/syslog-ng
-    install -Dm644 $srcdir/syslog-ng.conf $pkgdir/etc/syslog-ng.conf
-    install -Dm644 $srcdir/syslog-ng.logrotate $pkgdir/etc/logrotate.d/syslog-ng
-    install -Dm755 $srcdir/syslog-ng.rc $pkgdir/etc/rc.d/syslog-ng
+    cd ${srcdir}/${pkgname}-${pkgver}
+    make DESTDIR=${pkgdir} install 
+    install -dm755 ${pkgdir}/var/lib/syslog-ng
+    install -Dm644 ${srcdir}/syslog-ng.conf ${pkgdir}/etc/syslog-ng.conf
+    install -Dm644 ${srcdir}/syslog-ng.logrotate ${pkgdir}/etc/logrotate.d/syslog-ng
+    install -Dm755 ${srcdir}/syslog-ng.rc ${pkgdir}/etc/rc.d/syslog-ng
     # remove libexec
-    rm -rf $pkgdir/libexec
+    rm -rf ${pkgdir}/libexec
+
+    # fix conflict with every other packate
+    if [ -e ${pkgdir}/share/info/dir ]; then
+			rm ${pkgdir}/share/info/dir
+		fi
 }
 md5sums=('c0160053e24a0408d08bbfd454b110df'
          'e02be6637d0c3b5484d4597ce049ae39'
