@@ -3,12 +3,11 @@
 
 pkgname=xinetd
 pkgver=2.3.14
-pkgrel=1
+pkgrel=2
 pkgdesc="A secure replacement for inetd"
 arch=('i686')
 url="http://www.xinetd.org/"
 license=('custom')
-depends=('tcp_wrappers')
 optdepends=('perl: for xconv.pl script')
 backup=('etc/xinetd.conf' 'etc/xinetd.d/servers' 'etc/xinetd.d/services')
 source=(http://www.xinetd.org/xinetd-$pkgver.tar.gz
@@ -23,33 +22,30 @@ md5sums=('567382d7972613090215c6c54f9b82d9'
          '9fa2061dc7dd738c8424251deb86f81e')
 
 build() {
-  cd $srcdir/$pkgname-$pkgver
+  cd ${srcdir}/${pkgname}-${pkgver}
   sed -i "s#${prefix}/man#${prefix}/share/man#" configure
   sed -i "s#MAXHOSTNAMELEN#4096#" xinetd/addr.c
 
-  # Builds are rough.  The hardware could fail at any moment
-  # and certain steps are very time-consuming
-  
   if [ -e ${srcdir}/.configured ]
   then
     msg "Already configured"
   else
     msg "Configuring"
-    ./configure --prefix= --with-libwrap
+    ./configure --prefix= --without-libwrap
     touch ${srcdir}/.configured
   fi   
   make
 }
 
 package() {
-  cd $srcdir/$pkgname-$pkgver
-  make prefix=$pkgdir install
+  cd ${srcdir}/${pkgname}-${pkgver}
+  make prefix=${pkgdir} install
   
-  install -Dm755 $srcdir/xinetd $pkgdir/etc/rc.d/xinetd
-  install -Dm644 $srcdir/xinetd.conf $pkgdir/etc/xinetd.conf
-  install -Dm644 $srcdir/servers $pkgdir/etc/xinetd.d/servers
-  install -Dm644 $srcdir/services $pkgdir/etc/xinetd.d/services
+  install -Dm755 ${srcdir}/xinetd ${pkgdir}/etc/rc.d/xinetd
+  install -Dm644 ${srcdir}/xinetd.conf ${pkgdir}/etc/xinetd.conf
+  install -Dm644 ${srcdir}/servers ${pkgdir}/etc/xinetd.d/servers
+  install -Dm644 ${srcdir}/services ${pkgdir}/etc/xinetd.d/services
 
   # install license
-  install -Dm644 COPYRIGHT $pkgdir/share/licenses/$pkgname/COPYRIGHT
+  install -Dm644 COPYRIGHT ${pkgdir}/share/licenses/$Ppkgname}/COPYRIGHT
 }
