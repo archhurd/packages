@@ -2,17 +2,20 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=syslog-ng
-pkgver=3.2.1
-pkgrel=2
+pkgver=3.2.4
+pkgrel=1
 pkgdesc="Next-generation syslogd with advanced networking and filtering capabilities"
 arch=('i686')
 license=('GPL2')
 groups=('base')
 url="http://www.balabit.com/network-security/syslog-ng/"
-depends=('glib2' 'eventlog' 'openssl')
+depends=('glib2' 'eventlog' 'openssl' 'awk')
+makedepends=('flex' 'pkg-config')
 optdepends=('logrotate')
 provides=('logger')
-backup=('etc/syslog-ng.conf' 'etc/logrotate.d/syslog-ng')
+option=('!libtool')
+backup=('etc/syslog-ng/modules' 'etc/logrotate.d/syslog-ng'
+				'etc/syslog-ng/scl.conf' 'etc/syslog-ng/syslog-ng.conf')
 source=(http://www.balabit.com/downloads/files/syslog-ng/sources/$pkgver/source/$pkgname\_$pkgver.tar.gz
         syslog-ng.conf
         syslog-ng.logrotate
@@ -20,25 +23,30 @@ source=(http://www.balabit.com/downloads/files/syslog-ng/sources/$pkgver/source/
 install=syslog-ng.install
 
 build() {
-    cd $srcdir/$pkgname-$pkgver
+	cd $srcdir/$pkgname-$pkgver
 
-
-    ./configure \
-                --prefix= \
-                --sysconfdir=/etc \
+	if [ -e ${srcdir}/.configured ]; then
+		msg "Already configured"
+	else
+		msg "Configuring"
+		./configure \
+                --prefix= --sysconfdir=/etc/syslog-ng \
+                --libexecdir=/lib \
                 --localstatedir=/var/lib/syslog-ng \
                 --disable-tcp-wrapper \
                 --with-pidfile-dir=/var/run \
                 --disable-spoof-source \
                 --disable-linux-caps
+		touch ${srcdir}/.configured
+	fi
 
-    make 
+	make
 }
 
 package() {
     cd ${srcdir}/${pkgname}-${pkgver}
     make DESTDIR=${pkgdir} install 
-    install -dm755 ${pkgdir}/var/lib/syslog-ng
+    install -dm755 ${pkgdir}/var/lib/syslog-ng ${pkgdir}/etc/ysslog-ng/patterndb.d
     install -Dm644 ${srcdir}/syslog-ng.conf ${pkgdir}/etc/syslog-ng.conf
     install -Dm644 ${srcdir}/syslog-ng.logrotate ${pkgdir}/etc/logrotate.d/syslog-ng
     install -Dm755 ${srcdir}/syslog-ng.rc ${pkgdir}/etc/rc.d/syslog-ng
@@ -50,7 +58,7 @@ package() {
 			rm ${pkgdir}/share/info/dir
 		fi
 }
-md5sums=('c0160053e24a0408d08bbfd454b110df'
+md5sums=('5995f7dad0053a478b60a63f6f754203'
          'e02be6637d0c3b5484d4597ce049ae39'
          '735636090be4582885974542d2a75855'
          'ee7783bf72bbde82456e37117fe7426d')
