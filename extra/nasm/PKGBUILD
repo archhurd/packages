@@ -1,7 +1,7 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=nasm
-pkgver=2.08.01
+pkgver=2.09.10
 pkgrel=1
 pkgdesc="80x86 assembler designed for portability and modularity"
 url="http://www.nasm.us"
@@ -9,7 +9,8 @@ license=('LGPL')
 arch=('i686')
 depends=('glibc')
 source=(http://www.nasm.us/pub/nasm/releasebuilds/${pkgver}/${pkgname}-${pkgver}.tar.bz2)
-md5sums=('1e3ebc1289c2be5963571c0937b7a211')
+md5sums=('15c79dcb5838870a0fac15feb5fade66')
+sha1sums=('ca57a7454b29e18c64018e49cdf5c832937497ab')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
