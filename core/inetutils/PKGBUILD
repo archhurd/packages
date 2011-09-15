@@ -2,13 +2,14 @@
 
 pkgname=inetutils
 pkgver=1.8
-pkgrel=3
+pkgrel=4
 pkgdesc="A collection of common network programs"
 arch=('i686')
 url="http://www.gnu.org/software/inetutils/"
 license=('GPL')
 replaces=('hostname')
 provides=('hostname')
+groups=('base')
 depends=('readline' 'ncurses' 'pam')
 backup=('etc/conf.d/ftpd' 'etc/xinetd.d/telnet' 'etc/xinetd.d/talk')
 options=('!emptydirs')
