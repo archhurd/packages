@@ -1,7 +1,7 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=libsoup
-pkgver=2.30.2
+pkgver=2.34.3
 pkgrel=1
 arch=('i686')
 license=('LGPL')
@@ -9,14 +9,14 @@ pkgdesc="GNOME HTTP Library - base library"
 depends=('glib2>=2.24.1' 'libxml2>=2.7.7' 'gnutls>=2.8.6')
 makedepends=('glib2>=2.24.1' 'gnutls>=2.8.6' 'libxml2>=2.7.7' 'libproxy>=0.3.1' 'sqlite3>=3.6.23' 'libgnome-keyring>=2.30.1' 'intltool' 'pkg-config' 'gobject-introspection>=0.6.14')
 url="http://www.gnome.org"
-source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/2.30/${pkgname}-${pkgver}.tar.bz2)
+source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/${pkgver%.*}/${pkgname}-${pkgver}.tar.xz)
 options=('!libtool' '!emptydirs')
-sha256sums=('78ccbce84fccc74a49fb8168eeb409a6429a8a5854f197261d4108b8bb106bf6')
+sha256sums=('c43f8865a9f7016c618b481bea3dd9ea65d9200685d4a94cddc54f8663704a1c')
 
 build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
   ./configure --prefix= --sysconfdir=/etc \
-      --localstatedir=/var --disable-static --without-gnome
+      --localstatedir=/var --disable-static --without-gnome --disable-tls-check
   make
 }
 
