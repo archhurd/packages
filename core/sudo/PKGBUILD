@@ -1,25 +1,27 @@
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=sudo
-pkgver=1.7.5b1
-pkgrel=2
+_ver=1.8.1p2
+pkgver=${_ver/[a-z]/.${_ver//[0-9.]/}}
+pkgrel=1
 pkgdesc="Give certain users the ability to run some commands as root"
 arch=('i686')
 url="http://www.sudo.ws/sudo/"
 license=('custom')
 depends=('glibc' 'pam')
 backup=('etc/sudoers' 'etc/pam.d/sudo')
-source=(http://www.sudo.ws/sudo/dist/beta/$pkgname-$pkgver.tar.gz 
+source=(ftp://ftp.sudo.ws/pub/sudo/$pkgname-$_ver.tar.gz
         sudo.pam)
-options=('!libtool' '!makeflags' 'force')
-md5sums=('8c1242be606d81c293edab45be55225b'
+options=('!libtool' '!makeflags')
+md5sums=('e8330f0e63b0ecb2e12b5c76922818cc'
          '4e7ad4ec8f2fe6a40e12bcb2c0b256e3')
 
 build() {
-  cd $srcdir/$pkgname-$pkgver
+  cd $srcdir/$pkgname-$_ver
 
   ./configure --prefix= --with-pam --libexecdir=/lib \
-    --with-env-editor --with-all-insults --with-logfac=auth
+    --with-env-editor --with-all-insults --with-logfac=auth \
+    --disable-setresuid
 
   sed -i 's/LOCKF/FLOCK/' config.h
 
@@ -27,10 +29,10 @@ build() {
 }
 
 package() {
-  cd $srcdir/$pkgname-$pkgver
+  cd $srcdir/$pkgname-$_ver
 
   make DESTDIR=$pkgdir install
 
   install -Dm644 $srcdir/sudo.pam $pkgdir/etc/pam.d/sudo
-  install -Dm644 LICENSE $pkgdir/share/licenses/sudo/LICENSE
+  install -Dm644 doc/LICENSE $pkgdir/share/licenses/sudo/LICENSE
 }
