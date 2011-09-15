@@ -1,7 +1,9 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+# Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
+
 pkgname=m4
-pkgver=1.4.15
-pkgrel=1
+pkgver=1.4.16
+pkgrel=2
 pkgdesc="m4 macro processor"
 arch=('i686')
 license=('GPL3')
@@ -10,6 +12,7 @@ install=m4.install
 groups=('base-devel')
 depends=('glibc' 'bash')
 source=(ftp://ftp.gnu.org/gnu/m4/$pkgname-$pkgver.tar.xz)
+md5sums=('7548ec061a1ba993790159764f522d0e')
 
 build() {
   cd ${srcdir}/$pkgname-$pkgver
@@ -20,6 +23,5 @@ build() {
 package() {
   cd ${srcdir}/$pkgname-$pkgver
   make prefix=${pkgdir} install
+  rm ${pkgdir}/share/info/dir
 }
-
-md5sums=('1caf3410e6590f493834dc99ee04d027')
