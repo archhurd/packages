@@ -4,7 +4,7 @@
 # Contributor: Andreas Radke <andyrtr@archlinux.org>
 
 pkgname=file
-pkgver=5.08
+pkgver=5.09
 pkgrel=1
 pkgdesc="File type identification utility"
 arch=('i686')
@@ -25,7 +25,6 @@ build() {
   else
     msg "Patching"
     patch src/magic.c < ${srcdir}/file-5.05-MAXPATHLEN.patch
-#    patch -p0  < ${srcdir}/file-5.07-zip-detect.patch
     touch ${srcdir}/.patched
   fi
 
@@ -42,5 +41,6 @@ package(){
   
   install -D -m644 COPYING ${pkgdir}/share/licenses/${pkgname}/COPYING
 }
-md5sums=('6a2a263c20278f01fe3bb0f720b27d4e'
+
+md5sums=('6fd7cd6c4281e68fe9ec6644ce0fac6f'
          'd2d5ec39b67020188e894dc8201146a2')
