@@ -1,8 +1,8 @@
 # $Id: PKGBUILD 44870 2009-07-04 16:46:09Z kevin $
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=evilwm
-pkgver=1.0.1
+pkgver=1.1.0
 pkgrel=1
 pkgdesc="A minimalist but usable window manager for the X Window System."
 arch=('i686')
@@ -14,13 +14,14 @@ md5sums=('8fd9256c635cce2289b648a01d54202c' 'fd404c0f0787fbf99b8b3270f639128c')
 
 build() {
   cd $srcdir/$pkgname-$pkgver
-  make || return 1
+  make
 } 
 
 package() {
   cd $srcdir/$pkgname-$pkgver
-  make prefix=$pkgdir install
-  install -D -m644 $srcdir/evilwm.desktop \
-      $pkgdir/etc/X11/sessions/evilwm.desktop
+  make prefix=$pkgdir desktopfilesdir=/share/xsessions install
+  install -D -m644 $srcdir/evilwm.desktop $pkgdir/etc/X11/sessions/evilwm.desktop
   install -D -m644 README $pkgdir/share/licenses/$pkgname/README
 }
+md5sums=('5f14cc3019320860c85bb07c60a76bd7'
+         'fd404c0f0787fbf99b8b3270f639128c')
