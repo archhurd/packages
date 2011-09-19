@@ -1,7 +1,7 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=diffutils
-pkgver=2.9
+pkgver=3.2
 pkgrel=1
 pkgdesc="Utility programs used for creating patch files"
 arch=('i686')
@@ -11,15 +11,18 @@ groups=('base')
 depends=('glibc' 'sh')
 install=diffutils.install
 source=(ftp://ftp.gnu.org/gnu/$pkgname/$pkgname-$pkgver.tar.gz)
-md5sums=('d6bc1bdc874ddb14cfed4d1655a0dbbe')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver}
   ./configure --prefix= --mandir=/share/man --infodir=/share/info
-  make || return 1
+  make
 }
 
 package() {
   cd ${srcdir}/${pkgname}-${pkgver}
-  make DESTDIR=${pkgdir} install || return 1
+  make DESTDIR=${pkgdir} install
+
+	# conflicts with every other package
+	rm ${pkgdir}/share/info/dir
 }
+md5sums=('22e4deef5d8949a727b159d6bc65c1cc')
