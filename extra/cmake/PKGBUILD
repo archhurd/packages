@@ -5,7 +5,7 @@
 # Contributor: Konstantinos Pachnis <kpachnis@mes-direct.com>
 
 pkgname=cmake
-pkgver=2.8.4
+pkgver=2.8.5
 pkgrel=1
 pkgdesc="A cross-platform open-source make system"
 arch=('i686')
@@ -15,8 +15,6 @@ depends=('expat' 'curl' 'gcc-libs' 'shared-mime-info')
 install=${pkgname}.install
 source=("http://www.cmake.org/files/v2.8/${pkgname}-${pkgver}.tar.gz"
 	"hurd_complete_patch.patch")
-md5sums=('209b7d1d04b2e00986538d74ba764fcf'
-         '991d95283400665c0c3a4735b5e5a460')
 
 build() {
 	cd $srcdir/$pkgname-$pkgver
@@ -29,7 +27,10 @@ build() {
 		patch -p1 < ${srcdir}/hurd_complete_patch.patch
 		touch ${srcdir}/.patched
 	fi
-	./bootstrap --prefix= --mandir=/share/man --docdir=/share/doc/cmake -system-libs
+	./bootstrap --prefix= \
+		--mandir=/share/man \
+		--docdir=/share/doc/cmake \
+		-system-libs
 	make
 }
 
@@ -44,3 +45,5 @@ package() {
 	install -Dm644 Copyright.txt $pkgdir/share/licenses/$pkgname/LICENSE
 }
 
+md5sums=('3c5d32cec0f4c2dc45f4c2e84f4a20c5'
+         '0b7964dd5aa596e40a0e9960fafa59d0')
