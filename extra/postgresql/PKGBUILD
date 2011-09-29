@@ -3,14 +3,14 @@
 
 pkgbase=postgresql
 pkgname=('postgresql-libs' 'postgresql-docs' 'postgresql')
-pkgver=9.0.3
+pkgver=9.1.1
 pkgrel=1
 arch=('i686')
 url="http://www.postgresql.org"
 license=('custom:PostgreSQL')
 makedepends=('libxml2' 'python2' 'perl')
 source=(ftp://ftp.postgresql.org/pub/source/v${pkgver}/postgresql-${pkgver}.tar.bz2 \
-        postgresql postgresql.confd build.patch postgresql.pam postgresql.logrotate)
+        postgresql postgresql.confd postgresql.pam postgresql.logrotate)
 
 build() {
   cd "${srcdir}/${pkgbase}-${pkgver}"
@@ -18,8 +18,7 @@ build() {
   then
     msg "Already patched"
   else
-    # patch to remove regress/test make target (won't build with it present)
-    patch -Np1 -i ../build.patch
+    # No patches for now
     touch ${srcdir}/.patched-postgresql
   fi
 
@@ -139,9 +138,8 @@ package_postgresql() {
     "${pkgdir}/etc/logrotate.d/postgresql"
 }
 
-md5sums=('928df8c40bb012ad10756e58b70516fb'
-         'a8f88d404fe5060c58c6d08d21ea5552'
-         'd63a05943cf0a2726aa2070f3033c569'
+md5sums=('061a9f17323117c9358ed60f33ecff78'
+         'c4b4e9ee43d56d0a2f7e3ca3cb57715e'
          '4d74f4227dc5e12bf95b3490758d86c9'
          '96f82c38f3f540b53f3e5144900acf17'
          'd28e443f9f65a5712c52018b84e27137')
