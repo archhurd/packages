@@ -57,11 +57,14 @@ build() {
   export CFLAGS="$CFLAGS -mno-mmx -mno-sse -mno-sse2 -mno-3dnow -mno-sse3"
   autoreconf -vif ../$__gitname-build
   ../$__gitname-build/configure --host=i686-pc-gnu --prefix= --disable-device-drivers --enable-ide --enable-kdb
-  make || return 1
+  make
 }
 
 package() {
   cd "$srcdir/build"
-  make DESTDIR="$pkgdir/" install || return 1
+  make DESTDIR="$pkgdir/" install
+
+  # conflicts with about every other package
+  rm ${pkgdir}/share/info/dir
 } 
 
