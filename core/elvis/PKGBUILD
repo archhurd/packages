@@ -53,7 +53,9 @@ build() {
   cat $srcdir/patch-* > patches
   patch -p0 <patches
   echo -e $_DESKTOPFILE > $pkgname.desktop
-  ./configure --prefix= --verbose $_X11OPT
+
+  # pretend to be linux so that hurd-unaware script forces -lncurses instead of -ltermcap
+  ./configure linux --prefix= --verbose $_X11OPT
   sed 's/\<CTAGS\>/ELVTAGS/g; s/ctags\>/elvtags/g; s/ant" elvtags/ant" ctags/' doc/ctags.man >doc/elvtags.man
   /bin/make
   
