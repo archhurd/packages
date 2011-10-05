@@ -1,0 +1,32 @@
+diff -rupN a/include/drm/drm.h b/include/drm/drm.h
+--- a/include/drm/drm.h	2011-10-05 21:46:25.230000000 +0000
++++ b/include/drm/drm.h	2011-10-05 21:49:44.160000000 +0000
+@@ -44,7 +44,13 @@ typedef unsigned int drm_handle_t;
+ 
+ #else /* One of the BSDs */
+ 
++#if defined (__GNU__)
++//Hurd keeps ioccom.h by mach
++#include <mach/machine/ioccom.h>
++#else
+ #include <sys/ioccom.h>
++#endif
++
+ #include <sys/types.h>
+ typedef int8_t   __s8;
+ typedef uint8_t  __u8;
+diff -rupN a/xf86drm.h b/xf86drm.h
+--- a/xf86drm.h	2011-10-05 21:46:26.000000000 +0000
++++ b/xf86drm.h	2011-10-05 21:57:37.000000000 +0000
+@@ -54,7 +54,11 @@
+ 
+ #else /* One of the *BSDs */
+ 
++#if defined(__GNU__)
++#include <mach/machine/ioccom.h>
++#else
+ #include <sys/ioccom.h>
++#endif
+ #define DRM_IOCTL_NR(n)         ((n) & 0xff)
+ #define DRM_IOC_VOID            IOC_VOID
+ #define DRM_IOC_READ            IOC_OUT

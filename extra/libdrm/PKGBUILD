@@ -8,26 +8,29 @@ pkgdesc="Userspace interface to kernel DRM services"
 arch=('i686')
 license=('custom')
 depends=('glibc')
+makedepends=(libpciaccess)
 options=('!libtool')
 url="http://dri.freedesktop.org/"
 source=(http://dri.freedesktop.org/${pkgname}/${pkgname}-${pkgver}.tar.bz2
         no-pthread-stubs.patch
+	01-hurd-fix-ioccom-location.patch
         COPYING)
      
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  patch -Np1 -i "${srcdir}/no-pthread-stubs.patch" || return 1
-  patch -p1 -i "${srcdir}/intel-use-the-correct-size-when-allocating-reloc_target_info-array.patch" || return 1
+  patch -Np1 -i ${srcdir}/no-pthread-stubs.patch
+  patch -Np1 -i ${srcdir}/01-hurd-fix-ioccom-location.patch
 
   autoreconf --force --install
 
   ./configure --prefix= \
-      --enable-intel  \
-      --enable-radeon \
-      --enable-vmwgfx-experimental-api \
-      --enable-nouveau-experimental-api
+      --disable-intel  \
+      --disable-radeon \
+      --disable-vmwgfx-experimental-api \
+      --disable-nouveau-experimental-api
 
-  make
+  #when this goes x86_64, check to make sure /machine/ is still correct
+  CFLAGS="$CFLAGS -I/include/mach/machine" make
 }
 
 package() {
@@ -37,5 +40,6 @@ package() {
   install -m644 "${srcdir}/COPYING" "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
 md5sums=('062569426773f69b11a47a7712bba770'
-         '9b5ec3bbebe86921e2057694c42f65b8'
+         'c722c8406507b7e3a8da7a3030d1d9cf'
+         '754eb937d2f71f889f00eb61753f2f58'
          'ba65e71c481b94ef0fb6c23c7f21ffa1')
