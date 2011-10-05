@@ -19,7 +19,7 @@ _COMPILEWX11=true 		# X11 support built by default
 _SLACKWARECOLORS=false 	# elvis colorscheme from slackware not installed by default - it's boring
 
 
-pkgname=elvis_patched-withx
+pkgname=elvis
 pkgver=2.2_0
 pkgrel=1
 url="http://elvis.the-little-red-haired-girl.org/"
