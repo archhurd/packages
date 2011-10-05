@@ -5,7 +5,7 @@
 # Contributor: Konstantinos Pachnis <kpachnis@mes-direct.com>
 
 pkgname=cmake
-pkgver=2.8.5
+pkgver=2.8.6
 pkgrel=1
 pkgdesc="A cross-platform open-source make system"
 arch=('i686')
@@ -45,5 +45,5 @@ package() {
 	install -Dm644 Copyright.txt $pkgdir/share/licenses/$pkgname/LICENSE
 }
 
-md5sums=('3c5d32cec0f4c2dc45f4c2e84f4a20c5'
+md5sums=('2147da452fd9212bb9b4542a9eee9d5b'
          '0b7964dd5aa596e40a0e9960fafa59d0')
