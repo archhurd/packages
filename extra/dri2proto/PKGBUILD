@@ -1,7 +1,8 @@
+# Maintainer: Stephen Gilles <stphendgilles@gmail.com>
 # Maintainer: Michael Walker <mike@barrucadu.co.uk>
 
 pkgname=dri2proto
-pkgver=2.3
+pkgver=2.6
 pkgrel=1
 pkgdesc="X11 DRI protocol"
 arch=(any)
@@ -9,12 +10,11 @@ license=('custom')
 url="http://xorg.freedesktop.org/"
 makedepends=('xorg-util-macros')
 source=(${url}/releases/individual/proto/${pkgname}-${pkgver}.tar.bz2)
-sha1sums=('6c9e2c822e777db435a43616067f8dd21cc00a53')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= || return 1
-  make || return 1
+  ./configure --prefix= 
+  make 
 }
 
 package() {
@@ -24,3 +24,5 @@ package() {
   install -m755 -d "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" || return 1
 }
+
+md5sums=('2eb74959684f47c862081099059a11ab')
