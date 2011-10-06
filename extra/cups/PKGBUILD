@@ -27,13 +27,18 @@ md5sums=('e54ed09ede2340fc3014913333520fe4'
 
 build() {
   cd ${srcdir}/${pkgbase}-${pkgver}
-  # Avahi support in the dnssd backend. patch from Debian based on the Fedora work but brings it in a single file http://patch-tracker.debian.org/package/cups
-  patch -Np1 -i ${srcdir}/cups-avahi.patch
 
-  # Do not export SSL libs in cups-config
-  patch -Np1 -i "${srcdir}/cups-no-export-ssllibs.patch"
-
-  patch -Np1 -i "${srcdir}/cups-no-gcrypt.patch"
+  if [ -e ${srcdir}/.patched ] ; then
+    msg "Already patched"
+  else
+    msg "Patching"
+    # Avahi support in the dnssd backend. patch from Debian based on the Fedora work but brings it in a single file http://patch-tracker.debian.org/package/cups
+    patch -Np1 -i ${srcdir}/cups-avahi.patch
+    # Do not export SSL libs in cups-config
+    patch -Np1 -i "${srcdir}/cups-no-export-ssllibs.patch"
+    patch -Np1 -i "${srcdir}/cups-no-gcrypt.patch"
+    touch ${srcdir}/.patched
+  fi
   
   # Rebuild configure script for --enable-avahi.
   aclocal -I config-scripts
@@ -42,6 +47,7 @@ build() {
   ./configure --prefix= --sysconfdir=/etc --localstatedir=/var \
      --libdir=/lib \
      --with-logdir=/var/log/cups \
+     --with-datadir=/share \
      --with-docdir=/share/cups/doc \
      --with-cups-user=daemon \
      --with-cups-group=lp \
@@ -135,6 +141,10 @@ optdepends=('php: for included phpcups.so module'
   touch ${pkgdir}/etc/cups/subscriptions.conf 
   chgrp lp ${pkgdir}/etc/cups/{printers.conf,classes.conf,client.conf,subscriptions.conf}
   
+  # For some reason, the configure args don't handle having no /usr correctly
+  cp -r ${pkgdir}/usr/* ${pkgdir}/
+  rm -rf ${pkgdir}/usr
+
   # fix .desktop file
   sed -i 's|^Exec=htmlview http://localhost:631/|Exec=xdg-open http://localhost:631/|g' ${pkgdir}/share/applications/cups.desktop
   
