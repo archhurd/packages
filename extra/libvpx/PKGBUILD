@@ -1,0 +1,43 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Ionut Biru <ibiru@archlinux.org>
+pkgname=libvpx
+pkgver=0.9.7.p1
+realver=0.9.7-p1
+pkgrel=1
+pkgdesc="The VP8 Codec SDK"
+arch=('i686')
+url="http://www.webmproject.org/"
+license=('BSD')
+depends=('glibc')
+makedepends=('yasm')
+source=(http://webm.googlecode.com/files/${pkgname}-v${realver}.tar.bz2
+	01-enable-libraries.patch)
+
+build() {
+  cd "${srcdir}/${pkgname}-v${realver}"
+  if [ -e ${srcdir}/.patched ]; then
+    msg "Already patched"
+  else
+    msg "Patching"
+    patch -p1 -i ${srcdir}/01-enable-libraries.patch
+    touch ${srcdir}/.patched
+  fi    
+
+  ./configure --prefix= --enable-vp8 \
+    --enable-runtime-cpu-detect \
+    --enable-postproc \
+    --enable-shared \
+    --enable-pic \
+    --disable-install-docs \
+    --disable-install-srcs
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-v${realver}"
+  make DIST_DIR="$pkgdir" install
+  install -D -m 0644 LICENSE "$pkgdir/share/licenses/${pkgname}/LICENSE"
+}
+
+md5sums=('bd888cffde8d9c3061c7fd719b0cd4ce'
+         'e51bba5681ab7a10fa6ea73b77ce764e')
