@@ -5,7 +5,7 @@
 # Contributer: Jason Chu <jason@archlinux.org>
 
 pkgname=python
-pkgver=3.2.1
+pkgver=3.2.2
 pkgrel=1
 _pybasever=3.2
 pkgdesc="Next generation of the python high-level scripting language"
@@ -101,7 +101,7 @@ package() {
   # license
   install -Dm644 LICENSE ${pkgdir}/share/licenses/${pkgname}/LICENSE
 }
-md5sums=('f0869ba3f3797aacb1f954ef24c256f3'
+md5sums=('9d763097a13a59ff53428c9e4d098a05'
          '49b10b02f78becfe7abae8b0ab7b7612'
          'f255ad891e46f3acaa8b19078acdab6e'
          '3b57ce55849674fc0507af3c53750974'
