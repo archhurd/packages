@@ -19,15 +19,6 @@ diff -rupN a/sqlite3.c b/sqlite3.c
  # include <sys/mount.h>
  #endif
  
-@@ -29523,7 +29523,7 @@ static int unixOpen(
-   noLock = eType!=SQLITE_OPEN_MAIN_DB;
- 
-   
--#if defined(__APPLE__) || SQLITE_ENABLE_LOCKING_STYLE
-+#if defined(__APPLE__) && SQLITE_ENABLE_LOCKING_STYLE
-   struct statfs fsInfo;
-   if( fstatfs(fd, &fsInfo) == -1 ){
-     ((unixFile*)pFile)->lastErrno = errno;
 @@ -29536,7 +29536,7 @@ static int unixOpen(
    }
  #endif
