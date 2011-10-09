@@ -1,25 +1,33 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
-# $Id: PKGBUILD 81938 2010-06-07 11:01:46Z jgc $
-# Contributor: Jan de Groot <jgc@archlinux.org>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Maintainer: Jan de Groot <jgc@archlinux.org>
+
 pkgname=gobject-introspection
-pkgver=0.6.14
-pkgrel=1
+pkgver=1.30.0
+pkgrel=2
 pkgdesc="Introspection system for GObject-based libraries"
 url="http://live.gnome.org/GObjectInstrospection"
 arch=('i686')
 license=('LGPL' 'GPL')
-depends=('libffi' 'glib2' 'python' 'cairo')
+depends=('glib2' 'python2')
+makedepends=('cairo')
 options=('!libtool')
-source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/0.6/${pkgname}-${pkgver}.tar.bz2)
-sha256sums=('c4713bcbcebb06861738a8f630ab05289666e631f42f7abbf2e836978db7eba6')
+source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.30/${pkgname}-${pkgver}.tar.xz)
+sha256sums=('8e4274579096e983fad3148cdab50295a4701e45cd9a4e02f7242fc0a04c47b2')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  ./configure --prefix= --disable-static 
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/
+  ./configure --prefix= --disable-static
   make
 }
 
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
-  make DESTDIR="${pkgdir}" install 
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/
+  make DESTDIR="${pkgdir}" install
+
+  sed -i 's|#!/usr/bin/env python|#!/bin/env python2|' \
+    "${pkgdir}"/lib/gobject-introspection/giscanner/*.py
 }

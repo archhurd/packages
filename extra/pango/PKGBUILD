@@ -1,7 +1,7 @@
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=pango
-pkgver=1.28.3
+pkgver=1.29.4
 pkgrel=1
 pkgdesc="A library for layout and rendering of text"
 arch=('i686')
@@ -10,13 +10,16 @@ depends=('glib2' 'cairo' 'libxft' 'freetype2')
 makedepends=('pkgconfig' 'libxt' 'sh')
 options=('!libtool' '!emptydirs')
 install=pango.install
-source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.28/${pkgname}-${pkgver}.tar.bz2)
+source=(http://ftp.gnome.org/pub/gnome/sources/${pkgname}/1.29/${pkgname}-${pkgver}.tar.bz2)
 url="http://www.pango.org/"
-md5sums=('caa74baea47e7e16bc73c89f9089d522')
 
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
+
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/
+
   ./configure --prefix=  --sysconfdir=/etc \
       --localstatedir=/var --with-included-modules=basic-fc || return 1
   make
@@ -25,5 +28,10 @@ build() {
 
 package(){
   cd "${srcdir}/${pkgname}-${pkgver}"
+
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/
+
   make DESTDIR="${pkgdir}" install
 }
+md5sums=('a5ee785f4f31d6bdd8625a09ea3f8b4b')
