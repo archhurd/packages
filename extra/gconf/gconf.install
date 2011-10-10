@@ -1,0 +1,20 @@
+post_install() {
+  ldconfig -r .
+  chmod 755 etc/gconf/gconf.xml.system
+  bin/gio-querymodules lib/gio/modules
+}
+
+post_upgrade() {
+  ldconfig -r .
+  chmod 755 etc/gconf/gconf.xml.system
+  bin/gio-querymodules lib/gio/modules
+
+  PID=`pidof gconfd-2`
+  if [ ! -z "${PID}" ]; then
+    kill ${PID}
+  fi
+}
+
+post_remove() {
+    bin/gio-querymodules lib/gio/modules
+}

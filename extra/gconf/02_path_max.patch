@@ -1,0 +1,28 @@
+diff -rupN a/backends/markup-tree.h b/backends/markup-tree.h
+--- a/backends/markup-tree.h	2011-10-09 18:31:15.000000000 -0400
++++ b/backends/markup-tree.h	2011-10-09 18:34:51.170000000 -0400
+@@ -20,6 +20,10 @@
+ #ifndef MARKUP_TREE_H
+ #define MARKUP_TREE_H
+ 
++#ifndef PATH_MAX
++#define PATH_MAX 4096
++#endif
++
+ #include <glib.h>
+ #include "gconf/gconf-value.h"
+ 
+diff -rupN a/backends/xml-dir.h b/backends/xml-dir.h
+--- a/backends/xml-dir.h	2011-10-09 18:31:15.000000000 -0400
++++ b/backends/xml-dir.h	2011-10-09 18:40:03.000000000 -0400
+@@ -20,6 +20,10 @@
+ #ifndef GCONF_XML_DIR_H
+ #define GCONF_XML_DIR_H
+ 
++#ifndef PATH_MAX
++#define PATH_MAX 4906
++#endif
++
+ #include "gconf/gconf.h"
+ #include <libxml/tree.h>
+ 
