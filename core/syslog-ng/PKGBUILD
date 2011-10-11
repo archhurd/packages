@@ -2,7 +2,7 @@
 # Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=syslog-ng
-pkgver=3.2.4
+pkgver=3.3.1
 pkgrel=1
 pkgdesc="Next-generation syslogd with advanced networking and filtering capabilities"
 arch=('i686')
@@ -19,28 +19,39 @@ backup=('etc/syslog-ng/modules' 'etc/logrotate.d/syslog-ng'
 source=(http://www.balabit.com/downloads/files/syslog-ng/sources/$pkgver/source/$pkgname\_$pkgver.tar.gz
         syslog-ng.conf
         syslog-ng.logrotate
-        syslog-ng.rc)
+        syslog-ng.rc
+	01-IOV_MAX.patch
+	02-hurd-support.patch)
 install=syslog-ng.install
 
 build() {
-	cd $srcdir/$pkgname-$pkgver
+  cd $srcdir/$pkgname-$pkgver
 
-	if [ -e ${srcdir}/.configured ]; then
-		msg "Already configured"
-	else
-		msg "Configuring"
-		./configure \
-                --prefix= --sysconfdir=/etc/syslog-ng \
-                --libexecdir=/lib \
-                --localstatedir=/var/lib/syslog-ng \
-                --disable-tcp-wrapper \
-                --with-pidfile-dir=/var/run \
-                --disable-spoof-source \
-                --disable-linux-caps
-		touch ${srcdir}/.configured
-	fi
+  if [ -e ${srcdir}/.patched ]; then
+    msg2 "Already patched"
+  else
+    msg2 "Patching"
+    patch -Np1 -i ${srcdir}/01-IOV_MAX.patch
+    patch -Np1 -i ${srcdir}/02-hurd-support.patch
+    touch ${srcdir}/.patched
+  fi
 
-	make
+  if [ -e ${srcdir}/.configured ]; then
+    msg2 "Already configured"
+  else
+    msg2 "Configuring"
+    ./configure \
+      --prefix= --sysconfdir=/etc/syslog-ng \
+      --libexecdir=/lib \
+      --localstatedir=/var/lib/syslog-ng \
+      --disable-tcp-wrapper \
+      --with-pidfile-dir=/var/run \
+      --disable-spoof-source \
+      --disable-linux-caps
+    touch ${srcdir}/.configured
+  fi
+
+  make
 }
 
 package() {
@@ -53,12 +64,19 @@ package() {
     # remove libexec
     rm -rf ${pkgdir}/libexec
 
+    # add missing symlink
+    cd ${pkgdir}/lib
+    ln -s libsyslog-ng.so{,.0}
+
     # fix conflict with every other packate
     if [ -e ${pkgdir}/share/info/dir ]; then
-			rm ${pkgdir}/share/info/dir
-		fi
+      rm ${pkgdir}/share/info/dir
+    fi
 }
-md5sums=('5995f7dad0053a478b60a63f6f754203'
-         'e02be6637d0c3b5484d4597ce049ae39'
+
+md5sums=('a3dfe8a49aa8ce1aeb7e1ed5b11af378'
+         'd02e403f7877ba51511c36114675811d'
          '735636090be4582885974542d2a75855'
-         'ee7783bf72bbde82456e37117fe7426d')
+         'ee7783bf72bbde82456e37117fe7426d'
+         '3506e1c6c05fa894c2d97a2c8f14dfb0'
+         '95aa944947a24b162c37b4b38c3931ce')
