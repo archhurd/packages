@@ -1,0 +1,88 @@
+diff --git a/configure.ac b/configure.ac
+index e4235e0..377137d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2404,21 +2404,6 @@ AC_CHECK_FUNCS(clock_gettime, [], [
+ ])
+ AC_SUBST(GLIB_RT_LIBS)
+ 
+-AC_CACHE_CHECK(for monotonic clocks,
+-    glib_cv_monotonic_clock,AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+-#include <time.h>
+-#include <unistd.h>
+-int main() {
+-#if !(defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_MONOTONIC_CLOCK >= 0 && defined(CLOCK_MONOTONIC))
+-        #error No monotonic clock
+-#endif
+-	return 0;
+-}
+-]])],glib_cv_monotonic_clock=yes,glib_cv_monotonic_clock=no))
+-if test "$glib_cv_monotonic_clock" = "yes"; then
+-  AC_DEFINE(HAVE_MONOTONIC_CLOCK,1,[Have a monotonic clock])
+-fi
+-
+ 
+ dnl ************************
+ dnl *** g_atomic_* tests ***
+diff --git a/glib/gmain.c b/glib/gmain.c
+index 9a38482..b8afbf5 100644
+--- a/glib/gmain.c
++++ b/glib/gmain.c
+@@ -2015,29 +2015,14 @@ g_get_monotonic_time (void)
+ {
+ #ifdef HAVE_CLOCK_GETTIME
+   /* librt clock_gettime() is our first choice */
+-  {
+-#ifdef HAVE_MONOTONIC_CLOCK
+-    static volatile gsize clockid = 0;
+-#else
+-    static clockid_t clockid = CLOCK_REALTIME;
+-#endif
+     struct timespec ts;
+ 
+-#ifdef HAVE_MONOTONIC_CLOCK
+-    if (g_once_init_enter (&clockid))
+-      {
+-	clockid_t best_clockid;
+-
+-	if (sysconf (_SC_MONOTONIC_CLOCK) >= 0)
+-	  best_clockid = CLOCK_MONOTONIC;
+-	else
+-	  best_clockid = CLOCK_REALTIME;
+-	g_once_init_leave (&clockid, (gsize)best_clockid);
+-      }
++#ifdef CLOCK_MONOTONIC
++  clock_gettime (CLOCK_MONOTONIC, &ts);
++#else
++  clock_gettime (CLOCK_REALTIME, &ts);
+ #endif
+ 
+-    clock_gettime (clockid, &ts);
+-
+     /* In theory monotonic time can have any epoch.
+      *
+      * glib presently assumes the following:
+@@ -2061,20 +2046,19 @@ g_get_monotonic_time (void)
+               ts.tv_sec < G_GINT64_CONSTANT (315569520000000000));
+ 
+     return (((gint64) ts.tv_sec) * 1000000) + (ts.tv_nsec / 1000);
+-  }
+-#else
++
++#else /* !HAVE_CLOCK_GETTIME */
++
+   /* It may look like we are discarding accuracy on Windows (since its
+    * current time is expressed in 100s of nanoseconds) but according to
+    * many sources, the time is only updated 64 times per second, so
+    * microsecond accuracy is more than enough.
+    */
+-  {
+     GTimeVal tv;
+ 
+     g_get_current_time (&tv);
+ 
+     return (((gint64) tv.tv_sec) * 1000000) + tv.tv_usec;
+-  }
+ #endif
+ }
+ 
