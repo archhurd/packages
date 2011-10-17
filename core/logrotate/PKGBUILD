@@ -3,10 +3,10 @@
 # Contributor: Judd Vinet <jvinet@zeroflux.org>
 
 pkgname=logrotate
-pkgver=3.8.0
+pkgver=3.8.1
 pkgrel=1
 pkgdesc="Rotates system logs automatically"
-url='http://cvs.fedora.redhat.com'
+url='http://fedorahosted.org/logrotate'
 arch=('i686')
 license=('GPL')
 groups=('base')
@@ -41,7 +41,7 @@ package(){
   install -Dm744 ${srcdir}/logrotate.cron.daily ${pkgdir}/etc/cron.daily/logrotate
 }
 
-md5sums=('590f77c13077a4c384dbec7ca9c5f242'
+md5sums=('bd2e20d8dc644291b08f9215397d28a5'
          '462a5f364717461537eb2ae6394ad23e'
          '0289a7e3eaf06d3c16fa6306f0e3fa18'
          'd634a20bfd25ad458ff6a5b027584f00')

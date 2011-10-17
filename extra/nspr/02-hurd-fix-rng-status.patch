@@ -1,0 +1,12 @@
+diff -rupN a/mozilla/nsprpub/pr/src/md/unix/uxrng.c b/mozilla/nsprpub/pr/src/md/unix/uxrng.c
+--- a/mozilla/nsprpub/pr/src/md/unix/uxrng.c	2011-10-06 10:44:42.710000000 -0400
++++ b/mozilla/nsprpub/pr/src/md/unix/uxrng.c	2011-10-06 12:37:51.000000000 -0400
+@@ -126,7 +126,7 @@ GetHighResClock(void *buf, size_t maxbyt
+ 
+ #elif (defined(LINUX) || defined(FREEBSD) || defined(__FreeBSD_kernel__) \
+     || defined(NETBSD) || defined(__NetBSD_kernel__) || defined(OPENBSD) \
+-    || defined(SYMBIAN))
++    || defined(SYMBIAN) || defined(__GNU__))
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>

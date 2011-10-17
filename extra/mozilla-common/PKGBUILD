@@ -1,0 +1,21 @@
+# $Id$
+# Maintainer: dale <dale@archlinux.org>
+
+pkgname=mozilla-common
+pkgver=1.4
+pkgrel=1
+pkgdesc="Common Initialization Profile for Mozilla.org products"
+arch=('any')
+license=('GPL')
+url="http://www.mozilla.org/"
+install=mozilla-common.install
+source=('mozilla-common.sh'
+        'mozilla-common.csh')
+
+package() {
+  install -d "${pkgdir}/etc/profile.d/"
+  install -m755 mozilla-common.{,c}sh "${pkgdir}/etc/profile.d/"
+}
+
+md5sums=('7d0dafa46253735e63b82d98029047f3'
+         '61271e26295e8cf510ee97db2e6df889')

@@ -1,7 +1,7 @@
-# Maintainer: Alexander Preisinger <alexander.preisinger@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=libx11
-pkgver=1.4.1
+pkgver=1.4.4
 pkgrel=1
 pkgdesc="X11 client-side library"
 arch=('i686')
@@ -31,5 +31,5 @@ package() {
   install -d -m755 "${pkgdir}/share/licenses/${pkgname}"
   install -m644 COPYING "${pkgdir}/share/licenses/${pkgname}/" 
 }
-md5sums=('4603bdbce1bd73cbc140de402fe6ed24'
+md5sums=('ed7c382cbf8c13425b6a66bcac0ca5d9'
          '89a6aaedb662975742150b403d62c1cc')

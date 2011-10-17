@@ -1,0 +1,12 @@
+diff -rupN a/configure b/configure
+--- a/configure	2011-10-07 14:06:05.570000000 -0400
++++ b/configure	2011-10-07 14:11:45.030000000 -0400
+@@ -433,7 +433,7 @@ process_detect() {
+         # Can only build shared libs on a subset of platforms. Doing this check
+         # here rather than at option parse time because the target auto-detect
+         # magic happens after the command line has been parsed.
+-        enabled linux || die "--enable-shared only supported on ELF for now"
++        echo "Enabling shared.  I sure hope you're on ELF"
+     fi
+     if [ -z "$CC" ]; then
+         echo "Bypassing toolchain for environment detection."

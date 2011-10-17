@@ -1,0 +1,69 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Jan de Groot <jgc@archlinux.org>
+
+pkgname=glib2
+pkgver=2.30.0
+pkgrel=1
+pkgdesc="Common C routines used by GTK+ and other libs"
+url="http://www.gtk.org/"
+arch=('i686')
+license=('LGPL')
+depends=('pcre' 'libffi')
+makedepends=('pkgconfig' 'python2')
+optdepends=('python2: for gdbus-codegen')
+options=('!libtool' '!docs' '!emptydirs')
+#options=('!strip' '!libtool' '!docs' '!emptydirs')
+source=(http://ftp.gnome.org/pub/GNOME/sources/glib/2.29/glib-${pkgver}.tar.xz
+        glib2.sh
+        glib2.csh
+	CLOCK_MONOTONIC.patch)
+
+build() {
+  cd "${srcdir}/glib-${pkgver}"
+  
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/ 
+  
+  CONFRUN="autogen.sh"
+
+  if [ -e ${srcdir}/.patched ]; then
+    msg2 "Already patched"
+  else
+    msg2 "Patching"
+    patch -Np1 -i ${srcdir}/CLOCK_MONOTONIC.patch
+    touch ${srcdir}/.patched
+  fi
+
+  if [ -e ./configure ]; then
+    CONFRUN="configure"
+  fi
+
+  ./${CONFRUN} --prefix= \
+    --sysconfdir=/etc \
+    --with-pcre=system \
+    --disable-fam
+  make
+}
+
+package() {
+  cd "${srcdir}/glib-${pkgver}"
+
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/ 
+
+  make DESTDIR="${pkgdir}" install
+
+  install -d "${pkgdir}/etc/profile.d"
+  install -m755 "${srcdir}/glib2.sh" "${pkgdir}/etc/profile.d/"
+  install -m755 "${srcdir}/glib2.csh" "${pkgdir}/etc/profile.d/"
+
+  for _i in "${pkgdir}/etc/bash_completion.d/"*; do
+      chmod -x "${_i}"
+  done
+  sed -i "s|env python|env python2|" "$pkgdir"/bin/gdbus-codegen || true
+}
+
+md5sums=('68ac9516233044f27e76577d4f4e6de9'
+         '803017b365bd35dc20b092ce43b8c8c5'
+         '90c7b830bef4baf225c2eb8b7ead0cab'
+         '6db21e75c0ecb62a2a34ed5af8ff36a3')

@@ -1,0 +1,14 @@
+diff -rupN a/src/programs/pkexec.c b/src/programs/pkexec.c
+--- a/src/programs/pkexec.c	2011-10-08 13:12:46.000000000 -0400
++++ b/src/programs/pkexec.c	2011-10-08 13:14:36.000000000 -0400
+@@ -39,6 +39,10 @@
+ #include <sys/prctl.h>
+ #endif
+ 
++#if !defined(PATH_MAX)
++#define PATH_MAX 4096
++#endif
++
+ #include <glib/gi18n.h>
+ 
+ #ifdef POLKIT_AUTHFW_PAM
