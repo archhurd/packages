@@ -19,8 +19,6 @@ license=('GPL')
 depends=(libpcap)
 options=(!strip)
 makedepends=(libmachdev)
-source=('01-fix-unlock_refcnt.patch'
-        'ctrickedthreads.h')
 
 __gitroot="git://git.sv.gnu.org/hurd/incubator.git"
 __gitname=incubator
@@ -56,10 +54,6 @@ build() {
     rm -rvf $srcdir/$__gitname-build
     git clone $srcdir/$__gitname $srcdir/$__gitname-build
     cd $srcdir/$__gitname-build/
-    cp ${srcdir}/ctrickedthreads.h \
-      ${srcdir}/${__gitname}-build/libdde_linux26/lib/src/arch/l4/ctrickedthreads.h
-    patch ${srcdir}/${__gitname}-build/libdde_linux26/lib/src/arch/l4/ctrickedthreads.h \
-      -i ${srcdir}/01-fix-unlock_refcnt.patch
     touch ${srcdir}/.cloned
   fi
 
