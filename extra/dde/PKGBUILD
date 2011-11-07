@@ -17,7 +17,10 @@ url="http://www.gnu.org/software/hurd/hurd.html"
 license=('GPL')
 #depends=(gnumach-userleveldrivers libpcap)
 depends=(libpcap)
+options=(!strip)
 makedepends=(libmachdev)
+source=('01-fix-unlock_refcnt.patch'
+        'ctrickedthreads.h')
 
 __gitroot="git://git.sv.gnu.org/hurd/incubator.git"
 __gitname=incubator
@@ -52,7 +55,11 @@ build() {
   else
     rm -rvf $srcdir/$__gitname-build
     git clone $srcdir/$__gitname $srcdir/$__gitname-build
-
+    cd $srcdir/$__gitname-build/
+    cp ${srcdir}/ctrickedthreads.h \
+      ${srcdir}/${__gitname}-build/libdde_linux26/lib/src/arch/l4/ctrickedthreads.h
+    patch ${srcdir}/${__gitname}-build/libdde_linux26/lib/src/arch/l4/ctrickedthreads.h \
+      -i ${srcdir}/01-fix-unlock_refcnt.patch
     touch ${srcdir}/.cloned
   fi
 
@@ -80,6 +87,7 @@ build() {
   # this should be part of our official glibc.  I am not brave enough to 
   # take that on, however.
   
+  make libhurdbugaddr
   make devnode
   make libtrivfs
   LDLIBS="/lib/libmachuser.so" make libmachdev   # I'm not sure why system copies don't work
@@ -102,6 +110,7 @@ package_ddeutils() {
   pkgdesc="DDE support utilities."
   arch=(i686)
   license=('GPL')
+  groups=('dde')
   depends=(gnumach-userleveldrivers libpcap)
 
   cd "$srcdir/$__gitname-build"
@@ -115,6 +124,7 @@ package_libbpf() {
   pkgdesc="A packet filtering library."
   arch=(i686)
   license=('GPL')
+  groups=('dde')
   depends=(gnumach-userleveldrivers)
 
   cd "$srcdir/$__gitname-build/libbpf"

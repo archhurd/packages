@@ -1,0 +1,49 @@
+--- incubator/libdde_linux26/lib/src/arch/l4/cli_sti.c	2011-11-05 20:03:58.000000000 -0400
++++ incubator-build/libdde_linux26/lib/src/arch/l4/cli_sti.c	2011-11-06 14:30:30.000000000 -0500
+@@ -4,6 +4,8 @@
+ 
+ /* IRQ lock reference counter */
+ static atomic_t      _refcnt   = ATOMIC_INIT(0);
++/* refcnt value at which unlocking the cli_lock (it's not always 0) */
++static int unlock_refcnt;
+ static ddekit_lock_t cli_lock;
+ 
+ /* Check whether IRQs are currently disabled.
+@@ -57,15 +59,12 @@
+ /* Store the current flags state.
+  *
+  * This is done by returning the current refcnt.
+- *
+- * XXX: Up to now, flags was always 0 at this point and
+- *      I assume that this is always the case. Prove?
+  */
+ unsigned long __raw_local_save_flags(void)
+ {
+ 	unsigned long flags;
+ 	int do_lock = 0;
+-
++	
+ 	if (cli_lock == NULL)
+ 		ddekit_lock_init_unlocked(&cli_lock);
+ 	/* It's important to do lock here. 
+@@ -82,7 +81,7 @@
+ {
+ 	Assert(cli_lock != NULL);
+ 	atomic_set(&_refcnt, flags);
+-	if (flags == 0)
++	if (flags >= unlock_refcnt)
+ 		ddekit_lock_unlock(&cli_lock);
+ }
+ 
+@@ -94,8 +93,9 @@
+ 
+ 	if (cli_lock == NULL)
+ 		ddekit_lock_init_unlocked(&cli_lock);
+-
+-	nested_lock(cli_lock);
++	if (nested_lock(cli_lock))
++		/* Tell the corresponding restorer to release cli_lock */
++		unlock_refcnt = atomic_read(&_refcnt);
+ 	atomic_inc(&_refcnt);
+ }
+ 
