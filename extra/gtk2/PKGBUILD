@@ -3,8 +3,8 @@
 
 pkgbase=gtk2
 pkgname=('gtk2' 'gtk-update-icon-cache')
-pkgver=2.24.6
-pkgrel=2
+pkgver=2.24.7
+pkgrel=1
 arch=('i686')
 url="http://www.gtk.org/"
 makedepends=('atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxcomposite' 'libxdamage'
@@ -12,21 +12,15 @@ makedepends=('atk' 'pango' 'libxcursor' 'libxinerama' 'libxrandr' 'libxi' 'libxc
 options=('!libtool' '!docs')
 license=('LGPL')
 source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/2.24/gtk+-${pkgver}.tar.xz
-        xid-collision-debug.patch
-        gtk2-dont-ellipsize-filters.diff)
-sha256sums=('8a026b545dc1fa0c1a69b395232ad7c8ee8fa260be5f7d9a2f2ffcd799efefca'
-            'd758bb93e59df15a4ea7732cf984d1c3c19dff67c94b957575efea132b8fe558'
-            '90a9d50c1407ab87f6fa9ae131c2663477540419955b0ba39520a18882afceb8')
+        xid-collision-debug.patch)
 
 build() {
   cd "${srcdir}/gtk+-${pkgver}"
   if [ -e ${srcdir}/.patched ] ; then
-    msg "Already patched"
+    msg2 "Already patched"
   else
-    msg "Patching"
+    msg2 "Patching"
     patch -Np1 -i "${srcdir}/xid-collision-debug.patch"
-    #https://bugzilla.gnome.org/show_bug.cgi?id=657949
-    patch -Np1 -i "${srcdir}/gtk2-dont-ellipsize-filters.diff"
     touch ${srcdir}/.patched
   fi
 
@@ -34,9 +28,9 @@ build() {
   export PYTHONHOME=/
 
   if [ -e ${srcdir}/.configured ]; then
-    msg "Already configured"
+    msg2 "Already configured"
   else
-    msg "Configuring"  
+    msg2 "Configuring"  
     CXX=/bin/false ./configure --prefix= \
       --sysconfdir=/etc \
       --localstatedir=/var \
@@ -80,3 +74,7 @@ package_gtk-update-icon-cache() {
 
     install -D -m755 gtk-update-icon-cache ${pkgdir}/bin/gtk-update-icon-cache
 }
+
+
+md5sums=('719df30b5076a0e37b62f968a5e1312c'
+         '22355df723f6ca358e30e6b8f0baace5')
