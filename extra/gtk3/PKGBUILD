@@ -2,7 +2,7 @@
 # Contributor: Ionut Biru <ibiru@archlinux.org>
 
 pkgname=gtk3
-pkgver=3.2.0
+pkgver=3.2.1
 pkgrel=1
 pkgdesc="The GTK+ Toolkit (v3)"
 arch=('i686')
@@ -14,11 +14,7 @@ options=('!libtool' '!docs')
 backup=(etc/gtk-3.0/settings.ini)
 license=('LGPL')
 source=(http://ftp.gnome.org/pub/gnome/sources/gtk+/3.2/gtk+-${pkgver}.tar.xz
-        settings.ini
-        a11y.patch::http://git.gnome.org/browse/gtk+/patch/?id=e248c6812e8e33150d61074471ef0330668aed45)
-sha256sums=('bce3c1a9be6afd7552c795268656d8fdd09c299765a7faaf5a76498bb82ed44c'
-            'c214d3dcdcadda3d642112287524ab3e526ad592b70895c9f3e3733c23701621'
-            '0ae5f9c3553f9fc6c515343de96046c17544654936b17c09330443ed44778cb2')
+        settings.ini)
 
 build() {
   cd "${srcdir}/gtk+-${pkgver}"
@@ -30,7 +26,6 @@ build() {
     msg "Already patched"
   else
     msg "Patching" 
-    patch -Np1 -i "${srcdir}/a11y.patch"
     touch ${srcdir}/.patched
   fi
   
@@ -56,3 +51,6 @@ package() {
 
     install -Dm644 "${srcdir}/settings.ini" "${pkgdir}/etc/gtk-3.0/settings.ini"
 }
+
+md5sums=('67a49ef2c03be47e2b6b988c8e8c392d'
+         '6e2ab187d643029ccb4c88d9b4939632')
