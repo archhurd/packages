@@ -18,15 +18,19 @@ md5sums=('20337132c4ab06c1146ad384d55372c5')
 
 build() {
   cd ${srcdir}/py2cairo-${pkgver}
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/
   sed -i 's:usr/bin/env python:bin/env python2:' waf
   python2 ./waf --version
   pushd .waf-*
   popd
-  PYTHON=/bin/python2 ./waf configure --prefix=
-  PYTHON=/bin/python2 ./waf build
+  ./waf configure --prefix=
+  ./waf build
 }
 
 package() {
   cd "${srcdir}/py2cairo-${pkgver}"
-  PYTHON=/bin/python2 ./waf install --destdir="${pkgdir}"
+  export PYTHON=/bin/python2
+  export PYTHONHOME=/
+  ./waf install --destdir="${pkgdir}"
 }
