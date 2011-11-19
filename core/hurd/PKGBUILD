@@ -1,7 +1,8 @@
+# Maintainer Stephen Gilles <stephendgilles@gmail.com>
 # Maintainer Matthias Lanzinger <mlaenz@gmail.com>
 
 pkgname=hurd
-pkgver=20100903
+pkgver=$(date +%Y%m%d)
 pkgrel=1
 pkgdesc="The GNU Hurd"
 arch=(i686)
@@ -12,27 +13,8 @@ depends=('gnumach' 'glibc' 'initscripts')
 makedepends=('git' 'glibc')
 options=('!makeflags')
 backup=(etc/ttys)
-source=(tls_support.hurd.patch
-        tls_support.libpthread.patch
-        libpthread_fix.patch
-        pflocal.patch
-        ext2fs_large_stores.patch
-        libpager_update_seqno.patch
-        pfinet_dhcp.patch
-        extern_inline_fix.patch
-        stubs-pthread.h
+source=(01_libports-prevent-hang.patch
         ttys)
-md5sums=('af87e4b04d89392a2b6e7751361f2460'
-         '15886845ff60d66e767b8eb88c501458'
-         'f745ddc28dfe41fa42087fbb7dbd6b65'
-         '44291124d0b08ed4a735c42f06ceec28'
-         '416b442bc87c5882964851c7f03af1c5'
-         'b6473e67ed1aa9721f47df73e04ca427'
-         '1706c9685c0ab551a4367583c542dfa1'
-         'e0910b3df6fc3a18ec44de4299dcf0d0'
-         '710affee4a40101db4070654bd2e793f'
-         'f2ae144d872ec41cc4f2e070df71dfb1')
-
 
 _hurdgitroot="git://git.sv.gnu.org/hurd/hurd.git"
 _pthreadgitroot="git://git.sv.gnu.org/hurd/libpthread.git"
@@ -52,40 +34,43 @@ build() {
     git clone $_hurdgitroot hurd
     git clone $_pthreadgitroot libpthread
 
-	# jkprocfs
-    cd hurd
-    git remote add jk git://github.com/jeremie-koenig/hurd.git
-    git fetch jk
-    git checkout jk/procfs
   fi
   msg "GIT checkout done or server timeout"
 
-  rm -rf "$srcdir/build"
-  cp -r "$srcdir/hurd" "$srcdir/build"
-  cd "$srcdir/build"
-  patch -Np1 < $srcdir/tls_support.hurd.patch
-  patch -Np0 < $srcdir/pflocal.patch
-  patch -Np1 < $srcdir/ext2fs_large_stores.patch
-  patch -Np0 < $srcdir/libpager_update_seqno.patch
-  patch -Np0 < $srcdir/pfinet_dhcp.patch
-  patch -Np1 < $srcdir/extern_inline_fix.patch
+  if [ -e ${srcdir}/.prepared ]; then
+    msg2 "Build directory already prepared"
+  else
+    msg2 "Preparing build directory"
+    rm -rf "$srcdir/build"
+    cp -r "$srcdir/hurd" "$srcdir/build"
+    cd "$srcdir/build"
 
+    # Diego Nieto Cid's patch to prevent hanging
+    patch -Np1 -i ${srcdir}/01_libports-prevent-hang.patch
 
-  cp -a ../libpthread .
-  cd libpthread
-  git reset --hard 8a6c26d9251d098156c8ae8c33ce9f6122cd3c96
-  patch -Np1 < $srcdir/libpthread_fix.patch
-  patch -Np1 < $srcdir/tls_support.libpthread.patch
-  cd ..
+    cp -a ../libpthread .
+    touch ${srcdir}/.prepared
+  fi
 
   #
   # BUILD HERE
-  #
-  export LDFLAGS=`echo $LDFLAGS | sed 's/-Wl,--as-needed//'`
-  autoreconf -vif ../hurd
-  ./configure --prefix= --disable-profile \
+  # 
+  export LDFLAGS="$(echo $LDFLAGS | sed 's/-Wl,--as-needed//')"
+  
+  if [ -e ${srcdir}/.configured ]; then
+    msg2 "Already configured"
+  else
+    msg2 "Configuring"
+    autoreconf -vif 
+    ./configure --prefix= --disable-profile \
               --enable-static-progs='iso9660fs,ext2fs,ufs' \
               --without-parted
+    touch ${srcdir}/.configured
+  fi
+
+  # Fakeroot or --asroot may break this.  May need to be run by hand
+  make libihash || true
+  make -C libpthread || true
   make
 }
 

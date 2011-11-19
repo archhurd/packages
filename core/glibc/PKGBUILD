@@ -2,8 +2,8 @@
 # Note: For now there is now way around the ridiculous amount of patching :(
 
 pkgname=glibc
-pkgver=2.11.20100413git
-pkgrel=5
+pkgver=2.14.$(date +%Y%m%d)git
+pkgrel=1
 pkgdesc="GNU C Library"
 arch=(i686)
 url="http://www.gnu.org/software/libc"
@@ -88,51 +88,74 @@ build() {
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
 
-  rm -rf "$srcdir/$pkgname" "$srcdir/build"
-  cp -r "$srcdir/glibc-git" "$srcdir/$pkgname"
-  cd "$srcdir/$pkgname"
+  if [ -e ${srcdir}/.prepared ]; then
+    msg2 "Build directory already prepared"
+  else
+    msg2 "Preparing build directory"
+    rm -rf ${srcdir}/${pkgname} ${srcdir}/build
+    cp -r ${srcdir}/glibc-git ${srcdir}/${pkgname}
+    mkdir ${srcdir}/build
+    touch ${srcdir}/.prepared
+  fi
+
+  cd ${srcdir}/${pkgname}
 
   #Patching here
-  patch -Np1 < ${srcdir}/i686-cpuclock_which.patch
-  patch -Np1 < ${srcdir}/submitted-posix_opt.h.diff
-  patch -Np1 < ${srcdir}/local-pthread_posix-option.diff
-  patch -Np1 < ${srcdir}/local-pthread.diff
-  patch -Np1 < ${srcdir}/local-pthread_types.diff
-  patch -Np1 < ${srcdir}/local-pthread-unsupported-stubs.diff
-  patch -Np1 < ${srcdir}/local-mlock.diff
-  patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff
-  patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff
-  patch -Np1 < ${srcdir}/submitted-sysvshm.diff
-  patch -Np1 < ${srcdir}/submitted-critical-sections.diff
-  patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff
-  patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff
-  patch -Np1 < ${srcdir}/submitted-ECANCELED.diff
-  patch -Np1 < ${srcdir}/submitted-null-pathname.diff
-  patch -Np1 < ${srcdir}/submitted-sbrk.diff
-  patch -Np1 < ${srcdir}/submitted-readlinkat.diff
-  patch -Np1 < ${srcdir}/local-bigmem.diff
-  patch -Np1 < ${srcdir}/submitted-SOL_IP.patch
-  patch -Np1 < ${srcdir}/local-thread-cancel.diff
-  patch -Np1 < ${srcdir}/local-disable-ioctls.diff
-  patch -Np1 < ${srcdir}/local-locarchive.diff
-  patch -Np1 < ${srcdir}/cvs-linkat.diff
-  patch -Np1 < ${srcdir}/submitted-ttyname.diff
-  patch -Np1 < ${srcdir}/local-mkdir_root.diff
+  if [ -e ${srcdir}/.patched ]; then
+    msg2 "Already patched"
+  else
+    msg2 "Patching"
+    patch -Np1 < ${srcdir}/i686-cpuclock_which.patch || true
+    patch -Np1 < ${srcdir}/submitted-posix_opt.h.diff || true
+    patch -Np1 < ${srcdir}/local-pthread_posix-option.diff || true
+    patch -Np1 < ${srcdir}/local-pthread.diff || true
+    patch -Np1 < ${srcdir}/local-pthread_types.diff || true
+    patch -Np1 < ${srcdir}/local-pthread-unsupported-stubs.diff || true
+    patch -Np1 < ${srcdir}/local-mlock.diff || true
+    patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff || true
+    patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff || true
+    patch -Np1 < ${srcdir}/submitted-sysvshm.diff || true
+    patch -Np1 < ${srcdir}/submitted-critical-sections.diff || true
+    patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff || true
+    patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff || true
+    patch -Np1 < ${srcdir}/submitted-ECANCELED.diff || true
+    patch -Np1 < ${srcdir}/submitted-null-pathname.diff || true
+    patch -Np1 < ${srcdir}/submitted-sbrk.diff || true
+    patch -Np1 < ${srcdir}/submitted-readlinkat.diff || true
+    patch -Np1 < ${srcdir}/local-bigmem.diff || true
+    patch -Np1 < ${srcdir}/submitted-SOL_IP.patch || true
+    patch -Np1 < ${srcdir}/local-thread-cancel.diff || true
+    patch -Np1 < ${srcdir}/local-disable-ioctls.diff || true
+    patch -Np1 < ${srcdir}/local-locarchive.diff || true
+    patch -Np1 < ${srcdir}/cvs-linkat.diff || true
+    patch -Np1 < ${srcdir}/submitted-ttyname.diff || true
+    patch -Np1 < ${srcdir}/local-mkdir_root.diff || true
+    touch ${srcdir}/.patched
+  fi
 
-
-  mkdir "$srcdir/build"
-  cd "$srcdir/build"
-
-  ../$pkgname/configure --prefix= --build=i686-pc-gnu --libexecdir=/lib \
+  cd ${srcdir}/build
+  
+  if [ -e ${srcdir}/.configured ]; then
+    msg2 "Already configured"
+  else
+    msg2 "Configuring"
+    ../${pkgname}/configure --prefix= --build=i686-pc-gnu \
+              --libexecdir=/lib \
               --without-gd --without-cvs --disable-multi-arch \
               --disable-profile --enable-add-ons=
+  fi
 
-  make || return 1
+  make
 }
 
 package() {
-  cd "$srcdir/build"
-  make install_root="$pkgdir/" install || return 1
+  cd ${srcdir}/build
+
+  # prevent errors about empty manual/libc.info
+  # must do this in /glibc/ rather than /build/ for ./configure reasons
+  echo " " >> ${srcdir}/glibc/manual/libc.info
+
+  make install_root="${pkgdir}/" install
 
   install -dm755 ${pkgdir}/lib/locale
   install -m755 ${srcdir}/locale-gen ${pkgdir}/sbin
@@ -140,12 +163,15 @@ package() {
   # create /etc/locale.gen
   install -m644 ${srcdir}/locale.gen.txt ${pkgdir}/etc/locale.gen
   cp ${srcdir}/${pkgname}/localedata/SUPPORTED ${pkgdir}/
-  sed -i "s|/| |g" ${pkgdir}/SUPPORTED
-  sed -i 's|\\| |g' ${pkgdir}/SUPPORTED
-  sed -i "s|SUPPORTED-LOCALES=||" ${pkgdir}/SUPPORTED
+  sed -i 's:/: :g' ${pkgdir}/SUPPORTED
+  sed -i 's:\\: :g' ${pkgdir}/SUPPORTED
+  sed -i 's:SUPPORTED-LOCALES=::' ${pkgdir}/SUPPORTED
   cat ${pkgdir}/SUPPORTED >> ${pkgdir}/etc/locale.gen
-  sed -i "s|^|#|g" ${pkgdir}/etc/locale.gen
+  sed -i 's:^:#:g' ${pkgdir}/etc/locale.gen
   rm ${pkgdir}/SUPPORTED
+
+  # allows building gnumach, dde, etc
+  echo "INPUT ( AS_NEEDED ( -lmachuser -lhurduser ) )" >> ${pkgdir}/lib/libc.so
 
   cd ${pkgdir}/lib
   ln -s ld.so.1 ld.so
