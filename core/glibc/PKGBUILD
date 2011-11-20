@@ -1,4 +1,5 @@
-# Maintainer Matthias Lanzinger <mlaenz@gmail.com>
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
 # Note: For now there is now way around the ridiculous amount of patching :(
 
 pkgname=glibc
@@ -105,31 +106,28 @@ build() {
     msg2 "Already patched"
   else
     msg2 "Patching"
-    patch -Np1 < ${srcdir}/i686-cpuclock_which.patch || true
-    patch -Np1 < ${srcdir}/submitted-posix_opt.h.diff || true
-    patch -Np1 < ${srcdir}/local-pthread_posix-option.diff || true
-    patch -Np1 < ${srcdir}/local-pthread.diff || true
-    patch -Np1 < ${srcdir}/local-pthread_types.diff || true
-    patch -Np1 < ${srcdir}/local-pthread-unsupported-stubs.diff || true
-    patch -Np1 < ${srcdir}/local-mlock.diff || true
-    patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff || true
-    patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff || true
-    patch -Np1 < ${srcdir}/submitted-sysvshm.diff || true
-    patch -Np1 < ${srcdir}/submitted-critical-sections.diff || true
-    patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff || true
-    patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff || true
-    patch -Np1 < ${srcdir}/submitted-ECANCELED.diff || true
-    patch -Np1 < ${srcdir}/submitted-null-pathname.diff || true
-    patch -Np1 < ${srcdir}/submitted-sbrk.diff || true
-    patch -Np1 < ${srcdir}/submitted-readlinkat.diff || true
-    patch -Np1 < ${srcdir}/local-bigmem.diff || true
-    patch -Np1 < ${srcdir}/submitted-SOL_IP.patch || true
-    patch -Np1 < ${srcdir}/local-thread-cancel.diff || true
-    patch -Np1 < ${srcdir}/local-disable-ioctls.diff || true
-    patch -Np1 < ${srcdir}/local-locarchive.diff || true
-    patch -Np1 < ${srcdir}/cvs-linkat.diff || true
-    patch -Np1 < ${srcdir}/submitted-ttyname.diff || true
-    patch -Np1 < ${srcdir}/local-mkdir_root.diff || true
+    patch -Np1 < ${srcdir}/i686-cpuclock_which.patch
+    patch -Np1 < ${srcdir}/submitted-posix_opt.h.diff
+    patch -Np1 < ${srcdir}/local-pthread_posix-option.diff
+    patch -Np1 < ${srcdir}/local-pthread.diff
+    patch -Np1 < ${srcdir}/local-pthread_types.diff
+    patch -Np1 < ${srcdir}/local-pthread-unsupported-stubs.diff
+    patch -Np1 < ${srcdir}/local-mlock.diff
+    patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff
+    patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff
+    patch -Np1 < ${srcdir}/submitted-sysvshm.diff
+    patch -Np1 < ${srcdir}/submitted-critical-sections.diff
+    patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff
+    patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff
+    patch -Np1 < ${srcdir}/submitted-null-pathname.diff
+    patch -Np1 < ${srcdir}/submitted-sbrk.diff
+    patch -Np1 < ${srcdir}/submitted-readlinkat.diff
+    patch -Np1 < ${srcdir}/local-bigmem.diff
+    patch -Np1 < ${srcdir}/submitted-SOL_IP.patch
+    patch -Np1 < ${srcdir}/local-thread-cancel.diff
+    patch -Np1 < ${srcdir}/local-disable-ioctls.diff
+    patch -Np1 < ${srcdir}/local-locarchive.diff
+    patch -Np1 < ${srcdir}/local-mkdir_root.diff
     touch ${srcdir}/.patched
   fi
 
@@ -150,10 +148,6 @@ build() {
 
 package() {
   cd ${srcdir}/build
-
-  # prevent errors about empty manual/libc.info
-  # must do this in /glibc/ rather than /build/ for ./configure reasons
-  echo " " >> ${srcdir}/glibc/manual/libc.info
 
   make install_root="${pkgdir}/" install
 
