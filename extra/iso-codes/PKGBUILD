@@ -1,0 +1,24 @@
+# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Contributor: Jan de Groot <jgc@archlinux.org>
+
+pkgname=iso-codes
+pkgver=3.29
+pkgrel=1
+pkgdesc="Lists of the country, language, and currency names"
+arch=('any')
+url="http://pkg-isocodes.alioth.debian.org/"
+license=('LGPL')
+source=(http://pkg-isocodes.alioth.debian.org/downloads/${pkgname}-${pkgver}.tar.bz2{,.sig})
+md5sums=('c8c0c18d76cf204ad0da1e61229ea4c7'
+         '81b3071ab9d4b40d3af21d0dea415b49')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  ./configure --prefix=
+  make
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  make DESTDIR="${pkgdir}" pkgconfigdir=/lib/pkgconfig install
+}

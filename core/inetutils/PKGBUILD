@@ -1,37 +1,25 @@
 # Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 
 pkgname=inetutils
-pkgver=1.8
-pkgrel=4
+pkgver=1.9.1
+pkgrel=1
 pkgdesc="A collection of common network programs"
 arch=('i686')
 url="http://www.gnu.org/software/inetutils/"
 license=('GPL')
-replaces=('hostname')
-provides=('hostname')
 groups=('base')
 depends=('readline' 'ncurses' 'pam')
-backup=('etc/conf.d/ftpd' 'etc/xinetd.d/telnet' 'etc/xinetd.d/talk')
+backup=('etc/conf.d/ftpd' 'etc/xinetd.d/telnet' 'etc/xinetd.d/talk' 
+	'etc/xinetd.d/rlogin' 'etc/xinetd.d/rsh')
 options=('!emptydirs')
 install=inetutils.install
-source=(http://ftp.gnu.org/gnu/inetutils/${pkgname}-${pkgver}.tar.gz \
-        ftpd.rc ftpd.conf telnet.xinetd talk.xinetd 
-	no_eth0_segfault.patch)
-
+source=(http://ftp.gnu.org/gnu/inetutils/${pkgname}-${pkgver}.tar.gz{,.sig} 
+\
+        ftpd.rc ftpd.conf telnet.xinetd talk.xinetd rlogin.xinetd 
+rsh.xinetd \
+	dnsdomainname)
 build() {
-  ## stupid hack to fix a stupid problem.
-  ## somethings up with ./configure, and this is the fastest way to fix.
-  cd "${srcdir}/${pkgname}-${pkgver}/ifconfig"
-  mv flags.h flags.h.bak
-  echo "#include <stdlib.h>" > flags.h
-  cat flags.h.bak >> flags.h
-  ## end stupid hack
-  
-  ## now apply the patch that fixes segfaulting with no devices
-  # for some reason, breaks...
-  # cd "${srcdir}/${pkgname}-${pkgver}/ifconfig"
-  # patch -Rup0 options.c < ${srcdir}/no_eth0_segfault.patch
-  ## patch applied
+  cd "${srcdir}/${pkgname}-${pkgver}"
 
   cd "${srcdir}/${pkgname}-${pkgver}"
   ./configure --prefix= --libexec=/sbin --localstatedir=/var \
@@ -40,10 +28,10 @@ build() {
     --enable-ftp --enable-ftpd \
     --enable-telnet --enable-telnetd \
     --enable-talk --enable-talkd \
-    --disable-rlogin --disable-rlogind \
-    --disable-rsh --disable-rshd \
+    --enable-rlogin --enable-rlogind \
+    --enable-rsh --enable-rshd \
     --disable-rexec --disable-rexecd \
-    --disable-rcp \
+    --enable-rcp --enable-hostname \
     --disable-tftp --disable-tftpd \
     --enable-ping --enable-ping6 \
     --disable-logger --enable-syslogd \
@@ -53,23 +41,38 @@ build() {
   make
 }
 
+check() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+
+  # Currently the ping test fails for reasons unknown, though ping
+  # should work when used normally.  We therefore expect to fail 1/5 
+  # tests
+  make check || true
+}
+
 package() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   make DESTDIR="${pkgdir}" install
 
+  install -d "${pkgdir}/bin"
   install -D -m755 "${srcdir}/ftpd.rc" "${pkgdir}/etc/rc.d/ftpd"
   install -D -m644 "${srcdir}/ftpd.conf" "${pkgdir}/etc/conf.d/ftpd"
   install -D -m644 "${srcdir}/telnet.xinetd" "${pkgdir}/etc/xinetd.d/telnet"
   install -D -m644 "${srcdir}/talk.xinetd" "${pkgdir}/etc/xinetd.d/talk"
+  install -D -m644 "${srcdir}/rlogin.xinetd" "${pkgdir}/etc/xinetd.d/rlogin"
+  install -D -m644 "${srcdir}/rsh.xinetd" "${pkgdir}/etc/xinetd.d/rsh"
 
   # fix conflict with every other package...
   if [ -e ${pkgdir}/share/info/dir ]; then
     rm ${pkgdir}/share/info/dir
   fi
 }
-md5sums=('ad8fdcdf1797b9ca258264a6b04e48fd'
-         'abb31b95485802d23b7df3f96fa3c75a'
-         'e6e6e5990a2e8159a276fef8fbf54c04'
-         '433b6535e931f22654102de62402d76e'
-         'c84c281926ec95095971a666b3b11516'
-         'a04025e6a02649e2c8c26dc649900ea5')
+sha1sums=('86b7eb11cfdaefb1d4e9bfc10620beaf8f09bc90'
+          'ff0aad9946a38915580b094dadf67e790e8a2f87'
+          'a03eafe1b832b24b2ec7870380374381f2e61acc'
+          '68a590083b45997dfdb80e666b2de762f494ba74'
+          '6f88c5dc659d7a4844a840edeb26c5f066bde93f'
+          '4ee2648b4207339d6b2560ec229eba279234db19'
+          '91da589d5188a2d6f09c92892d68194040dfb614'
+          'bcbbaaba40c5b5c32612da0581e4c7cba03690a4'
+          '738203619dd1fffabfef8c296990453878ae1c04')

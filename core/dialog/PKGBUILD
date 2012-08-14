@@ -4,15 +4,14 @@
 # Contributor: Andreas Radke <andyrtr@archlinux.org>
 
 pkgname=dialog
-pkgver=1.1_20110707
-pkgrel=2
+pkgver=1.1_20120215
+pkgrel=1
 pkgdesc="A tool to display dialog boxes from shell scripts"
 arch=('i686')
 url="http://invisible-island.net/dialog/"
 license=('GPL')
 depends=('ncurses')
 source=(ftp://invisible-island.net/${pkgname}/${pkgname}-${pkgver/_/-}.tgz)
-md5sums=('34d01aaacbb2932b77774e6c1eec8d2a')
 
 build() {
   cd ${srcdir}/${pkgname}-${pkgver/_/-}
@@ -25,3 +24,4 @@ package() {
   cd ${srcdir}/${pkgname}-${pkgver/_/-}
   make DESTDIR=${pkgdir} install install-lib
 }
+sha1sums=('0d8a07e064c6d4f9cc7d9cb21c4609dc4a19537e')

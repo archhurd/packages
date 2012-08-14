@@ -1,0 +1,17 @@
+diff -rupN a/lib/logproto.c b/lib/logproto.c
+--- a/lib/logproto.c	2011-10-11 14:38:45.000000000 -0400
++++ b/lib/logproto.c	2011-10-11 14:44:01.000000000 -0400
+@@ -419,9 +419,13 @@ log_proto_file_writer_new(LogTransport *
+   if (flush_lines == 0)
+     /* the flush-lines option has not been specified, use a default value */
+     flush_lines = 1;
++
++#ifdef IOV_MAX
++  /* platforms without IOV_MAX do not have this limitation */
+   if (flush_lines > IOV_MAX)
+     /* limit the flush_lines according to the current platform */
+     flush_lines = IOV_MAX;
++#endif
+ 
+   /* allocate the structure with the proper number of items at the end */
+   LogProtoFileWriter *self = (LogProtoFileWriter *)g_malloc0(sizeof(LogProtoFileWriter) + sizeof(struct iovec)*flush_lines);
