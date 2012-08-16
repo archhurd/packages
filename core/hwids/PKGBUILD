@@ -1,0 +1,17 @@
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+
+pkgname=hwids
+pkgver=20120730
+pkgrel=1
+pkgdesc="Hardware identification databases"
+url=https://github.com/gentoo/hwids
+license=('GPL2')
+arch=('any')
+source=("https://github.com/gentoo/${pkgname}/tarball/${pkgname}-${pkgver}")
+md5sums=('4522b801967ae8730d7269c0d881d8e5')
+
+package() {
+  cd ${srcdir}/*
+  mkdir -p "${pkgdir}/share/hwdata"
+  cp pci.ids usb.ids "${pkgdir}/share/hwdata/"
+}
