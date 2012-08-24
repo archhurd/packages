@@ -1,9 +1,8 @@
 # Maintainer: Stephen Gilles <stephendgilles@gmail.com>
 # Maintainer: Matthias Lanzinger <mlaenz@gmail.com>
-# Note: For now there is now way around the ridiculous amount of patching :(
 
 pkgname=glibc
-pkgver=2.14.$(date +%Y%m%d)git
+pkgver=2.16.90.$(date +%Y%m%d)git
 pkgrel=1
 pkgdesc="GNU C Library"
 arch=(i686)
@@ -15,76 +14,31 @@ makedepends=('hurd' 'gcc>=4.3')
 options=('!strip')
 
 source=(locale.gen.txt
-        locale-gen
-        i686-cpuclock_which.patch
-        submitted-posix_opt.h.diff
-        local-pthread_posix-option.diff
-        local-pthread.diff
-        local-pthread_types.diff
-        local-pthread-unsupported-stubs.diff
-        local-mlock.diff
-        local-dl-dynamic-weak.diff
-        submitted-ioctl-unsigned-size_t.diff
-        submitted-sysvshm.diff
-        submitted-critical-sections.diff
-        submitted-ioctl-decode-argument.diff
-        submitted-IPV6_PKTINFO.diff
-        submitted-ECANCELED.diff
-        submitted-null-pathname.diff
-        submitted-sbrk.diff
-        submitted-readlinkat.diff
-        local-bigmem.diff
-        submitted-SOL_IP.patch
-        local-thread-cancel.diff
-        local-disable-ioctls.diff
-        local-locarchive.diff
-        cvs-linkat.diff
-        submitted-ttyname.diff
-        local-mkdir_root.diff)
+        locale-gen)
 
-md5sums=('07ac979b6ab5eeb778d55f041529d623'
-         '476e9113489f93b348b21e144b6a8fcf'
-         '1a6638ab233513400c520e9230612ece'
-         'e4ff9dc224aaa00765ad74ba0fcb4425'
-         '50fe2822b00a7dc970d532bae918a6de'
-         '5325c498384ca533c3d20f6fd1047cca'
-         '293e19249d7b20a2d2f221fd93b7d231'
-         '0d8bb94dc5a9f97cbf6e8502ba818fcd'
-         '139d74c68e9b8c31f263ac7b442b63ec'
-         '4c6c13001eeb1679f72464e43f018951'
-         '6b868ad42836c45f39161e3d8a5d1ad4'
-         'aced139b7b7452ac3fd4f32683dde3c5'
-         '4b9dc0f1f8a97c9cd48948b03f59cdd1'
-         'a9405f6901922f08d717d78efaeee6ec'
-         'da0c98a4bb54cfd75027f3f5c933fa68'
-         'c395cd788e5fe600c06188ad395a9825'
-         '09c7d497fd3ac679464cefcb41267774'
-         '224cc7696de3adf00e0f449e61ee9ef8'
-         'b27368831fabf9ff72ee1a050a402a20'
-         'eab54e54c25cea9b95092813a1eb1c00'
-         '6599be3678ce7f9499086b5d4e559e87'
-         '42ba8ed433571b6002529e67e2f0fdd3'
-         '4af96a5c4125eb9362f6e32b78133c28'
-         '8d9e3914e6ce9980aa736ef5d53d5106'
-         'fd2301f383ad5e1417b442397ad8b907'
-         '1edf76c8b5a30a1b8a2e0e2ecedd9a48'
-         '439d0965d12c62db39cb6dd0c53c71be')
-
-
-__gitroot="git://git.sv.gnu.org/hurd/glibc.git"
+__glibcgitroot="git://git.sv.gnu.org/hurd/glibc.git"
+__glibcgitbranch="rbraun/hurd_with_pthreads"
+__libpthreadgitroot="git://git.sv.gnu.org/hurd/libpthread.git"
+__libpthreadgitbranch="rbraun/hurd_with_pthreads"
 
 build() {
   cd "$srcdir"
   msg "Connecting to GIT server...."
-
-  if [ -d glibc-git ] ; then
-    cd glibc-git && git pull origin tschwinge/Roger_Whittaker
-    msg "The local files are updated."
+ 
+  if [ -d glibc-git -a -d libpthread-git ] ; then
+    cd "$srcdir/glibc-git" && git pull 
+    cd "$srcdir/libpthread-git" && git pull
   else
-    git clone --no-checkout $__gitroot glibc-git
-    cd glibc-git
-    git checkout origin/tschwinge/Roger_Whittaker
+    rm -rf glibc-git libpthread-git
+    git clone $__glibcgitroot -b $__glibcgitbranch glibc-git
+    git clone $__libpthreadgitroot -b $__libpthreadgitbranch libpthread-git
   fi
+
+  ## Sometimes during git cloning/pulling the sheer amount of data prevents a
+  ## full merge from taking place.  This forces all files to be checked out.
+  #cd "${srcdir}/${pkgname}-git"
+  #git reset --hard HEAD
+  #cd "${srcdir}"
 
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
@@ -93,10 +47,12 @@ build() {
     msg2 "Build directory already prepared"
   else
     msg2 "Preparing build directory"
-    rm -rf ${srcdir}/${pkgname} ${srcdir}/build
-    cp -r ${srcdir}/glibc-git ${srcdir}/${pkgname}
-    mkdir ${srcdir}/build
-    touch ${srcdir}/.prepared
+    rm -rf "$srcdir/$pkgname" "$srcdir/build"
+    cp -r "$srcdir/glibc-git" "$srcdir/$pkgname"
+    cp -a "$srcdir/libpthread-git" "$srcdir/$pkgname/libpthread"
+    mkdir "$srcdir/build"
+
+    touch "$srcdir/.prepared"
   fi
 
   cd ${srcdir}/${pkgname}
@@ -106,28 +62,13 @@ build() {
     msg2 "Already patched"
   else
     msg2 "Patching"
-    patch -Np1 < ${srcdir}/i686-cpuclock_which.patch
-    patch -Np1 < ${srcdir}/submitted-posix_opt.h.diff
-    patch -Np1 < ${srcdir}/local-pthread_posix-option.diff
-    patch -Np1 < ${srcdir}/local-pthread.diff
-    patch -Np1 < ${srcdir}/local-pthread_types.diff
-    patch -Np1 < ${srcdir}/local-pthread-unsupported-stubs.diff
-    patch -Np1 < ${srcdir}/local-mlock.diff
-    patch -Np1 < ${srcdir}/local-dl-dynamic-weak.diff
-    patch -Np1 < ${srcdir}/submitted-ioctl-unsigned-size_t.diff
-    patch -Np1 < ${srcdir}/submitted-sysvshm.diff
-    patch -Np1 < ${srcdir}/submitted-critical-sections.diff
-    patch -Np1 < ${srcdir}/submitted-ioctl-decode-argument.diff
-    patch -Np1 < ${srcdir}/submitted-IPV6_PKTINFO.diff
-    patch -Np1 < ${srcdir}/submitted-null-pathname.diff
-    patch -Np1 < ${srcdir}/submitted-sbrk.diff
-    patch -Np1 < ${srcdir}/submitted-readlinkat.diff
-    patch -Np1 < ${srcdir}/local-bigmem.diff
-    patch -Np1 < ${srcdir}/submitted-SOL_IP.patch
-    patch -Np1 < ${srcdir}/local-thread-cancel.diff
-    patch -Np1 < ${srcdir}/local-disable-ioctls.diff
-    patch -Np1 < ${srcdir}/local-locarchive.diff
-    patch -Np1 < ${srcdir}/local-mkdir_root.diff
+
+    # This is either a bug in the makefile system, or a bug in my personal
+    # setup.  Either way, this is a quick and dirty fix
+    mkdir -p "$srcdir/build/nss/"
+    cp "$srcdir/libpthread-git/include/pthread/pthread.h" \
+      "$srcdir/build/nss/"
+
     touch ${srcdir}/.patched
   fi
 
@@ -141,6 +82,7 @@ build() {
               --libexecdir=/lib \
               --without-gd --without-cvs --disable-multi-arch \
               --disable-profile --enable-add-ons=
+    touch "$srcdir/.configured"
   fi
 
   make
@@ -149,7 +91,8 @@ build() {
 package() {
   cd ${srcdir}/build
 
-  make install_root="${pkgdir}/" install
+  make install_root="$pkgdir" install
+#  make install_root="$pkgdir" libpthread-install
 
   install -dm755 ${pkgdir}/lib/locale
   install -m755 ${srcdir}/locale-gen ${pkgdir}/sbin
@@ -171,3 +114,5 @@ package() {
   ln -s ld.so.1 ld.so
 }
 
+md5sums=('07ac979b6ab5eeb778d55f041529d623'
+         '476e9113489f93b348b21e144b6a8fcf')
