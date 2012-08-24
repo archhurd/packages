@@ -1,9 +1,11 @@
-# Maintainer: Stephen Gilles <stephendgilles@gmail.com>
+# Maintainer: Michael Walker <mike@barrucadu.co.uk>
+# Contributor: Stephen Gilles <stephendgilles@gmail.com>
 # Contributor: Alexander Preisinger <alexander.preisinger@gmail.com>
 
 pkgname=readline
-_patchlevel=001 #prepare for some patches
-pkgver=6.2.$_patchlevel
+_basever=6.2
+_patchlevel=004 #prepare for some patches
+pkgver=$_basever.$_patchlevel
 pkgrel=1
 pkgdesc="GNU readline library"
 arch=('i686')
@@ -11,37 +13,46 @@ url="http://tiswww.case.edu/php/chet/readline/rltop.html"
 license=('GPL')
 depends=('glibc' 'ncurses')
 backup=("etc/inputrc")
-source=(http://ftp.gnu.org/gnu/readline/readline-6.2.tar.gz
+options=('!emptydirs')
+install=readline.install
+source=(http://ftp.gnu.org/gnu/readline/readline-$_basever.tar.gz{,.sig}
         inputrc)
 if [ $_patchlevel -gt 00 ]; then
-    for p in $(seq -w 01 $_patchlevel); do
-        source=(${source[@]} http://ftp.gnu.org/gnu/readline/readline-6.2-patches/readline62-$p)
+    for (( p=1; p<=$((10#${_patchlevel})); p++ )); do
+        source=(${source[@]} http://ftp.gnu.org/gnu/readline/readline-$_basever-patches/readline${_basever//./}-$(printf "%03d" $p){,.sig})
     done
 fi
+md5sums=('67948acb2ca081f23359d0256e9a271c'
+         '928f7d248320a65e43c2dc427e99582b'
+         '58d54966c1191db45973cb3191ac621a'
+         '83287d52a482f790dfb30ec0a8746669'
+         '8e6a51e2e0e6e45a82752e3692c111ac'
+         '0665020ea118e8434bd145fb71f452cc'
+         '285361ca6d48c51ae2428157e174e812'
+         'c9d5d79718856e711667dede87cb7622'
+         '4437205bb1462f5f32e4812b8292c675'
+         'c08e787f50579ce301075c523fa660a4'
+         '7e39cad1d349b8ae789e4fc33dbb235f')
 
 build() {
-  cd ${srcdir}/${pkgname}-6.2
-  for p in ../readline61-*; do
-    [ -e "$p" ] || continue
-    msg "applying patch ${p}"
-    patch -Np0 -i ${p}
+  cd ${srcdir}/${pkgname}-$_basever
+  for (( p=1; p<=$((10#${_patchlevel})); p++ )); do
+    msg "applying patch readline${_basever//./}-$(printf "%03d" $p)"
+    patch -Np0 -i $srcdir/readline${_basever//./}-$(printf "%03d" $p)
   done
 
   # Remove RPATH from shared objects (FS#14366)
   sed -i 's|-Wl,-rpath,$(libdir) ||g' support/shobj-conf
 
-  ./configure --prefix= --libdir=/lib \
-        --mandir=/share/man --infodir=/share/info
-  make SHLIB_LIBS=-lncursesw
+  ./configure --prefix=
+  make SHLIB_LIBS=-lncurses
 }
 
 package() {
-  cd ${srcdir}/${pkgname}-6.2
+  cd ${srcdir}/${pkgname}-$_basever
   make DESTDIR=${pkgdir} install
   
-  mkdir -p ${pkgdir}/etc
-  install -m644 ../inputrc ${pkgdir}/etc/inputrc
+  install -Dm644 ${srcdir}/inputrc ${pkgdir}/etc/inputrc
+
+  rm ${pkgdir}/share/info/dir
 }
-md5sums=('67948acb2ca081f23359d0256e9a271c'
-         'e5fc955f56d9fa5beb871f3279b8fa8b'
-         '83287d52a482f790dfb30ec0a8746669')

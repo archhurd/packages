@@ -1,10 +1,10 @@
-infodir=/share/info
-filelist=(bash.info)
+info_dir=share/info
+info_files=(bash.info)
 
 post_install() {
   [ -x bin/install-info ] || return 0
-  for file in ${filelist[@]}; do
-    install-info $infodir/$file.gz $infodir/dir 2> /dev/null
+  for f in ${info_files[@]}; do
+    bin/install-info ${info_dir}/$f.gz ${info_dir}/dir 2> /dev/null
   done
 }
 
@@ -14,8 +14,7 @@ post_upgrade() {
 
 pre_remove() {
   [ -x bin/install-info ] || return 0
-  for file in ${filelist[@]}; do
-    install-info --delete $infodir/$file.gz $infodir/dir 2> /dev/null
+  for f in ${info_files[@]}; do
+    bin/install-info --delete ${info_dir}/$f.gz ${info_dir}/dir 2> /dev/null
   done
 }
-
